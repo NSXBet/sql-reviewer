@@ -4,16 +4,36 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 
 ## Features
 
-- Support for multiple database engines (MySQL, PostgreSQL, Oracle, SQL Server, Snowflake)
-- Configurable rule sets
-- Multiple output formats (text, JSON, YAML)
-- Schema-aware analysis
-- Extensible architecture
+- **Complete MySQL Support**: 92 comprehensive rules covering naming conventions, schema constraints, and statement analysis
+- **Schema.yaml Integration**: Default rule configurations with automatic payload generation
+- **Flexible Configuration**: Support for both schema.yaml defaults and custom YAML/JSON config files
+- **Multiple Output Formats**: Clean text, structured JSON, and YAML output options
+- **ANTLR-based Parsing**: Robust SQL parsing with detailed error reporting and line/column information
+- **Zero-config Operation**: Works out-of-the-box with sensible defaults for MySQL
+- **Extensible Architecture**: Modular design supporting easy addition of new database engines and rules
 
 ## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/NSXBet/sql-reviewer-cli.git
+cd sql-reviewer-cli
+
+# Build the CLI
 go build -o sql-reviewer main.go
+```
+
+## Quick Start
+
+```bash
+# Check a SQL file with default MySQL rules
+./sql-reviewer check -e mysql examples/test.sql
+
+# Enable debug output to see detailed rule processing
+./sql-reviewer check -e mysql examples/test.sql --debug
+
+# Output results in JSON format
+./sql-reviewer check -e mysql -o json examples/test.sql
 ```
 
 ## Usage
@@ -21,39 +41,57 @@ go build -o sql-reviewer main.go
 ### Basic Usage
 
 ```bash
-# Check a SQL file against MySQL rules
-./sql-reviewer check -e mysql schema.sql
+# Check a SQL file against MySQL rules (uses schema.yaml defaults)
+./sql-reviewer check -e mysql migration.sql
 
 # Check with custom rules configuration
-./sql-reviewer check -e postgres -r rules.yaml migration.sql
+./sql-reviewer check -e mysql -r custom-rules.yaml migration.sql
 
-# Output results in JSON format
-./sql-reviewer check -e mysql -o json schema.sql
+# Check PostgreSQL with JSON output (when PostgreSQL rules are implemented)
+./sql-reviewer check -e postgres -o json schema.sql
 ```
 
 ### Configuration
 
-Create a rules configuration file in YAML format:
+The tool supports two configuration approaches:
+
+#### 1. Default Configuration (schema.yaml)
+
+The tool includes a comprehensive `schema.yaml` file with default rule configurations. No additional setup required:
+
+```bash
+# Uses built-in schema.yaml automatically
+./sql-reviewer check -e mysql your-file.sql
+```
+
+#### 2. Custom Configuration File
+
+Create a custom rules configuration file in YAML format:
 
 ```yaml
-engine: mysql
+id: "custom-mysql-rules"
 rules:
   - type: "naming.table"
     level: "ERROR"
-    payload: '{"format": "^[a-z][a-z0-9_]*$", "maxLength": 63}'
     engine: "MYSQL"
-    comment: "Table names should be lowercase with underscores"
+    payload:
+      format: "^[a-z][a-z0-9_]*$"
+      maxLength: 63
   
   - type: "statement.select.no-select-all"
     level: "WARNING"
-    payload: '{}'
     engine: "MYSQL"
-    comment: "Avoid using SELECT *"
+    payload: {}
+  
+  - type: "table.require-pk"
+    level: "ERROR"
+    engine: "MYSQL"
+    payload: {}
 ```
 
-### Schema File
+### Schema-Aware Analysis
 
-Provide database schema information in JSON format to enable schema-aware checks:
+Provide database schema information in JSON format to enable advanced schema-aware checks:
 
 ```json
 {
@@ -71,7 +109,7 @@ Provide database schema information in JSON format to enable schema-aware checks
               "nullable": false
             },
             {
-              "name": "email",
+              "name": "email", 
               "type": "VARCHAR(255)",
               "nullable": false
             }
@@ -83,97 +121,191 @@ Provide database schema information in JSON format to enable schema-aware checks
 }
 ```
 
+Usage with schema file:
+```bash
+./sql-reviewer check -e mysql --schema db-schema.json migration.sql
+```
+
 ### Command Line Options
 
 #### Global Flags
 - `--config`: Configuration file path
-- `--verbose`: Enable verbose output
-- `--debug`: Enable debug output
+- `--verbose`: Enable verbose output  
+- `--debug`: Enable debug output (shows rule processing details)
 
 #### Check Command Flags
-- `-e, --engine`: Database engine (mysql, postgres, oracle, mssql, snowflake)
-- `-o, --output`: Output format (text, json, yaml)
-- `-r, --rules`: Path to rules configuration file
-- `--schema`: Path to database schema file
+- `-e, --engine`: Database engine (`mysql`, `postgres`)
+- `-o, --output`: Output format (`text`, `json`, `yaml`)
+- `-r, --rules`: Path to custom rules configuration file
+- `--schema`: Path to database schema file (JSON)
 - `--fail-on-error`: Exit with non-zero code if errors are found
 - `--fail-on-warning`: Exit with non-zero code if warnings are found
 
 ## Examples
 
-### Check MySQL Migration
+### Check MySQL Migration with Default Rules
 ```bash
-./sql-reviewer check -e mysql -r mysql-rules.yaml --schema db-schema.json migration.sql
+./sql-reviewer check -e mysql migration.sql
 ```
 
-### Check PostgreSQL with JSON Output
+### Check with Custom Rules and Schema
 ```bash
-./sql-reviewer check -e postgres -o json --fail-on-error schema.sql
+./sql-reviewer check -e mysql -r custom-rules.yaml --schema db-schema.json migration.sql
 ```
 
-### Custom Configuration File
+### CI/CD Integration
 ```bash
-./sql-reviewer --config ~/.sql-reviewer.yaml check -e mysql schema.sql
+# Fail the build if any errors are found
+./sql-reviewer check -e mysql --fail-on-error migration.sql
+
+# JSON output for parsing by other tools
+./sql-reviewer check -e mysql -o json migration.sql | jq '.advices[] | select(.status == "ERROR")'
 ```
 
 ## Supported Database Engines
 
-- **MySQL** (`mysql`)
-- **PostgreSQL** (`postgres`, `postgresql`)
+- **MySQL** (`mysql`) - ✅ Complete implementation (92 rules)
+- **PostgreSQL** (`postgres`, `postgresql`) - 🚧 Framework ready, rules pending implementation
 
-## Rule Types
+## Rule Categories
 
-The tool supports various types of SQL review rules:
+The tool supports comprehensive SQL review rules organized into categories:
 
-### Naming Conventions
-- Table naming conventions
-- Column naming conventions  
-- Index naming conventions
-- Constraint naming conventions
+### MySQL Rules (92 total)
 
-### Schema Rules
-- Required columns
-- Column nullability
-- Data type restrictions
-- Primary key requirements
+#### Naming Conventions (7 rules)
+- Table naming patterns
+- Column naming patterns
+- Index naming (UK, IDX, FK)
+- Auto-increment column naming
+- Identifier keyword restrictions
 
-### Statement Rules
-- SELECT statement restrictions
-- WHERE clause requirements
-- JOIN limitations
-- Transaction rules
+#### Schema Rules (25 rules)
+- Required columns and primary keys
+- Column constraints (NOT NULL, DEFAULT, etc.)
+- Data type restrictions and limits
+- Character set and collation requirements
+- Index and foreign key constraints
 
-### Engine-Specific Rules
-- MySQL storage engine requirements
-- PostgreSQL-specific constraints
-- Oracle naming restrictions
+#### Statement Rules (45 rules)
+- SELECT statement best practices
+- WHERE clause requirements and restrictions
+- JOIN limitations and performance rules
+- DML/DDL operation constraints
+- Transaction and execution limits
+
+#### Engine-Specific Rules (15 rules)
+- MySQL storage engine requirements (InnoDB)
+- Character set and collation allowlists
+- System object creation restrictions
+- Performance and optimization rules
+
+### Rule Examples
+
+```sql
+-- ❌ Fails naming.table rule
+CREATE TABLE UserData (id INT);
+
+-- ✅ Passes naming.table rule  
+CREATE TABLE user_data (id INT);
+
+-- ❌ Fails table.require-pk rule
+CREATE TABLE logs (message TEXT);
+
+-- ✅ Passes table.require-pk rule
+CREATE TABLE logs (id INT PRIMARY KEY, message TEXT);
+```
 
 ## Architecture
 
-The tool is designed with a modular architecture:
+The tool follows a modular, extensible architecture:
 
-- `pkg/advisor/`: Core advisor logic and rule definitions
-- `pkg/catalog/`: Database schema catalog and lookup functionality
-- `pkg/config/`: Configuration management
-- `pkg/logger/`: Logging abstraction
-- `pkg/types/`: Type definitions and data structures
-- `cmd/`: CLI command implementations
+```
+sql-reviewer-cli/
+├── cmd/                    # CLI command implementations (Cobra)
+├── pkg/
+│   ├── advisor/           # Core rule engine and registration
+│   ├── config/            # Configuration and schema.yaml handling
+│   ├── rules/
+│   │   └── mysql/         # MySQL-specific rule implementations
+│   ├── catalog/           # Database schema metadata handling
+│   ├── mysqlparser/       # ANTLR-based MySQL SQL parser
+│   ├── types/             # Shared type definitions
+│   └── logger/            # Logging utilities
+├── schema.yaml            # Default rule configurations
+├── examples/              # Example configurations and SQL files
+└── docs/                  # Documentation
+```
+
+### Key Components
+
+- **ANTLR Parser**: Robust SQL parsing with detailed AST analysis
+- **Rule Engine**: Generic framework supporting multiple database engines
+- **Configuration System**: Flexible YAML/JSON config with schema integration
+- **Payload Normalization**: Automatic conversion between config formats
+- **Advisor Registration**: Plugin-style rule registration system
 
 ## Development
 
-To extend the tool with new rules or database engines:
+See [CLAUDE.md](CLAUDE.md) for comprehensive development guidelines.
 
-1. Add new advisor types in `pkg/advisor/types.go`
-2. Implement the advisor interface in `pkg/advisor/`
-3. Register the advisor in the appropriate engine mapping
-4. Add error codes in `pkg/advisor/code.go`
+### Adding New Rules
+
+1. **Create rule implementation** in `pkg/rules/mysql/`
+2. **Add test data** in `pkg/rules/mysql/testdata/`
+3. **Register the rule** in `pkg/rules/mysql/init.go`
+4. **Update schema.yaml** with default configuration
+5. **Test thoroughly** with various SQL patterns
+
+### Rule Implementation Example
+
+```go
+type TableCommentAdvisor struct {
+    *mysql.BaseAntlrRule
+}
+
+func (r *TableCommentAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+    res, err := mysql.ParseMySQL(statements)
+    if err != nil {
+        return nil, err
+    }
+
+    checker := &tableCommentChecker{rule: rule}
+    return mysql.NewGenericAntlrChecker(res.Tree, checker).Check()
+}
+```
+
+## Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# Run MySQL rule tests specifically
+go test ./pkg/rules/mysql/
+
+# Test with debug output
+go run main.go check -e mysql examples/test.sql --debug
+```
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/new-rule`)
+3. Implement your changes following the patterns in [CLAUDE.md](CLAUDE.md)
+4. Add comprehensive tests
+5. Update documentation as needed
+6. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Roadmap
+
+- [ ] **PostgreSQL Engine**: Complete PostgreSQL rule implementation
+- [ ] **Performance Optimization**: Parallel rule execution
+- [ ] **Rule Management**: CLI commands for listing and validating rules
+- [ ] **CI/CD Integration**: GitHub Actions and pipeline examples
+- [ ] **VS Code Extension**: IDE integration for real-time SQL review
+- [ ] **Additional Engines**: Oracle, SQL Server, and Snowflake support
