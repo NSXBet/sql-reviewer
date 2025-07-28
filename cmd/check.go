@@ -175,13 +175,13 @@ func loadConfiguration(engine types.Engine) (*config.Config, error) {
 }
 
 func loadDefaultConfigFromSchema(engine types.Engine) (*config.Config, error) {
-	// Try to find schema.yaml in the working directory first
-	schemaPath := "schema.yaml"
+	// Try to find schema.yaml in the config directory first
+	schemaPath := "config/schema.yaml"
 	if _, err := os.Stat(schemaPath); os.IsNotExist(err) {
-		// If not found in working directory, try in the project root
-		schemaPath = "/Users/nsx/workspace/bytebase/sql-reviewer-cli/schema.yaml"
+		// If not found in config directory, try the legacy location
+		schemaPath = "schema.yaml"
 		if _, err := os.Stat(schemaPath); os.IsNotExist(err) {
-			slog.Warn("schema.yaml not found, using empty default config")
+			slog.Warn("schema.yaml not found in config/ or root directory, using empty default config")
 			return config.DefaultConfig("default"), nil
 		}
 	}

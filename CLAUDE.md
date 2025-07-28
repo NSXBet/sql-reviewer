@@ -17,7 +17,7 @@ The SQL Reviewer CLI is a command-line tool for reviewing SQL statements against
 - **`pkg/mysqlparser/`**: ANTLR-based MySQL SQL parser and utilities
 - **`pkg/types/`**: Type definitions and data structures
 - **`pkg/logger/`**: Logging abstraction layer
-- **`schema.yaml`**: Default rule configurations and payload definitions
+- **`config/schema.yaml`**: Default rule configurations and payload definitions
 - **`examples/`**: Example configurations and test SQL files
 - **`docs/`**: Project documentation and rule references
 
@@ -25,13 +25,28 @@ The SQL Reviewer CLI is a command-line tool for reviewing SQL statements against
 
 **ALWAYS follow these steps after making code changes:**
 
-### After Go Code Changes
-1. **Format**: Run `gofmt -w` on modified files
-2. **Lint**: Run `golangci-lint run --allow-parallel-runners` to catch issues
-   - **Important**: Run golangci-lint repeatedly until there are no issues
-3. **Auto-fix**: Use `golangci-lint run --fix --allow-parallel-runners` to fix issues automatically
-4. **Test**: Run relevant tests before committing: `go test ./...`
-5. **Build**: Test build with `go build -o sql-reviewer main.go`
+### Development Commands
+- `make setup` - Set up the development environment
+- `make build` - Build the application
+- `make test` - Run all tests (unit tests, coverage, and package coverage)
+- `make unit` - Run unit tests
+- `make lint` - Run linting for Go and YAML files
+- `make clean` - Clean generated files
+- `go run main.go` - Run the CLI locally during development
+- `go install .` - Install the binary locally
+
+### Testing Commands
+- `make unit` - Run unit tests with testdox format and coverage
+- `make coverage` - Generate and display test coverage report
+- `make coverage-html` - Generate HTML coverage report and open it
+- `make update-unit-snapshots` - Update test snapshots
+
+### Linting Commands
+- `make lint-golang` - Lint Go files using golangci-lint
+- `make lint-yaml` - Lint YAML files using yamllint
+
+## Workflow Reminders
+- Before commit and push, always run make lint, make test, make gen, make format
 
 ### Rule Development
 When implementing new rules:
@@ -40,10 +55,10 @@ When implementing new rules:
 3. **Implement proper payload handling** using advisor utility functions
 4. **Add comprehensive test data** in corresponding `testdata/` directory
 5. **Register the rule** in the appropriate `init.go` file
-6. **Update schema.yaml** with default payload configuration if needed
+6. **Update config/schema.yaml** with default payload configuration if needed
 
 ### Configuration Changes
-1. **Test schema.yaml** integration with `go run main.go check -e mysql examples/test.sql --debug`
+1. **Test config/schema.yaml** integration with `go run main.go check -e mysql examples/test.sql --debug`
 2. **Verify payload normalization** works correctly for YAML config files
 3. **Ensure no WARN logs** appear during rule execution
 
@@ -111,7 +126,7 @@ func (r *MyRuleAdvisor) Check(ctx context.Context, statements string, rule *type
 
 ## Schema Integration
 
-The project uses `schema.yaml` for default rule configurations:
+The project uses `config/schema.yaml` for default rule configurations:
 - **componentList**: Defines rule payload structure
 - **Payload types**: STRING, NUMBER, STRING_ARRAY, TEMPLATE, BOOLEAN
 - **Multi-component rules**: Naming rules use only the "format" component

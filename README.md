@@ -6,7 +6,7 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 
 - **Complete MySQL Support**: 92 comprehensive rules covering naming conventions, schema constraints, and statement analysis
 - **Schema.yaml Integration**: Default rule configurations with automatic payload generation
-- **Flexible Configuration**: Support for both schema.yaml defaults and custom YAML/JSON config files
+- **Flexible Configuration**: Support for both config/schema.yaml defaults and custom YAML/JSON config files
 - **Multiple Output Formats**: Clean text, structured JSON, and YAML output options
 - **ANTLR-based Parsing**: Robust SQL parsing with detailed error reporting and line/column information
 - **Zero-config Operation**: Works out-of-the-box with sensible defaults for MySQL
@@ -41,7 +41,7 @@ go build -o sql-reviewer main.go
 ### Basic Usage
 
 ```bash
-# Check a SQL file against MySQL rules (uses schema.yaml defaults)
+# Check a SQL file against MySQL rules (uses config/schema.yaml defaults)
 ./sql-reviewer check -e mysql migration.sql
 
 # Check with custom rules configuration
@@ -55,12 +55,12 @@ go build -o sql-reviewer main.go
 
 The tool supports two configuration approaches:
 
-#### 1. Default Configuration (schema.yaml)
+#### 1. Default Configuration (config/schema.yaml)
 
-The tool includes a comprehensive `schema.yaml` file with default rule configurations. No additional setup required:
+The tool includes a comprehensive `config/schema.yaml` file with default rule configurations. No additional setup required:
 
 ```bash
-# Uses built-in schema.yaml automatically
+# Uses built-in config/schema.yaml automatically
 ./sql-reviewer check -e mysql your-file.sql
 ```
 
@@ -225,14 +225,15 @@ sql-reviewer-cli/
 ├── cmd/                    # CLI command implementations (Cobra)
 ├── pkg/
 │   ├── advisor/           # Core rule engine and registration
-│   ├── config/            # Configuration and schema.yaml handling
+│   ├── config/            # Configuration handling and schema.yaml
 │   ├── rules/
 │   │   └── mysql/         # MySQL-specific rule implementations
 │   ├── catalog/           # Database schema metadata handling
 │   ├── mysqlparser/       # ANTLR-based MySQL SQL parser
 │   ├── types/             # Shared type definitions
 │   └── logger/            # Logging utilities
-├── schema.yaml            # Default rule configurations
+├── config/
+│   └── schema.yaml        # Default rule configurations
 ├── examples/              # Example configurations and SQL files
 └── docs/                  # Documentation
 ```
@@ -254,7 +255,7 @@ See [CLAUDE.md](CLAUDE.md) for comprehensive development guidelines.
 1. **Create rule implementation** in `pkg/rules/mysql/`
 2. **Add test data** in `pkg/rules/mysql/testdata/`
 3. **Register the rule** in `pkg/rules/mysql/init.go`
-4. **Update schema.yaml** with default configuration
+4. **Update config/schema.yaml** with default configuration
 5. **Test thoroughly** with various SQL patterns
 
 ### Rule Implementation Example
