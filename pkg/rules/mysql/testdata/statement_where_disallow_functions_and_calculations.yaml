@@ -1,0 +1,11 @@
+- statement: SELECT * FROM employee WHERE id = RAND();
+  changeType: 1
+  want:
+    - status: 2
+      code: 1702
+      title: statement.where.disallow-functions-and-calculations
+      content: Function is disallowed in where clause, but "SELECT * FROM employee WHERE id = RAND();" uses
+      startposition:
+        line: 0
+        column: 0
+      endposition: null

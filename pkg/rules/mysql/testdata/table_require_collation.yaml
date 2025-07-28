@@ -1,0 +1,55 @@
+- statement: CREATE TABLE users (id int PRIMARY KEY) COLLATE=utf8mb4_unicode_ci;
+  changeType: 1
+- statement: CREATE TABLE products (id int, name varchar(100)) ENGINE=InnoDB COLLATE=utf8_general_ci;
+  changeType: 1
+- statement: |-
+    CREATE TABLE orders (id int PRIMARY KEY);
+    CREATE TABLE items (id int, order_id int);
+  changeType: 1
+  want:
+    - status: 2
+      code: 617
+      title: table.require-collation
+      content: Table orders does not have a collation specified
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 617
+      title: table.require-collation
+      content: Table items does not have a collation specified
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    CREATE TABLE categories (
+      id int PRIMARY KEY,
+      name varchar(50)
+    );
+  changeType: 1
+  want:
+    - status: 2
+      code: 617
+      title: table.require-collation
+      content: Table categories does not have a collation specified
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    CREATE TABLE good_table (id int) COLLATE=utf8mb4_unicode_ci;
+    CREATE TABLE bad_table (id int) ENGINE=InnoDB;
+  changeType: 1
+  want:
+    - status: 2
+      code: 617
+      title: table.require-collation
+      content: Table bad_table does not have a collation specified
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    CREATE TABLE mixed_options (
+      id int PRIMARY KEY,
+      name varchar(100)
+    ) ENGINE=InnoDB CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  changeType: 1

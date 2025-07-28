@@ -1,0 +1,28 @@
+- statement: INSERT INTO tech_book VALUES(1, "a");
+  changeType: 1
+- statement: |-
+    INSERT INTO tech_book VALUES(1, "a");
+    INSERT INTO tech_book SELECT * FROM tech_book ORDER BY rand();
+  changeType: 1
+  want:
+    - status: 2
+      code: 1108
+      title: statement.insert.disallow-order-by-rand
+      content: '"INSERT INTO tech_book SELECT * FROM tech_book ORDER BY rand();" uses ORDER BY RAND in the INSERT statement'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    INSERT INTO tech_book VALUES(1, "a");
+    INSERT INTO tech_book SELECT * FROM tech_book ORDER BY RAND() LIMIT 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 1108
+      title: statement.insert.disallow-order-by-rand
+      content: '"INSERT INTO tech_book SELECT * FROM tech_book ORDER BY RAND() LIMIT 1;" uses ORDER BY RAND in the INSERT statement'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null

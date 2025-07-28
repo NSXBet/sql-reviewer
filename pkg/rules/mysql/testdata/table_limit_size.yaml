@@ -1,0 +1,8 @@
+- statement: CREATE TABLE test_table (id INT PRIMARY KEY);
+  changeType: 1
+- statement: ALTER TABLE test_table ADD COLUMN name VARCHAR(100);
+  changeType: 1
+- statement: DROP TABLE test_table;
+  changeType: 1
+- statement: TRUNCATE TABLE test_table;
+  changeType: 1

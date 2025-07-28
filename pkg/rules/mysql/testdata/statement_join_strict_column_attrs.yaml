@@ -1,0 +1,26 @@
+- statement: CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(255));
+  changeType: 1
+- statement: CREATE TABLE orders (id INT PRIMARY KEY, user_id INT, total DECIMAL(10,2));
+  changeType: 1
+- statement: SELECT * FROM users WHERE id = 1;
+  changeType: 1
+- statement: SELECT u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id;
+  changeType: 1
+  want:
+    - status: 2
+      code: 226
+      title: statement.join-strict-column-attrs
+      content: "Join column attributes check required. Please verify that joined columns have matching types, character sets, and collations."
+      startposition:
+        line: 0
+        column: 0
+- statement: SELECT u.name, o.total FROM users u, orders o WHERE u.id = o.user_id;
+  changeType: 1
+  want:
+    - status: 2
+      code: 226
+      title: statement.join-strict-column-attrs
+      content: "Join column attributes check required. Please verify that joined columns have matching types, character sets, and collations."
+      startposition:
+        line: 0
+        column: 0

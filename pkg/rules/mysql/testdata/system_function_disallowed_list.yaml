@@ -1,0 +1,42 @@
+- statement: CREATE TABLE t(a int);
+  changeType: 1
+- statement: SELECT RAND();
+  changeType: 1
+  want:
+    - status: 2
+      code: 1702
+      title: system.function.disallowed-list
+      content: Function "RAND" is disallowed, but "SELECT RAND();" uses
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    CREATE TABLE employee (
+      id VARCHAR(36) DEFAULT (UUID()) PRIMARY KEY,
+      name VARCHAR(255),
+      age INT
+    );
+  changeType: 1
+  want:
+    - status: 2
+      code: 1702
+      title: system.function.disallowed-list
+      content: |-
+        Function "UUID" is disallowed, but "CREATE TABLE employee (
+          id VARCHAR(36) DEFAULT (UUID()) PRIMARY KEY,
+          name VARCHAR(255),
+          age INT
+        );" uses
+      startposition:
+        line: 1
+        column: 0
+- statement: SELECT SLEEP(5);
+  changeType: 1
+  want:
+    - status: 2
+      code: 1702
+      title: system.function.disallowed-list
+      content: Function "SLEEP" is disallowed, but "SELECT SLEEP(5);" uses
+      startposition:
+        line: 0
+        column: 0

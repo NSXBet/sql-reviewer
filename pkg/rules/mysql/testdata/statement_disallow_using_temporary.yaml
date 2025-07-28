@@ -1,0 +1,24 @@
+- statement: CREATE TABLE t (id INT PRIMARY KEY, name VARCHAR(255));
+  changeType: 1
+- statement: INSERT INTO t VALUES (1, 'test');
+  changeType: 1
+- statement: SELECT id FROM t WHERE id = 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 220
+      title: statement.disallow-using-temporary
+      content: "Using temporary table check required. Please verify that this query does not use temporary tables by running EXPLAIN and checking the 'Extra' column."
+      startposition:
+        line: 0
+        column: 0
+- statement: SELECT DISTINCT name FROM t;
+  changeType: 1
+  want:
+    - status: 2
+      code: 220
+      title: statement.disallow-using-temporary
+      content: "Using temporary table check required. Please verify that this query does not use temporary tables by running EXPLAIN and checking the 'Extra' column."
+      startposition:
+        line: 0
+        column: 0

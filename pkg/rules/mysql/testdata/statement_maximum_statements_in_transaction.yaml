@@ -1,0 +1,33 @@
+- statement: CREATE TABLE t (id INT PRIMARY KEY);
+  changeType: 1
+- statement: INSERT INTO t VALUES (1); INSERT INTO t VALUES (2);
+  changeType: 1
+- statement: INSERT INTO t VALUES (1); INSERT INTO t VALUES (2); INSERT INTO t VALUES (3);
+  changeType: 1
+- statement: INSERT INTO t VALUES (1); INSERT INTO t VALUES (2); INSERT INTO t VALUES (3); INSERT INTO t VALUES (4);
+  changeType: 1
+  want:
+    - status: 2
+      code: 228
+      title: statement.maximum-statements-in-transaction
+      content: Number of statements (4) exceeds the maximum limit (3) for a transaction.
+      startposition:
+        line: 0
+        column: 0
+- statement: INSERT INTO t VALUES (1); INSERT INTO t VALUES (2); UPDATE t SET id = 10 WHERE id = 1; DELETE FROM t WHERE id = 2; INSERT INTO t VALUES (5);
+  changeType: 1
+  want:
+    - status: 2
+      code: 228
+      title: statement.maximum-statements-in-transaction
+      content: Number of statements (4) exceeds the maximum limit (3) for a transaction.
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 228
+      title: statement.maximum-statements-in-transaction
+      content: Number of statements (5) exceeds the maximum limit (3) for a transaction.
+      startposition:
+        line: 0
+        column: 0

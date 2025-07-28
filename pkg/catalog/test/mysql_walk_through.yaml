@@ -1,0 +1,295 @@
+- statement: |-
+    CREATE TABLE `test`.`t1` (a INT);
+    CREATE TABLE `other`.`t1` (a INT);
+    RENAME TABLE `other`.`t1` TO `other`.`t2`;
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 201
+    content: Database `other` is not the current database `test`
+    line: 2
+    payload: null
+- statement: |-
+    CREATE TABLE `test`.`t1` (a INT);
+    RENAME TABLE `test`.`t1` TO `other`.`t1`;
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {}
+      ]
+    }
+  err: null
+- statement: |-
+    CREATE TABLE t1(a INT);
+    CREATE TABLE t2(a INT);
+    RENAME TABLE t2 TO t1;
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 301
+    content: Table `t1` already exists
+    line: 3
+    payload: null
+- statement: |-
+    CREATE TABLE t1(a INT);
+    RENAME TABLE t2 TO t3;
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 302
+    content: Table `t2` does not exist
+    line: 2
+    payload: null
+- statement: |-
+    CREATE TABLE t1 (a INT);
+    RENAME TABLE t1 TO t2;
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {
+          "tables": [
+            {
+              "name": "t2",
+              "columns": [
+                {
+                  "name": "a",
+                  "position": 1,
+                  "nullable": true,
+                  "type": "int"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  err: null
+- statement: CREATE DATABASE another;
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 201
+    content: Database `another` is not the current database `test`
+    line: 1
+    payload: null
+- statement: |-
+    -- this is comment
+    DROP DATABASE test;
+    CREATE TABLE t(a int);
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 202
+    content: Database `test` is deleted
+    line: 1
+    payload: null
+- statement: |-
+    ALTER DATABASE CHARACTER SET = utf8mb4;
+    ALTER DATABASE test COLLATE utf8mb4_polish_ci;
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {}
+      ],
+      "characterSet": "utf8mb4",
+      "collation": "utf8mb4_polish_ci"
+    }
+  err: null
+- statement: |-
+    CREATE TABLE t1(
+      a INT PRIMARY KEY,
+      c VARCHAR(255) NOT NULL
+    );
+    ALTER TABLE t1 ADD INDEX idx1 (c);
+    CREATE FULLTEXT INDEX ftk1 ON t1 (c);
+    DROP INDEX `PRIMARY` ON t1;
+    DROP INDEX idx1 ON t1;
+    DROP INDEX ftk1 ON t1;
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {
+          "tables": [
+            {
+              "name": "t1",
+              "columns": [
+                {
+                  "name": "a",
+                  "position": 1,
+                  "type": "int"
+                },
+                {
+                  "name": "c",
+                  "position": 2,
+                  "type": "varchar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  err: null
+- statement: |-
+    CREATE TABLE t1(
+      a INT,
+      b INT,
+      c VARCHAR(255) NOT NULL,
+      d GEOMETRY NOT NULL
+    );
+    CREATE INDEX idx1 ON t1 (a) INVISIBLE;
+    CREATE UNIQUE INDEX uk1 ON t1 (b);
+    CREATE FULLTEXT INDEX ftk1 ON t1 (c);
+    CREATE SPATIAL INDEX sk1 ON t1 (d);
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {
+          "tables": [
+            {
+              "name": "t1",
+              "columns": [
+                {
+                  "name": "a",
+                  "position": 1,
+                  "nullable": true,
+                  "type": "int"
+                },
+                {
+                  "name": "b",
+                  "position": 2,
+                  "nullable": true,
+                  "type": "int"
+                },
+                {
+                  "name": "c",
+                  "position": 3,
+                  "type": "varchar"
+                },
+                {
+                  "name": "d",
+                  "position": 4,
+                  "type": "geometry"
+                }
+              ],
+              "indexes": [
+                {
+                  "name": "ftk1",
+                  "expressions": [
+                    "c"
+                  ],
+                  "type": "FULLTEXT",
+                  "visible": true
+                },
+                {
+                  "name": "idx1",
+                  "expressions": [
+                    "a"
+                  ],
+                  "type": "BTREE"
+                },
+                {
+                  "name": "sk1",
+                  "expressions": [
+                    "d"
+                  ],
+                  "type": "SPATIAL",
+                  "visible": true
+                },
+                {
+                  "name": "uk1",
+                  "expressions": [
+                    "b"
+                  ],
+                  "type": "BTREE",
+                  "unique": true,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  err: null
+- statement: |-
+    CREATE TABLE t1(a GEOMETRY);
+    CREATE SPATIAL INDEX sk1 ON t1 (a);
+  ignore_case_sensitive: false
+  want: ""
+  err:
+    type: 507
+    content: All parts of a SPATIAL index must be NOT NULL, but `a` is nullable
+    line: 2
+    payload: null
+- statement: |-
+    CREATE TABLE t1(
+      a INT PRIMARY KEY,
+      b INT,
+      UNIQUE uk1 (b)
+    );
+    ALTER TABLE t1 ENGINE = MyISAM;
+    ALTER TABLE t1 COMMENT = 't1 table';
+    ALTER TABLE t1 COLLATE utf8mb4_unicode_ci;
+  ignore_case_sensitive: false
+  want: |-
+    {
+      "name": "test",
+      "schemas": [
+        {
+          "tables": [
+            {
+              "name": "t1",
+              "columns": [
+                {
+                  "name": "a",
+                  "position": 1,
+                  "type": "int"
+                },
+                {
+                  "name": "b",
+                  "position": 2,
+                  "nullable": true,
+                  "type": "int"
+                }
+              ],
+              "indexes": [
+                {
+                  "name": "PRIMARY",
+                  "expressions": [
+                    "a"
+                  ],
+                  "type": "BTREE",
+                  "unique": true,
+                  "primary": true,
+                  "visible": true
+                },
+                {
+                  "name": "uk1",
+                  "expressions": [
+                    "b"
+                  ],
+                  "type": "BTREE",
+                  "unique": true,
+                  "visible": true
+                }
+              ],
+              "engine": "MyISAM",
+              "collation": "utf8mb4_unicode_ci",
+              "comment": "t1 table"
+            }
+          ]
+        }
+      ]
+    }
+  err: null

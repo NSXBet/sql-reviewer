@@ -1,0 +1,57 @@
+- statement: ALTER TABLE users ADD COLUMN email varchar(255);
+  changeType: 1
+- statement: ALTER TABLE users ADD COLUMN (email varchar(255), phone varchar(20));
+  changeType: 1
+- statement: |-
+    ALTER TABLE tech_book ADD COLUMN title varchar(100) FIRST;
+    ALTER TABLE tech_book ADD COLUMN summary text AFTER title;
+  changeType: 1
+  want:
+    - status: 2
+      code: 231
+      title: statement.add-column-without-position
+      content: add column with position "FIRST"
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 231
+      title: statement.add-column-without-position
+      content: add column with position "AFTER"
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    ALTER TABLE users ADD COLUMN id int PRIMARY KEY FIRST;
+  changeType: 1
+  want:
+    - status: 2
+      code: 231
+      title: statement.add-column-without-position
+      content: add column with position "FIRST"
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    ALTER TABLE users ADD COLUMN created_at timestamp FIRST;
+  changeType: 1
+  want:
+    - status: 2
+      code: 231
+      title: statement.add-column-without-position
+      content: add column with position "FIRST"
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    ALTER TABLE users ADD COLUMN status varchar(20) AFTER email;
+    ALTER TABLE users ADD COLUMN active boolean;
+  changeType: 1
+  want:
+    - status: 2
+      code: 231
+      title: statement.add-column-without-position
+      content: add column with position "AFTER"
+      startposition:
+        line: 0
+        column: 0

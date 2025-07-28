@@ -1,0 +1,37 @@
+- statement: CREATE TABLE simple_table (id int PRIMARY KEY, name varchar(50));
+  changeType: 1
+- statement: CREATE TABLE text_heavy_table (id int PRIMARY KEY, description text, notes mediumtext);
+  changeType: 1
+  want:
+    - status: 2
+      code: 611
+      title: table.text-fields-total-length
+      content: Table "text_heavy_table" total text column length (16842750) exceeds the limit (10000).
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    CREATE TABLE large_text_table (
+      id int PRIMARY KEY,
+      content longtext,
+      metadata text
+    );
+  changeType: 1
+  want:
+    - status: 2
+      code: 611
+      title: table.text-fields-total-length
+      content: Table "large_text_table" total text column length (4295032830) exceeds the limit (10000).
+      startposition:
+        line: 0
+        column: 0
+- statement: CREATE TABLE varchar_table (id int, name varchar(5000), description varchar(6000));
+  changeType: 1
+  want:
+    - status: 2
+      code: 611
+      title: table.text-fields-total-length
+      content: Table "varchar_table" total text column length (11000) exceeds the limit (10000).
+      startposition:
+        line: 0
+        column: 0

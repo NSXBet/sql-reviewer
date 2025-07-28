@@ -1,0 +1,92 @@
+- statement: CREATE TABLE t(a varchar(20) CHARSET utf8);
+  changeType: 1
+- statement: CREATE TABLE t(a int, b varchar(20) CHARSET utf8mb4);
+  changeType: 1
+- statement: |-
+    CREATE TABLE t1(a varchar(20));
+    CREATE TABLE t2(b char(10));
+  changeType: 1
+  want:
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column a does not have a character set specified
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column b does not have a character set specified
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    CREATE TABLE t(
+      id int PRIMARY KEY,
+      name varchar(50),
+      description text,
+      data tinytext
+    );
+  changeType: 1
+  want:
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column name does not have a character set specified
+      startposition:
+        line: 2
+        column: 0
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column description does not have a character set specified
+      startposition:
+        line: 3
+        column: 0
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column data does not have a character set specified
+      startposition:
+        line: 4
+        column: 0
+- statement: |-
+    ALTER TABLE tech_book ADD COLUMN title varchar(100) CHARSET utf8mb4;
+    ALTER TABLE tech_book ADD COLUMN summary text CHARSET utf8mb4;
+  changeType: 1
+- statement: |-
+    ALTER TABLE tech_book ADD COLUMN content text;
+    ALTER TABLE tech_book ADD COLUMN notes varchar(255);
+  changeType: 1
+  want:
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column content does not have a character set specified
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column notes does not have a character set specified
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    CREATE TABLE mixed(
+      id int,
+      good_col varchar(20) CHARSET utf8mb4,
+      bad_col varchar(30),
+      another_good char(5) CHARSET ascii
+    );
+  changeType: 1
+  want:
+    - status: 2
+      code: 616
+      title: column.require-charset
+      content: Column bad_col does not have a character set specified
+      startposition:
+        line: 3
+        column: 0

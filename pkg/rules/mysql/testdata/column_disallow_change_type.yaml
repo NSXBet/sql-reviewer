@@ -1,0 +1,68 @@
+- statement: |-
+    ALTER TABLE tech_book MODIFY id int;
+    ALTER TABLE tech_book MODIFY id INT;
+    ALTER TABLE tech_book MODIFY id INTEGER;
+    ALTER TABLE tech_book MODIFY id INTEGER UNSIGNED;
+  changeType: 1
+  want:
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book MODIFY id INTEGER;" changes column type'
+      startposition:
+        line: 2
+        column: 0
+      endposition: null
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book MODIFY id INTEGER UNSIGNED;" changes column type'
+      startposition:
+        line: 3
+        column: 0
+      endposition: null
+- statement: |-
+    ALTER TABLE tech_book MODIFY id int;
+    ALTER TABLE tech_book MODIFY id int(4);
+  changeType: 1
+  want:
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book MODIFY id int(4);" changes column type'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    ALTER TABLE tech_book MODIFY id bigint;
+    ALTER TABLE tech_book MODIFY id smallint;
+  changeType: 1
+  want:
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book MODIFY id bigint;" changes column type'
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book MODIFY id smallint;" changes column type'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: ALTER TABLE tech_book CHANGE name uname varchar(20);
+  changeType: 1
+  want:
+    - status: 2
+      code: 403
+      title: column.disallow-change-type
+      content: '"ALTER TABLE tech_book CHANGE name uname varchar(20);" changes column type'
+      startposition:
+        line: 0
+        column: 0
+      endposition: null

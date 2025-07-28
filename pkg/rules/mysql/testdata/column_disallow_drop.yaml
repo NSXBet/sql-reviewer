@@ -1,0 +1,55 @@
+- statement: |-
+    CREATE TABLE t(a INT, b VARCHAR(20));
+    ALTER TABLE t DROP COLUMN a;
+  changeType: 1
+  want:
+    - status: 2
+      code: 425
+      title: column.disallow-drop
+      content: 'drops column "a" of table "t"'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    CREATE TABLE users(id INT, name VARCHAR(50), email VARCHAR(100));
+    ALTER TABLE users DROP COLUMN email;
+  changeType: 1
+  want:
+    - status: 2
+      code: 425
+      title: column.disallow-drop
+      content: 'drops column "email" of table "users"'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    CREATE TABLE test_table(col1 INT, col2 VARCHAR(30), col3 DATETIME);
+    ALTER TABLE test_table DROP COLUMN col1, DROP COLUMN col2;
+  changeType: 1
+  want:
+    - status: 2
+      code: 425
+      title: column.disallow-drop
+      content: 'drops column "col1" of table "test_table"'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+    - status: 2
+      code: 425
+      title: column.disallow-drop
+      content: 'drops column "col2" of table "test_table"'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    CREATE TABLE t(a INT, b VARCHAR(20));
+    ALTER TABLE t ADD COLUMN c INT;
+  changeType: 1
+- statement: |-
+    CREATE TABLE t(a INT, b VARCHAR(20));
+    ALTER TABLE t MODIFY COLUMN a BIGINT;
+  changeType: 1

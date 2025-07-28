@@ -1,0 +1,24 @@
+- statement: CREATE TABLE t (id INT PRIMARY KEY, name VARCHAR(255));
+  changeType: 1
+- statement: INSERT INTO t VALUES (1, 'test');
+  changeType: 1
+- statement: SELECT id FROM t WHERE id = 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 224
+      title: statement.query.minimum-plan-level
+      content: Query plan level check required. Please verify that this query meets the minimum plan level requirement (INDEX) using EXPLAIN.
+      startposition:
+        line: 0
+        column: 0
+- statement: SELECT * FROM t WHERE name = 'test';
+  changeType: 1
+  want:
+    - status: 2
+      code: 224
+      title: statement.query.minimum-plan-level
+      content: Query plan level check required. Please verify that this query meets the minimum plan level requirement (INDEX) using EXPLAIN.
+      startposition:
+        line: 0
+        column: 0

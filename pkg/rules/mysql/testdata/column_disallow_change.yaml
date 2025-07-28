@@ -1,0 +1,17 @@
+- statement: |-
+    CREATE TABLE t(b int);
+    ALTER TABLE t ADD COLUMN a int;
+  changeType: 1
+- statement: |-
+    CREATE TABLE t(b int);
+    ALTER TABLE t CHANGE COLUMN b a int;
+  changeType: 1
+  want:
+    - status: 2
+      code: 406
+      title: column.disallow-change
+      content: '"ALTER TABLE t CHANGE COLUMN b a int;" contains CHANGE COLUMN statement'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null

@@ -1,0 +1,61 @@
+- statement: ALTER TABLE tech_book ADD COLUMN a int;
+  changeType: 1
+- statement: |-
+    ALTER TABLE tech_book ADD COLUMN a int;
+    ALTER TABLE tech_book CHANGE COLUMN a c int;
+  changeType: 1
+  want:
+    - status: 2
+      code: 207
+      title: statement.merge-alter-table
+      content: There are 2 statements to modify table `tech_book`
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: |-
+    CREATE TABLE t(a int);
+    ALTER TABLE tech_book ADD COLUMN b int;
+    ALTER TABLE t ADD COLUMN b int;
+    ALTER TABLE tech_book MODIFY COLUMN b varchar(255);
+  changeType: 1
+  want:
+    - status: 2
+      code: 207
+      title: statement.merge-alter-table
+      content: There are 2 statements to modify table `t`
+      startposition:
+        line: 2
+        column: 0
+      endposition: null
+    - status: 2
+      code: 207
+      title: statement.merge-alter-table
+      content: There are 2 statements to modify table `tech_book`
+      startposition:
+        line: 3
+        column: 0
+      endposition: null
+- statement: |-
+    CREATE TABLE t(a int);
+    ALTER TABLE tech_book ADD COLUMN a int;
+    ALTER TABLE tech_book ADD COLUMN b int;
+    ALTER TABLE t ADD COLUMN b int;
+  changeType: 1
+  want:
+    - status: 2
+      code: 207
+      title: statement.merge-alter-table
+      content: There are 2 statements to modify table `tech_book`
+      startposition:
+        line: 2
+        column: 0
+      endposition: null
+    - status: 2
+      code: 207
+      title: statement.merge-alter-table
+      content: There are 2 statements to modify table `t`
+      startposition:
+        line: 3
+        column: 0
+      endposition: null

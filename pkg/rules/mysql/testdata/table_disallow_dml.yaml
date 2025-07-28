@@ -1,0 +1,46 @@
+- statement: INSERT INTO users (name) VALUES ('John');
+  changeType: 1
+- statement: UPDATE products SET price = 100 WHERE id = 1;
+  changeType: 1
+- statement: INSERT INTO audit_log (action) VALUES ('login');
+  changeType: 1
+  want:
+    - status: 2
+      code: 614
+      title: table.disallow-dml
+      content: DML is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+- statement: UPDATE system_config SET config_value = 'new' WHERE config_key = 'test';
+  changeType: 1
+  want:
+    - status: 2
+      code: 614
+      title: table.disallow-dml
+      content: DML is disallowed on table system_config.
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    DELETE FROM audit_log WHERE id = 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 614
+      title: table.disallow-dml
+      content: DML is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    SELECT * FROM users INTO OUTFILE 'audit_log';
+  changeType: 1
+  want:
+    - status: 2
+      code: 614
+      title: table.disallow-dml
+      content: DML is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0

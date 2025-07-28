@@ -1,0 +1,24 @@
+- statement: CREATE TABLE t (id INT PRIMARY KEY, name VARCHAR(255));
+  changeType: 1
+- statement: INSERT INTO t VALUES (1, 'test');
+  changeType: 1
+- statement: SELECT id FROM t WHERE id = 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 219
+      title: statement.disallow-using-filesort
+      content: "Using filesort check required. Please verify that this query does not use filesort by running EXPLAIN and checking the 'Extra' column."
+      startposition:
+        line: 0
+        column: 0
+- statement: SELECT * FROM t ORDER BY name;
+  changeType: 1
+  want:
+    - status: 2
+      code: 219
+      title: statement.disallow-using-filesort
+      content: "Using filesort check required. Please verify that this query does not use filesort by running EXPLAIN and checking the 'Extra' column."
+      startposition:
+        line: 0
+        column: 0

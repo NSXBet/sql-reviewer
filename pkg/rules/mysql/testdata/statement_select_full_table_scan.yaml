@@ -1,0 +1,7 @@
+- statement: CREATE TABLE t (id INT PRIMARY KEY, name VARCHAR(255));
+  changeType: 1
+- statement: INSERT INTO t VALUES (1, 'test');
+  changeType: 1
+- statement: SELECT * FROM t;
+  changeType: 1
+  # TODO: Add test case with driver

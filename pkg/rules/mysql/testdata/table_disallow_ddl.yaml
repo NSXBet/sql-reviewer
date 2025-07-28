@@ -1,0 +1,74 @@
+- statement: CREATE TABLE users (id int PRIMARY KEY);
+  changeType: 1
+- statement: ALTER TABLE products ADD COLUMN price decimal(10,2);
+  changeType: 1
+- statement: |-
+    CREATE TABLE audit_log (id int PRIMARY KEY);
+    ALTER TABLE system_config ADD COLUMN value varchar(255);
+  changeType: 1
+  want:
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table system_config.
+      startposition:
+        line: 1
+        column: 0
+- statement: |-
+    DROP TABLE audit_log;
+  changeType: 1
+  want:
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    RENAME TABLE system_config TO new_system_config;
+  changeType: 1
+  want:
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table system_config.
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    TRUNCATE TABLE audit_log;
+  changeType: 1
+  want:
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+- statement: |-
+    DROP TABLE audit_log, system_config, users;
+  changeType: 1
+  want:
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table audit_log.
+      startposition:
+        line: 0
+        column: 0
+    - status: 2
+      code: 613
+      title: table.disallow-ddl
+      content: DDL is disallowed on table system_config.
+      startposition:
+        line: 0
+        column: 0
