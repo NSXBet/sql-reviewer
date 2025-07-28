@@ -9,11 +9,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // TableTextFieldsTotalLengthRule is the ANTLR-based implementation for checking table text fields total length
@@ -23,7 +22,11 @@ type TableTextFieldsTotalLengthRule struct {
 }
 
 // NewTableTextFieldsTotalLengthRule creates a new ANTLR-based table text fields total length rule
-func NewTableTextFieldsTotalLengthRule(level types.SQLReviewRuleLevel, title string, maximum int) *TableTextFieldsTotalLengthRule {
+func NewTableTextFieldsTotalLengthRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	maximum int,
+) *TableTextFieldsTotalLengthRule {
 	return &TableTextFieldsTotalLengthRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -80,10 +83,15 @@ func (r *TableTextFieldsTotalLengthRule) checkCreateTable(ctx *mysql.CreateTable
 
 	if totalLength > int64(r.maximum) {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.TotalTextLengthExceedsLimit),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Table %q total text column length (%d) exceeds the limit (%d).", tableName, totalLength, r.maximum),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.TotalTextLengthExceedsLimit),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Table %q total text column length (%d) exceeds the limit (%d).",
+				tableName,
+				totalLength,
+				r.maximum,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -134,7 +142,12 @@ func (r *TableTextFieldsTotalLengthRule) extractLength(dataType string, defaultL
 type TableTextFieldsTotalLengthAdvisor struct{}
 
 // Check performs the ANTLR-based table text fields total length check
-func (a *TableTextFieldsTotalLengthAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableTextFieldsTotalLengthAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")
@@ -151,7 +164,11 @@ func (a *TableTextFieldsTotalLengthAdvisor) Check(ctx context.Context, statement
 	}
 
 	// Create the rule
-	tableTextFieldsTotalLengthRule := NewTableTextFieldsTotalLengthRule(types.SQLReviewRuleLevel(level), string(rule.Type), payload.Number)
+	tableTextFieldsTotalLengthRule := NewTableTextFieldsTotalLengthRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+		payload.Number,
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{tableTextFieldsTotalLengthRule})

@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -84,7 +83,12 @@ func (r *StatementWhereNoEqualNullRule) checkPrimaryExprCompare(ctx *mysql.Prima
 type StatementWhereNoEqualNullAdvisor struct{}
 
 // Check performs the ANTLR-based where no equal null check
-func (a *StatementWhereNoEqualNullAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereNoEqualNullAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse MySQL statement: %w", err)

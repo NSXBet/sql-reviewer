@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
@@ -23,7 +22,12 @@ type IndexTotalNumberLimitRule struct {
 }
 
 // NewIndexTotalNumberLimitRule creates a new ANTLR-based index total number limit rule
-func NewIndexTotalNumberLimitRule(level types.SQLReviewRuleLevel, title string, maxIndexes int, catalog *catalog.Finder) *IndexTotalNumberLimitRule {
+func NewIndexTotalNumberLimitRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	maxIndexes int,
+	catalog *catalog.Finder,
+) *IndexTotalNumberLimitRule {
 	return &IndexTotalNumberLimitRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -91,10 +95,15 @@ func (r *IndexTotalNumberLimitRule) generateAdvice() []*types.Advice {
 			tableInfo := r.catalog.Final.FindTable(&catalog.TableFind{TableName: table.name})
 			if tableInfo != nil && tableInfo.CountIndex() > r.max {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.IndexCountExceedsLimit),
-					Title:         r.title,
-					Content:       fmt.Sprintf("The count of index in table `%s` should be no more than %d, but found %d", table.name, r.max, tableInfo.CountIndex()),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.IndexCountExceedsLimit),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"The count of index in table `%s` should be no more than %d, but found %d",
+						table.name,
+						r.max,
+						tableInfo.CountIndex(),
+					),
 					StartPosition: ConvertANTLRLineToPosition(table.line),
 				})
 			}
@@ -195,7 +204,11 @@ func (r *IndexTotalNumberLimitRule) checkTableConstraintDef(tableName string, ct
 		return
 	}
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserFULLTEXT_SYMBOL:
+	case mysql.MySQLParserPRIMARY_SYMBOL,
+		mysql.MySQLParserUNIQUE_SYMBOL,
+		mysql.MySQLParserKEY_SYMBOL,
+		mysql.MySQLParserINDEX_SYMBOL,
+		mysql.MySQLParserFULLTEXT_SYMBOL:
 		r.lineForTable[tableName] = r.baseLine + ctx.GetStart().GetLine()
 	}
 }
@@ -204,7 +217,12 @@ func (r *IndexTotalNumberLimitRule) checkTableConstraintDef(tableName string, ct
 type IndexTotalNumberLimitAdvisor struct{}
 
 // Check performs the ANTLR-based index total number limit check using payload
-func (a *IndexTotalNumberLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *IndexTotalNumberLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)
@@ -240,11 +258,12 @@ func (a *IndexTotalNumberLimitAdvisor) Check(ctx context.Context, statements str
 	if catalogFinder != nil {
 		// Convert our parse results to the format expected by catalog walkthrough
 		catalogAST := catalog.ConvertMySQLParseResults(root)
-		
+
 		// Walk through the statements to update the catalog state
 		if err := catalogFinder.WalkThrough(catalogAST); err != nil {
 			// If walkthrough fails, continue without updated catalog but log the error
 			// This ensures the rule still works even if catalog update fails
+			_ = err // Ignore error but keep variable assignment to satisfy staticcheck
 		}
 	}
 

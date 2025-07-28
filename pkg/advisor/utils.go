@@ -7,9 +7,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // NormalizeStatement limit the max length of the statements.
@@ -32,7 +31,9 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	if engine == types.Engine_POSTGRES && qCtx.UsePostgresDatabaseOwner {
 		const query = `
@@ -170,12 +171,12 @@ func UnmarshalNumberTypeRulePayload(payload map[string]interface{}) (*NumberType
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	
+
 	number, ok := payload["number"]
 	if !ok {
 		return nil, errors.New("missing 'number' field in payload")
 	}
-	
+
 	var num int
 	switch v := number.(type) {
 	case int:
@@ -188,7 +189,7 @@ func UnmarshalNumberTypeRulePayload(payload map[string]interface{}) (*NumberType
 	default:
 		return nil, errors.New("invalid number type in payload")
 	}
-	
+
 	return &NumberTypeRulePayload{Number: num}, nil
 }
 
@@ -202,12 +203,12 @@ func UnmarshalStringArrayTypeRulePayload(payload map[string]interface{}) (*Strin
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	
+
 	listInterface, ok := payload["list"]
 	if !ok {
 		return nil, errors.New("missing 'list' field in payload")
 	}
-	
+
 	// Handle both []interface{} and []string cases, and nil (empty array) case
 	var list []string
 	switch v := listInterface.(type) {
@@ -227,7 +228,7 @@ func UnmarshalStringArrayTypeRulePayload(payload map[string]interface{}) (*Strin
 	default:
 		return nil, errors.New("'list' field is not an array")
 	}
-	
+
 	return &StringArrayTypeRulePayload{List: list}, nil
 }
 
@@ -241,17 +242,17 @@ func UnmarshalStringTypeRulePayload(payload map[string]interface{}) (*StringType
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	
+
 	stringInterface, ok := payload["string"]
 	if !ok {
 		return nil, errors.New("missing 'string' field in payload")
 	}
-	
+
 	str, ok := stringInterface.(string)
 	if !ok {
 		return nil, errors.New("'string' field is not a string")
 	}
-	
+
 	return &StringTypeRulePayload{String: str}, nil
 }
 
@@ -265,17 +266,17 @@ func UnmarshalBooleanTypeRulePayload(payload map[string]interface{}) (*BooleanTy
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	
+
 	boolInterface, ok := payload["boolean"]
 	if !ok {
 		return nil, errors.New("missing 'boolean' field in payload")
 	}
-	
+
 	boolVal, ok := boolInterface.(bool)
 	if !ok {
 		return nil, errors.New("'boolean' field is not a boolean")
 	}
-	
+
 	return &BooleanTypeRulePayload{Boolean: boolVal}, nil
 }
 

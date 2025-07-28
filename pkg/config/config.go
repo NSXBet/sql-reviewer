@@ -11,7 +11,7 @@ import (
 
 // Config represents the configuration for SQL review
 type Config struct {
-	ID    string                 `yaml:"id" json:"id"`
+	ID    string                 `yaml:"id"    json:"id"`
 	Rules []*types.SQLReviewRule `yaml:"rules" json:"rules"`
 }
 

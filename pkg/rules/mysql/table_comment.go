@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // TableCommentRule is the ANTLR-based implementation for checking table comment convention
@@ -101,7 +100,12 @@ func (*TableCommentRule) handleCreateTableOptions(ctx mysql.ICreateTableOptionsC
 type TableCommentAdvisor struct{}
 
 // Check performs the ANTLR-based table comment convention check
-func (a *TableCommentAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableCommentAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

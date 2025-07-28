@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -108,19 +107,27 @@ func (r *NamingTableAdvisor) handleTableName(tableName string, lineNumber int) {
 	lineNumber += r.baseLine
 	if r.pattern != nil && !r.pattern.MatchString(tableName) {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingTableConvention),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s` mismatches table naming convention, naming format should be %q", tableName, r.pattern.String()),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingTableConvention),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s` mismatches table naming convention, naming format should be %q",
+				tableName,
+				r.pattern.String(),
+			),
 			StartPosition: ConvertANTLRLineToPosition(lineNumber),
 		})
 	}
 	if r.maxLength > 0 && len(tableName) > r.maxLength {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingTableConvention),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s` mismatches table naming convention, its length should be within %d characters", tableName, r.maxLength),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingTableConvention),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s` mismatches table naming convention, its length should be within %d characters",
+				tableName,
+				r.maxLength,
+			),
 			StartPosition: ConvertANTLRLineToPosition(lineNumber),
 		})
 	}
@@ -130,7 +137,12 @@ func (r *NamingTableAdvisor) handleTableName(tableName string, lineNumber int) {
 type NamingTableConventionAdvisor struct{}
 
 // Check performs the ANTLR-based table naming check using payload
-func (a *NamingTableConventionAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *NamingTableConventionAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

@@ -7,12 +7,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // IndexPkTypeLimitRule is the ANTLR-based implementation for checking primary key column types
@@ -112,7 +111,8 @@ func (r *IndexPkTypeLimitRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 				r.checkFieldDefinition(tableName, columnName, alterListItem.FieldDefinition())
 			case alterListItem.OPEN_PAR_SYMBOL() != nil && alterListItem.TableElementList() != nil:
 				for _, tableElement := range alterListItem.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -170,10 +170,15 @@ func (r *IndexPkTypeLimitRule) checkConstraintDef(tableName string, ctx mysql.IT
 func (r *IndexPkTypeLimitRule) addAdvice(tableName, columnName, columnType string, lineNumber int) {
 	if !strings.EqualFold(columnType, "INT") && !strings.EqualFold(columnType, "BIGINT") {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.IndexPKType),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Columns in primary key must be INT/BIGINT but `%s`.`%s` is %s", tableName, columnName, columnType),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.IndexPKType),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Columns in primary key must be INT/BIGINT but `%s`.`%s` is %s",
+				tableName,
+				columnName,
+				columnType,
+			),
 			StartPosition: ConvertANTLRLineToPosition(lineNumber),
 		})
 	}
@@ -184,7 +189,7 @@ func (r *IndexPkTypeLimitRule) getPKColumnType(tableName string, columnName stri
 	if columnType, ok := r.tablesNewColumns.get(tableName, columnName); ok {
 		return columnType, nil
 	}
-	
+
 	if r.catalog != nil {
 		column := r.catalog.Origin.FindColumn(&catalog.ColumnFind{
 			TableName:  tableName,
@@ -194,7 +199,7 @@ func (r *IndexPkTypeLimitRule) getPKColumnType(tableName string, columnName stri
 			return column.Type(), nil
 		}
 	}
-	
+
 	return "", errors.Errorf("cannot find the type of `%s`.`%s`", tableName, columnName)
 }
 
@@ -213,7 +218,12 @@ func (*IndexPkTypeLimitRule) getIntOrBigIntStr(ctx mysql.IDataTypeContext) strin
 type IndexPkTypeLimitAdvisor struct{}
 
 // Check performs the ANTLR-based index PK type limit check
-func (a *IndexPkTypeLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *IndexPkTypeLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,11 @@ type ColumnTypeDisallowListRule struct {
 }
 
 // NewColumnTypeDisallowListRule creates a new ANTLR-based column type disallow list rule
-func NewColumnTypeDisallowListRule(level types.SQLReviewRuleLevel, title string, typeRestriction map[string]bool) *ColumnTypeDisallowListRule {
+func NewColumnTypeDisallowListRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	typeRestriction map[string]bool,
+) *ColumnTypeDisallowListRule {
 	return &ColumnTypeDisallowListRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -72,11 +75,20 @@ func (r *ColumnTypeDisallowListRule) checkCreateTable(ctx *mysql.CreateTableCont
 		if tableElement.ColumnDefinition().FieldDefinition() == nil {
 			continue
 		}
-		r.checkFieldDefinition(tableName, columnName, tableElement.ColumnDefinition().FieldDefinition(), tableElement.GetStart().GetLine())
+		r.checkFieldDefinition(
+			tableName,
+			columnName,
+			tableElement.ColumnDefinition().FieldDefinition(),
+			tableElement.GetStart().GetLine(),
+		)
 	}
 }
 
-func (r *ColumnTypeDisallowListRule) checkFieldDefinition(tableName, columnName string, ctx mysql.IFieldDefinitionContext, line int) {
+func (r *ColumnTypeDisallowListRule) checkFieldDefinition(
+	tableName, columnName string,
+	ctx mysql.IFieldDefinitionContext,
+	line int,
+) {
 	if ctx.DataType() == nil {
 		return
 	}
@@ -120,11 +132,17 @@ func (r *ColumnTypeDisallowListRule) checkAlterTable(ctx *mysql.AlterTableContex
 				r.checkFieldDefinition(tableName, columnName, item.FieldDefinition(), ctx.GetStart().GetLine())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
-					r.checkFieldDefinition(tableName, columnName, tableElement.ColumnDefinition().FieldDefinition(), ctx.GetStart().GetLine())
+					r.checkFieldDefinition(
+						tableName,
+						columnName,
+						tableElement.ColumnDefinition().FieldDefinition(),
+						ctx.GetStart().GetLine(),
+					)
 				}
 			}
 		// modify column
@@ -143,7 +161,12 @@ func (r *ColumnTypeDisallowListRule) checkAlterTable(ctx *mysql.AlterTableContex
 type ColumnTypeDisallowListAdvisor struct{}
 
 // Check performs the ANTLR-based column type disallow list check using payload
-func (a *ColumnTypeDisallowListAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *ColumnTypeDisallowListAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

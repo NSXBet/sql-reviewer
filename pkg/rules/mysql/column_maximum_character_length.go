@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,11 @@ type ColumnMaximumCharacterLengthRule struct {
 }
 
 // NewColumnMaximumCharacterLengthRule creates a new ANTLR-based column maximum character length rule
-func NewColumnMaximumCharacterLengthRule(level types.SQLReviewRuleLevel, title string, maximum int) *ColumnMaximumCharacterLengthRule {
+func NewColumnMaximumCharacterLengthRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	maximum int,
+) *ColumnMaximumCharacterLengthRule {
 	return &ColumnMaximumCharacterLengthRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -60,7 +63,7 @@ func (r *ColumnMaximumCharacterLengthRule) checkCreateTable(ctx *mysql.CreateTab
 	if tableName == "" {
 		return
 	}
-	
+
 	for _, tableElement := range ctx.TableElementList().AllTableElement() {
 		if tableElement.ColumnDefinition() == nil {
 			continue
@@ -75,10 +78,15 @@ func (r *ColumnMaximumCharacterLengthRule) checkCreateTable(ctx *mysql.CreateTab
 		charLength := r.getCharLength(tableElement.ColumnDefinition().FieldDefinition().DataType())
 		if r.maximum > 0 && charLength > r.maximum {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.CharLengthExceedsLimit),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The length of the CHAR column `%s.%s` is bigger than %d, please use VARCHAR instead", tableName, columnName, r.maximum),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.CharLengthExceedsLimit),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The length of the CHAR column `%s.%s` is bigger than %d, please use VARCHAR instead",
+					tableName,
+					columnName,
+					r.maximum,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + tableElement.GetStart().GetLine()),
 			})
 		}
@@ -100,7 +108,7 @@ func (r *ColumnMaximumCharacterLengthRule) checkAlterTable(ctx *mysql.AlterTable
 	if tableName == "" {
 		return
 	}
-	
+
 	// alter table add column, change column, modify column.
 	for _, item := range ctx.AlterTableActions().AlterCommandList().AlterList().AllAlterListItem() {
 		if item == nil {
@@ -126,7 +134,8 @@ func (r *ColumnMaximumCharacterLengthRule) checkAlterTable(ctx *mysql.AlterTable
 					if tableElement.ColumnDefinition() == nil {
 						continue
 					}
-					if tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					if tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
@@ -159,14 +168,19 @@ func (r *ColumnMaximumCharacterLengthRule) checkAlterTable(ctx *mysql.AlterTable
 		default:
 			continue
 		}
-		
+
 		for _, columnName := range columnList {
 			if charLength, ok := charLengthMap[columnName]; ok && r.maximum > 0 && charLength > r.maximum {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.CharLengthExceedsLimit),
-					Title:         r.title,
-					Content:       fmt.Sprintf("The length of the CHAR column `%s.%s` is bigger than %d, please use VARCHAR instead", tableName, columnName, r.maximum),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.CharLengthExceedsLimit),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"The length of the CHAR column `%s.%s` is bigger than %d, please use VARCHAR instead",
+						tableName,
+						columnName,
+						r.maximum,
+					),
 					StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 				})
 			}
@@ -199,7 +213,12 @@ func (*ColumnMaximumCharacterLengthRule) getCharLength(ctx mysql.IDataTypeContex
 type ColumnMaximumCharacterLengthAdvisor struct{}
 
 // Check performs the ANTLR-based column maximum character length check using payload
-func (a *ColumnMaximumCharacterLengthAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *ColumnMaximumCharacterLengthAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

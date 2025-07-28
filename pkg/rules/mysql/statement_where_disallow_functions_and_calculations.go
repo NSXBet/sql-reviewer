@@ -6,16 +6,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementWhereDisallowFunctionsAndCalculationsAdvisor struct {
-}
+type StatementWhereDisallowFunctionsAndCalculationsAdvisor struct{}
 
-func (a *StatementWhereDisallowFunctionsAndCalculationsAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereDisallowFunctionsAndCalculationsAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -50,7 +53,10 @@ type StatementWhereDisallowFunctionsAndCalculationsRule struct {
 }
 
 // NewStatementWhereDisallowFunctionsAndCalculationsRule creates a new StatementWhereDisallowFunctionsAndCalculationsRule.
-func NewStatementWhereDisallowFunctionsAndCalculationsRule(level types.Advice_Status, title string) *StatementWhereDisallowFunctionsAndCalculationsRule {
+func NewStatementWhereDisallowFunctionsAndCalculationsRule(
+	level types.Advice_Status,
+	title string,
+) *StatementWhereDisallowFunctionsAndCalculationsRule {
 	return &StatementWhereDisallowFunctionsAndCalculationsRule{
 		BaseRule: BaseRule{
 			level: level,

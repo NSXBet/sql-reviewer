@@ -7,12 +7,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // IndexPrimaryKeyTypeAllowlistRule is the ANTLR-based implementation for checking primary key type allowlist
@@ -24,7 +23,12 @@ type IndexPrimaryKeyTypeAllowlistRule struct {
 }
 
 // NewIndexPrimaryKeyTypeAllowlistRule creates a new ANTLR-based index primary key type allowlist rule
-func NewIndexPrimaryKeyTypeAllowlistRule(level types.SQLReviewRuleLevel, title string, allowlist map[string]bool, catalog *catalog.Finder) *IndexPrimaryKeyTypeAllowlistRule {
+func NewIndexPrimaryKeyTypeAllowlistRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	allowlist map[string]bool,
+	catalog *catalog.Finder,
+) *IndexPrimaryKeyTypeAllowlistRule {
 	return &IndexPrimaryKeyTypeAllowlistRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -112,7 +116,8 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) checkAlterTable(ctx *mysql.AlterTable
 				r.checkFieldDefinition(tableName, columnName, alterListItem.FieldDefinition())
 			case alterListItem.OPEN_PAR_SYMBOL() != nil && alterListItem.TableElementList() != nil:
 				for _, tableElement := range alterListItem.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -145,10 +150,15 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) checkFieldDefinition(tableName, colum
 		if attribute.PRIMARY_SYMBOL() != nil {
 			if _, exists := r.allowlist[columnType]; !exists {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.IndexPKType),
-					Title:         r.title,
-					Content:       fmt.Sprintf("The column `%s` in table `%s` is one of the primary key, but its type \"%s\" is not in allowlist", columnName, tableName, columnType),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.IndexPKType),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"The column `%s` in table `%s` is one of the primary key, but its type \"%s\" is not in allowlist",
+						columnName,
+						tableName,
+						columnType,
+					),
 					StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 				})
 			}
@@ -174,10 +184,15 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) checkConstraintDef(tableName string, 
 		columnType = strings.ToLower(columnType)
 		if _, exists := r.allowlist[columnType]; !exists {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.IndexPKType),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The column `%s` in table `%s` is one of the primary key, but its type \"%s\" is not in allowlist", columnName, tableName, columnType),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.IndexPKType),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The column `%s` in table `%s` is one of the primary key, but its type \"%s\" is not in allowlist",
+					columnName,
+					tableName,
+					columnType,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 			})
 		}
@@ -189,7 +204,7 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) getPKColumnType(tableName string, col
 	if columnType, ok := r.tablesNewColumns.get(tableName, columnName); ok {
 		return columnType, nil
 	}
-	
+
 	if r.catalog != nil {
 		column := r.catalog.Origin.FindColumn(&catalog.ColumnFind{
 			TableName:  tableName,
@@ -199,7 +214,7 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) getPKColumnType(tableName string, col
 			return column.Type(), nil
 		}
 	}
-	
+
 	return "", errors.Errorf("cannot find the type of `%s`.`%s`", tableName, columnName)
 }
 
@@ -207,7 +222,12 @@ func (r *IndexPrimaryKeyTypeAllowlistRule) getPKColumnType(tableName string, col
 type IndexPrimaryKeyTypeAllowlistAdvisor struct{}
 
 // Check performs the ANTLR-based index primary key type allowlist check using payload
-func (a *IndexPrimaryKeyTypeAllowlistAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *IndexPrimaryKeyTypeAllowlistAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)
@@ -239,7 +259,12 @@ func (a *IndexPrimaryKeyTypeAllowlistAdvisor) Check(ctx context.Context, stateme
 	}
 
 	// Create the rule with allowlist and catalog
-	pkTypeAllowlistRule := NewIndexPrimaryKeyTypeAllowlistRule(types.SQLReviewRuleLevel(level), string(rule.Type), allowlist, catalogFinder)
+	pkTypeAllowlistRule := NewIndexPrimaryKeyTypeAllowlistRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+		allowlist,
+		catalogFinder,
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{pkTypeAllowlistRule})

@@ -9,11 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 // UnifiedTestCase represents a single test case from the YAML file matching Bytebase format
@@ -25,7 +24,12 @@ type TestCase struct {
 
 // RuleAdvisor interface for all rule advisors (using payload from context)
 type RuleAdvisor interface {
-	Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error)
+	Check(
+		ctx context.Context,
+		statements string,
+		rule *types.SQLReviewRule,
+		checkContext advisor.Context,
+	) ([]*types.Advice, error)
 }
 
 // RuleMapping maps rule names to their advisor instances and titles
@@ -732,7 +736,7 @@ func runRuleTest(t *testing.T, ruleName string, mapping RuleMapping, record bool
 				Type:  string(mapping.RuleType),
 				Level: types.SQLReviewRuleLevel_WARNING,
 			}
-			
+
 			// Set default payload for rules that require them
 			if payload, err := SetDefaultSQLReviewRulePayload(mapping.RuleType); err == nil && payload != nil {
 				rule.Payload = payload
@@ -745,7 +749,7 @@ func runRuleTest(t *testing.T, ruleName string, mapping RuleMapping, record bool
 			} else {
 				mockDB = CreateMockDatabaseForTableRequirePK()
 			}
-			
+
 			checkContext := advisor.Context{
 				DBSchema:   mockDB,
 				DBType:     types.Engine_MYSQL,
@@ -821,7 +825,7 @@ func runRuleTest(t *testing.T, ruleName string, mapping RuleMapping, record bool
 		require.NoError(t, err)
 		byteValue, err := yaml.Marshal(tests)
 		require.NoError(t, err)
-		err = os.WriteFile(testFile, byteValue, 0644)
+		err = os.WriteFile(testFile, byteValue, 0o644)
 		require.NoError(t, err)
 	}
 }
@@ -829,9 +833,8 @@ func runRuleTest(t *testing.T, ruleName string, mapping RuleMapping, record bool
 // unifiedFormatTestName creates a readable test name from the test case
 func unifiedFormatTestName(_ int, statement string) string {
 	// Extract first line for the test name
-	lines := []rune(statement)
 	var firstLine []rune
-	for _, r := range lines {
+	for _, r := range statement {
 		if r == '\n' {
 			break
 		}
@@ -913,7 +916,7 @@ func TestMySQLColumnSetDefaultForNotNullRule(t *testing.T) {
 func TestMySQLColumnDisallowChangeTypeRule(t *testing.T) {
 	// Create advisor with mock catalog for this specific test
 	ruleAdvisor := &ColumnDisallowChangeTypeAdvisor{}
-	
+
 	// Read the YAML test file
 	var tests []TestCase
 	testFile := filepath.Join("testdata", "column_disallow_change_type.yaml")
@@ -988,8 +991,20 @@ func TestMySQLColumnDisallowChangeTypeRule(t *testing.T) {
 
 				if want.StartPosition != nil {
 					require.NotNilf(t, advice.StartPosition, "Advice[%d].StartPosition should not be nil", j)
-					require.Equalf(t, want.StartPosition.Line, advice.StartPosition.Line, "Advice[%d].StartPosition.Line mismatch", j)
-					require.Equalf(t, want.StartPosition.Column, advice.StartPosition.Column, "Advice[%d].StartPosition.Column mismatch", j)
+					require.Equalf(
+						t,
+						want.StartPosition.Line,
+						advice.StartPosition.Line,
+						"Advice[%d].StartPosition.Line mismatch",
+						j,
+					)
+					require.Equalf(
+						t,
+						want.StartPosition.Column,
+						advice.StartPosition.Column,
+						"Advice[%d].StartPosition.Column mismatch",
+						j,
+					)
 				}
 			}
 		})
@@ -1103,7 +1118,7 @@ func TestMySQLIndexPrimaryKeyTypeAllowlistRule(t *testing.T) {
 func TestMySQLIndexTotalNumberLimitRule(t *testing.T) {
 	// Create advisor with mock catalog for this specific test
 	ruleAdvisor := &IndexTotalNumberLimitAdvisor{}
-	
+
 	// Read the YAML test file
 	var tests []TestCase
 	testFile := filepath.Join("testdata", "index_total_number_limit.yaml")
@@ -1123,9 +1138,10 @@ func TestMySQLIndexTotalNumberLimitRule(t *testing.T) {
 				Type:  string(advisor.SchemaRuleIndexTotalNumberLimit),
 				Level: types.SQLReviewRuleLevel_WARNING,
 			}
-			
+
 			// Set payload for max index count
-			if payload, err := SetDefaultSQLReviewRulePayload(advisor.SchemaRuleIndexTotalNumberLimit); err == nil && payload != nil {
+			if payload, err := SetDefaultSQLReviewRulePayload(advisor.SchemaRuleIndexTotalNumberLimit); err == nil &&
+				payload != nil {
 				rule.Payload = payload
 			}
 
@@ -1176,13 +1192,61 @@ func TestMySQLIndexTotalNumberLimitRule(t *testing.T) {
 				}
 
 				expected := tc.Want[j]
-				require.Equalf(t, int32(expected.Status), int32(advice.Status), "advice[%d].Status, expected: %d, actual: %d", j, expected.Status, advice.Status)
-				require.Equalf(t, expected.Code, advice.Code, "advice[%d].Code, expected: %d, actual: %d", j, expected.Code, advice.Code)
-				require.Equalf(t, expected.Title, advice.Title, "advice[%d].Title, expected: %s, actual: %s", j, expected.Title, advice.Title)
-				require.Equalf(t, expected.Content, advice.Content, "advice[%d].Content, expected: %s, actual: %s", j, expected.Content, advice.Content)
+				require.Equalf(
+					t,
+					int32(expected.Status),
+					int32(advice.Status),
+					"advice[%d].Status, expected: %d, actual: %d",
+					j,
+					expected.Status,
+					advice.Status,
+				)
+				require.Equalf(
+					t,
+					expected.Code,
+					advice.Code,
+					"advice[%d].Code, expected: %d, actual: %d",
+					j,
+					expected.Code,
+					advice.Code,
+				)
+				require.Equalf(
+					t,
+					expected.Title,
+					advice.Title,
+					"advice[%d].Title, expected: %s, actual: %s",
+					j,
+					expected.Title,
+					advice.Title,
+				)
+				require.Equalf(
+					t,
+					expected.Content,
+					advice.Content,
+					"advice[%d].Content, expected: %s, actual: %s",
+					j,
+					expected.Content,
+					advice.Content,
+				)
 				if expected.StartPosition != nil && advice.StartPosition != nil {
-					require.Equalf(t, expected.StartPosition.Line, advice.StartPosition.Line, "advice[%d].StartPosition.Line, expected: %d, actual: %d", j, expected.StartPosition.Line, advice.StartPosition.Line)
-					require.Equalf(t, expected.StartPosition.Column, advice.StartPosition.Column, "advice[%d].StartPosition.Column, expected: %d, actual: %d", j, expected.StartPosition.Column, advice.StartPosition.Column)
+					require.Equalf(
+						t,
+						expected.StartPosition.Line,
+						advice.StartPosition.Line,
+						"advice[%d].StartPosition.Line, expected: %d, actual: %d",
+						j,
+						expected.StartPosition.Line,
+						advice.StartPosition.Line,
+					)
+					require.Equalf(
+						t,
+						expected.StartPosition.Column,
+						advice.StartPosition.Column,
+						"advice[%d].StartPosition.Column, expected: %d, actual: %d",
+						j,
+						expected.StartPosition.Column,
+						advice.StartPosition.Column,
+					)
 				}
 			}
 		})
@@ -1208,10 +1272,12 @@ func TestMySQLNamingIdentifierNoKeywordRule(t *testing.T) {
 	mapping := GetRuleMappings()["naming_identifier_no_keyword"]
 	runRuleTest(t, "naming_identifier_no_keyword", mapping, false)
 }
+
 func TestMySQLNamingIndexFKRule(t *testing.T) {
 	mapping := GetRuleMappings()["naming_index_fk"]
 	runRuleTest(t, "naming_index_fk", mapping, false)
 }
+
 func TestMySQLNamingIndexIdxRule(t *testing.T) {
 	mapping := GetRuleMappings()["naming_index_idx"]
 	runRuleTest(t, "naming_index_idx", mapping, false)
@@ -1376,18 +1442,22 @@ func TestStatementInsertRowLimit(t *testing.T) {
 	mapping := GetRuleMappings()["statement_insert_row_limit"]
 	runRuleTest(t, "statement_insert_row_limit", mapping, true)
 }
+
 func TestStatementDmlDryRun(t *testing.T) {
 	mapping := GetRuleMappings()["statement_dml_dry_run"]
 	runRuleTest(t, "statement_dml_dry_run", mapping, true)
 }
+
 func TestTableNoDuplicateIndex(t *testing.T) {
 	mapping := GetRuleMappings()["table_no_duplicate_index"]
 	runRuleTest(t, "table_no_duplicate_index", mapping, true)
 }
+
 func TestSchemaBackwardCompatibility(t *testing.T) {
 	mapping := GetRuleMappings()["schema_backward_compatibility"]
 	runRuleTest(t, "schema_backward_compatibility", mapping, true)
 }
+
 func TestStatementAffectedRowLimit(t *testing.T) {
 	mapping := GetRuleMappings()["statement_affected_row_limit"]
 	runRuleTest(t, "statement_affected_row_limit", mapping, true)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -31,7 +30,13 @@ type NamingIndexFkAdvisor struct {
 }
 
 // NewNamingIndexFkAdvisor creates a new ANTLR-based foreign key naming rule
-func NewNamingIndexFkAdvisor(level types.SQLReviewRuleLevel, title string, format string, maxLength int, templateList []string) *NamingIndexFkAdvisor {
+func NewNamingIndexFkAdvisor(
+	level types.SQLReviewRuleLevel,
+	title string,
+	format string,
+	maxLength int,
+	templateList []string,
+) *NamingIndexFkAdvisor {
 	return &NamingIndexFkAdvisor{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -134,19 +139,29 @@ func (r *NamingIndexFkAdvisor) handleIndexList(indexDataList []*fkIndexMetaData)
 		}
 		if !regex.MatchString(indexData.indexName) {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingFKConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Foreign key in table `%s` mismatches the naming convention, expect %q but found `%s`", indexData.tableName, regex, indexData.indexName),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingFKConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Foreign key in table `%s` mismatches the naming convention, expect %q but found `%s`",
+					indexData.tableName,
+					regex,
+					indexData.indexName,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
 		if r.maxLength > 0 && len(indexData.indexName) > r.maxLength {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingFKConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Foreign key `%s` in table `%s` mismatches the naming convention, its length should be within %d characters", indexData.indexName, indexData.tableName, r.maxLength),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingFKConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Foreign key `%s` in table `%s` mismatches the naming convention, its length should be within %d characters",
+					indexData.indexName,
+					indexData.tableName,
+					r.maxLength,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
@@ -200,7 +215,11 @@ func (*NamingIndexFkAdvisor) handleReferences(ctx mysql.IReferencesContext) (str
 }
 
 // getTemplateRegexp returns the regexp for the given template format and metadata
-func (r *NamingIndexFkAdvisor) getTemplateRegexp(format string, templateList []string, metaData map[string]string) (*regexp.Regexp, error) {
+func (r *NamingIndexFkAdvisor) getTemplateRegexp(
+	format string,
+	templateList []string,
+	metaData map[string]string,
+) (*regexp.Regexp, error) {
 	regexpPattern := format
 	for _, templateToken := range templateList {
 		value, exists := metaData[templateToken]
@@ -216,7 +235,12 @@ func (r *NamingIndexFkAdvisor) getTemplateRegexp(format string, templateList []s
 type NamingIndexFKAdvisor struct{}
 
 // Check performs the ANTLR-based foreign key naming check using payload
-func (a *NamingIndexFKAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *NamingIndexFKAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

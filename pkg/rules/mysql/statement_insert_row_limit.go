@@ -8,16 +8,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementInsertRowLimitAdvisor struct {
-}
+type StatementInsertRowLimitAdvisor struct{}
 
-func (a *StatementInsertRowLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementInsertRowLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -63,7 +66,13 @@ type InsertRowLimitRule struct {
 }
 
 // NewInsertRowLimitRule creates a new InsertRowLimitRule.
-func NewInsertRowLimitRule(ctx context.Context, level types.Advice_Status, title string, maxRow int, driver *sql.DB) *InsertRowLimitRule {
+func NewInsertRowLimitRule(
+	ctx context.Context,
+	level types.Advice_Status,
+	title string,
+	maxRow int,
+	driver *sql.DB,
+) *InsertRowLimitRule {
 	return &InsertRowLimitRule{
 		BaseRule: BaseRule{
 			level: level,

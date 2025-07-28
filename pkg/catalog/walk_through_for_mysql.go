@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 )
 
@@ -118,7 +117,7 @@ func (l *mysqlListener) EnterCreateDatabase(ctx *mysql.CreateDatabaseContext) {
 	if ctx.SchemaName() == nil {
 		return
 	}
-	
+
 	databaseName := mysqlparser.NormalizeMySQLSchemaName(ctx.SchemaName())
 	if !l.databaseState.isCurrentDatabase(databaseName) {
 		l.err = &WalkThroughError{
@@ -136,7 +135,7 @@ func (l *mysqlListener) EnterDropDatabase(ctx *mysql.DropDatabaseContext) {
 	if ctx.SchemaRef() == nil {
 		return
 	}
-	
+
 	databaseName := mysqlparser.NormalizeMySQLSchemaRef(ctx.SchemaRef())
 	if l.databaseState.isCurrentDatabase(databaseName) {
 		l.databaseState.deleted = true
@@ -153,7 +152,7 @@ func (l *mysqlListener) EnterAlterDatabase(ctx *mysql.AlterDatabaseContext) {
 	if !mysqlparser.IsTopMySQLRule(&ctx.BaseParserRuleContext) {
 		return
 	}
-	
+
 	// Check if this is modifying the current database
 	if ctx.SchemaRef() != nil {
 		databaseName := mysqlparser.NormalizeMySQLSchemaRef(ctx.SchemaRef())
@@ -166,7 +165,7 @@ func (l *mysqlListener) EnterAlterDatabase(ctx *mysql.AlterDatabaseContext) {
 		}
 	}
 	// If no database name is specified, it applies to the current database
-	
+
 	// Process database options
 	for _, option := range ctx.AllAlterDatabaseOption() {
 		if option.CreateDatabaseOption() != nil {
@@ -357,6 +356,7 @@ func (s *SchemaState) createIncompleteTable(name string) *TableState {
 	return table
 }
 
+//nolint:unused
 func (t *TableState) createIncompleteColumn(name string) *ColumnState {
 	column := &ColumnState{
 		name:           name,
@@ -366,6 +366,7 @@ func (t *TableState) createIncompleteColumn(name string) *ColumnState {
 	return column
 }
 
+//nolint:unused
 func (t *TableState) createIncompleteIndex(name string) *IndexState {
 	index := &IndexState{
 		name: name,
@@ -374,7 +375,12 @@ func (t *TableState) createIncompleteIndex(name string) *IndexState {
 	return index
 }
 
-func (t *TableState) mysqlCreateColumn(ctx *FinderContext, columnName string, fieldDef mysql.IFieldDefinitionContext, position *mysqlColumnPosition) *WalkThroughError {
+func (t *TableState) mysqlCreateColumn(
+	ctx *FinderContext,
+	columnName string,
+	fieldDef mysql.IFieldDefinitionContext,
+	position *mysqlColumnPosition,
+) *WalkThroughError {
 	if _, exists := t.columnSet[strings.ToLower(columnName)]; exists {
 		return &WalkThroughError{
 			Type:    ErrorTypeColumnExists,
@@ -585,7 +591,12 @@ func (t *TableState) mysqlCreateConstraint(ctx *FinderContext, constraintDef mys
 }
 
 // mysqlValidateKeyListVariants validates the key list variants.
-func (t *TableState) mysqlValidateKeyListVariants(ctx *FinderContext, keyList mysql.IKeyListVariantsContext, primary bool, isSpatial bool) *WalkThroughError {
+func (t *TableState) mysqlValidateKeyListVariants(
+	ctx *FinderContext,
+	keyList mysql.IKeyListVariantsContext,
+	primary bool,
+	isSpatial bool,
+) *WalkThroughError {
 	if keyList.KeyList() != nil {
 		columns := mysqlparser.NormalizeKeyList(keyList.KeyList())
 		if err := t.mysqlValidateColumnList(ctx, columns, primary, isSpatial); err != nil {
@@ -601,7 +612,12 @@ func (t *TableState) mysqlValidateKeyListVariants(ctx *FinderContext, keyList my
 	return nil
 }
 
-func (t *TableState) mysqlValidateColumnList(ctx *FinderContext, columnList []string, primary bool, isSpatial bool) *WalkThroughError {
+func (t *TableState) mysqlValidateColumnList(
+	ctx *FinderContext,
+	columnList []string,
+	primary bool,
+	isSpatial bool,
+) *WalkThroughError {
 	for _, columnName := range columnList {
 		column, exists := t.columnSet[strings.ToLower(columnName)]
 		if !exists {
@@ -626,7 +642,12 @@ func (t *TableState) mysqlValidateColumnList(ctx *FinderContext, columnList []st
 
 // mysqlValidateExpressionList validates the expression list.
 // TODO: update expression validation.
-func (t *TableState) mysqlValidateExpressionList(_ *FinderContext, expressionList []string, primary bool, isSpatial bool) *WalkThroughError {
+func (t *TableState) mysqlValidateExpressionList(
+	_ *FinderContext,
+	expressionList []string,
+	primary bool,
+	isSpatial bool,
+) *WalkThroughError {
 	for _, expression := range expressionList {
 		column, exists := t.columnSet[strings.ToLower(expression)]
 		// If expression is not a column, we do not need to validate it.
@@ -725,7 +746,14 @@ func (t *TableState) mysqlReorderColumn(position *mysqlColumnPosition) (int, *Wa
 	}
 }
 
-func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool, tp string, tableConstraint mysql.ITableConstraintDefContext, createIndexDef mysql.ICreateIndexContext) *WalkThroughError {
+func (t *TableState) mysqlCreateIndex(
+	name string,
+	keyList []string,
+	unique bool,
+	tp string,
+	tableConstraint mysql.ITableConstraintDefContext,
+	createIndexDef mysql.ICreateIndexContext,
+) *WalkThroughError {
 	if len(keyList) == 0 {
 		return &WalkThroughError{
 			Type:    ErrorTypeIndexEmptyKeys,
@@ -773,7 +801,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -783,7 +812,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -794,7 +824,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -804,7 +835,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -815,7 +847,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -825,7 +858,8 @@ func (t *TableState) mysqlCreateIndex(name string, keyList []string, unique bool
 		if attribute == nil || attribute.CommonIndexOption() == nil {
 			continue
 		}
-		if attribute.CommonIndexOption().Visibility() != nil && attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
+		if attribute.CommonIndexOption().Visibility() != nil &&
+			attribute.CommonIndexOption().Visibility().INVISIBLE_SYMBOL() != nil {
 			index.visible = newFalsePointer()
 		}
 	}
@@ -980,6 +1014,7 @@ func (t *TableState) dropIndex(ctx *FinderContext, indexName string) *WalkThroug
 	return nil
 }
 
+//nolint:unused
 func (t *TableState) renameColumn(ctx *FinderContext, oldName string, newName string) *WalkThroughError {
 	if strings.EqualFold(oldName, newName) {
 		return nil
@@ -1011,6 +1046,7 @@ func (t *TableState) renameColumn(ctx *FinderContext, oldName string, newName st
 	return nil
 }
 
+//nolint:unused
 func (t *TableState) renameColumnInIndexKey(oldName string, newName string) {
 	if strings.EqualFold(oldName, newName) {
 		return
@@ -1254,4 +1290,3 @@ func positionFromPlaceContext(place mysql.IPlaceContext) *mysqlColumnPosition {
 	}
 	return &mysqlColumnPosition{tp: ColumnPositionNone}
 }
-

@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementAddColumnWithoutPositionRule is the ANTLR-based implementation for checking no position in ADD COLUMN clause
@@ -19,7 +18,10 @@ type StatementAddColumnWithoutPositionRule struct {
 }
 
 // NewStatementAddColumnWithoutPositionRule creates a new ANTLR-based statement add column without position rule
-func NewStatementAddColumnWithoutPositionRule(level types.SQLReviewRuleLevel, title string) *StatementAddColumnWithoutPositionRule {
+func NewStatementAddColumnWithoutPositionRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+) *StatementAddColumnWithoutPositionRule {
 	return &StatementAddColumnWithoutPositionRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -126,7 +128,12 @@ func (r *StatementAddColumnWithoutPositionRule) getPosition(ctx mysql.IPlaceCont
 type StatementAddColumnWithoutPositionAdvisor struct{}
 
 // Check performs the ANTLR-based statement add column without position check
-func (a *StatementAddColumnWithoutPositionAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementAddColumnWithoutPositionAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")
@@ -138,7 +145,10 @@ func (a *StatementAddColumnWithoutPositionAdvisor) Check(ctx context.Context, st
 	}
 
 	// Create the rule
-	statementAddColumnWithoutPositionRule := NewStatementAddColumnWithoutPositionRule(types.SQLReviewRuleLevel(level), string(rule.Type))
+	statementAddColumnWithoutPositionRule := NewStatementAddColumnWithoutPositionRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{statementAddColumnWithoutPositionRule})

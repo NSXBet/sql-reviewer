@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnSetDefaultForNotNullRule is the ANTLR-based implementation for checking set default value for not null column
@@ -222,7 +221,8 @@ func (r *ColumnSetDefaultForNotNullRule) checkAlterTable(ctx *mysql.AlterTableCo
 				r.checkFieldDefinition(tableName, columnName, item.FieldDefinition())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -252,7 +252,12 @@ func (r *ColumnSetDefaultForNotNullRule) checkAlterTable(ctx *mysql.AlterTableCo
 type ColumnSetDefaultForNotNullAdvisor struct{}
 
 // Check performs the ANTLR-based column set default for not null check
-func (a *ColumnSetDefaultForNotNullAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnSetDefaultForNotNullAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

@@ -10,8 +10,13 @@ import (
 // Rule defines the interface for SQL review rules
 type Rule interface {
 	// Check runs the rule against SQL statements and returns advice
-	Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error)
-	
+	Check(
+		ctx context.Context,
+		statements string,
+		rule *types.SQLReviewRule,
+		checkContext advisor.Context,
+	) ([]*types.Advice, error)
+
 	// GetType returns the rule type this implementation handles
 	GetType() string
 }

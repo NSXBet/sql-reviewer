@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementMaximumStatementsInTransactionRule is the ANTLR-based implementation for checking maximum statements in transaction
@@ -21,7 +20,11 @@ type StatementMaximumStatementsInTransactionRule struct {
 }
 
 // NewStatementMaximumStatementsInTransactionRule creates a new ANTLR-based statement maximum statements in transaction rule
-func NewStatementMaximumStatementsInTransactionRule(level types.SQLReviewRuleLevel, title string, limitMaxValue int) *StatementMaximumStatementsInTransactionRule {
+func NewStatementMaximumStatementsInTransactionRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	limitMaxValue int,
+) *StatementMaximumStatementsInTransactionRule {
 	return &StatementMaximumStatementsInTransactionRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -55,10 +58,14 @@ func (r *StatementMaximumStatementsInTransactionRule) checkSimpleStatement(ctx *
 	// If we exceed the maximum number of statements, report it
 	if r.count > r.limitMaxValue {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.StatementMaximumStatementsInTransaction),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Number of statements (%d) exceeds the maximum limit (%d) for a transaction.", r.count, r.limitMaxValue),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.StatementMaximumStatementsInTransaction),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Number of statements (%d) exceeds the maximum limit (%d) for a transaction.",
+				r.count,
+				r.limitMaxValue,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -68,7 +75,12 @@ func (r *StatementMaximumStatementsInTransactionRule) checkSimpleStatement(ctx *
 type StatementMaximumStatementsInTransactionAdvisor struct{}
 
 // Check performs the ANTLR-based statement maximum statements in transaction check
-func (a *StatementMaximumStatementsInTransactionAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementMaximumStatementsInTransactionAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")
@@ -85,7 +97,11 @@ func (a *StatementMaximumStatementsInTransactionAdvisor) Check(ctx context.Conte
 	}
 
 	// Create the rule
-	statementMaximumStatementsInTransactionRule := NewStatementMaximumStatementsInTransactionRule(types.SQLReviewRuleLevel(level), string(rule.Type), payload.Number)
+	statementMaximumStatementsInTransactionRule := NewStatementMaximumStatementsInTransactionRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+		payload.Number,
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{statementMaximumStatementsInTransactionRule})

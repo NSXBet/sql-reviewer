@@ -8,7 +8,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -74,7 +73,8 @@ func (r *IndexTypeAllowListRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 	if ctx.TableRef() == nil {
 		return
 	}
-	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil || ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
+	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil ||
+		ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
 		return
 	}
 
@@ -90,7 +90,12 @@ func (r *IndexTypeAllowListRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 
 func (r *IndexTypeAllowListRule) handleConstraintDef(ctx mysql.ITableConstraintDefContext) {
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL, mysql.MySQLParserFULLTEXT_SYMBOL, mysql.MySQLParserSPATIAL_SYMBOL:
+	case mysql.MySQLParserINDEX_SYMBOL,
+		mysql.MySQLParserKEY_SYMBOL,
+		mysql.MySQLParserPRIMARY_SYMBOL,
+		mysql.MySQLParserUNIQUE_SYMBOL,
+		mysql.MySQLParserFULLTEXT_SYMBOL,
+		mysql.MySQLParserSPATIAL_SYMBOL:
 	default:
 		return
 	}
@@ -109,7 +114,8 @@ func (r *IndexTypeAllowListRule) handleConstraintDef(ctx mysql.ITableConstraintD
 }
 
 func (r *IndexTypeAllowListRule) checkCreateIndex(ctx *mysql.CreateIndexContext) {
-	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil || ctx.CreateIndexTarget().KeyListVariants() == nil {
+	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil ||
+		ctx.CreateIndexTarget().KeyListVariants() == nil {
 		return
 	}
 
@@ -145,7 +151,12 @@ func (r *IndexTypeAllowListRule) validateIndexType(indexType string, line int) {
 type IndexTypeAllowListAdvisor struct{}
 
 // Check performs the ANTLR-based index type allow list check using payload
-func (a *IndexTypeAllowListAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *IndexTypeAllowListAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

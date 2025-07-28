@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
-	
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
-
 
 // SyntaxError is a syntax error.
 type SyntaxError struct {
@@ -30,7 +28,13 @@ type ParseErrorListener struct {
 }
 
 // SyntaxError returns the errors.
-func (l *ParseErrorListener) SyntaxError(_ antlr.Recognizer, token any, line, column int, message string, _ antlr.RecognitionException) {
+func (l *ParseErrorListener) SyntaxError(
+	_ antlr.Recognizer,
+	token any,
+	line, column int,
+	message string,
+	_ antlr.RecognitionException,
+) {
 	if l.Err != nil {
 		return
 	}
@@ -48,7 +52,7 @@ func (l *ParseErrorListener) SyntaxError(_ antlr.Recognizer, token any, line, co
 		}
 		errMessage = fmt.Sprintf("related text: %s", stream.GetTextFromInterval(antlr.NewInterval(start, stop)))
 	}
-	
+
 	l.Err = &SyntaxError{
 		Position: &types.Position{
 			Line:   int32(line + l.BaseLine),
@@ -60,16 +64,41 @@ func (l *ParseErrorListener) SyntaxError(_ antlr.Recognizer, token any, line, co
 }
 
 // ReportAmbiguity reports an ambiguity.
-func (*ParseErrorListener) ReportAmbiguity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex int, exact bool, ambigAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
+func (*ParseErrorListener) ReportAmbiguity(
+	recognizer antlr.Parser,
+	dfa *antlr.DFA,
+	startIndex, stopIndex int,
+	exact bool,
+	ambigAlts *antlr.BitSet,
+	configs *antlr.ATNConfigSet,
+) {
 	antlr.ConsoleErrorListenerINSTANCE.ReportAmbiguity(recognizer, dfa, startIndex, stopIndex, exact, ambigAlts, configs)
 }
 
 // ReportAttemptingFullContext reports an attempting full context.
-func (*ParseErrorListener) ReportAttemptingFullContext(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex int, conflictingAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
-	antlr.ConsoleErrorListenerINSTANCE.ReportAttemptingFullContext(recognizer, dfa, startIndex, stopIndex, conflictingAlts, configs)
+func (*ParseErrorListener) ReportAttemptingFullContext(
+	recognizer antlr.Parser,
+	dfa *antlr.DFA,
+	startIndex, stopIndex int,
+	conflictingAlts *antlr.BitSet,
+	configs *antlr.ATNConfigSet,
+) {
+	antlr.ConsoleErrorListenerINSTANCE.ReportAttemptingFullContext(
+		recognizer,
+		dfa,
+		startIndex,
+		stopIndex,
+		conflictingAlts,
+		configs,
+	)
 }
 
 // ReportContextSensitivity reports a context sensitivity.
-func (*ParseErrorListener) ReportContextSensitivity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex, stopIndex, prediction int, configs *antlr.ATNConfigSet) {
+func (*ParseErrorListener) ReportContextSensitivity(
+	recognizer antlr.Parser,
+	dfa *antlr.DFA,
+	startIndex, stopIndex, prediction int,
+	configs *antlr.ATNConfigSet,
+) {
 	antlr.ConsoleErrorListenerINSTANCE.ReportContextSensitivity(recognizer, dfa, startIndex, stopIndex, prediction, configs)
 }

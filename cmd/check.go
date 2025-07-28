@@ -8,19 +8,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/config"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/logger"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
-
-	// Import rule implementations to trigger init functions
 	_ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 var checkCmd = &cobra.Command{
@@ -46,12 +43,12 @@ func init() {
 	checkCmd.Flags().Bool("fail-on-warning", false, "exit with non-zero code if warnings are found")
 
 	// Bind flags to viper
-	viper.BindPFlag("engine", checkCmd.Flags().Lookup("engine"))
-	viper.BindPFlag("output", checkCmd.Flags().Lookup("output"))
-	viper.BindPFlag("rules", checkCmd.Flags().Lookup("rules"))
-	viper.BindPFlag("schema", checkCmd.Flags().Lookup("schema"))
-	viper.BindPFlag("fail-on-error", checkCmd.Flags().Lookup("fail-on-error"))
-	viper.BindPFlag("fail-on-warning", checkCmd.Flags().Lookup("fail-on-warning"))
+	_ = viper.BindPFlag("engine", checkCmd.Flags().Lookup("engine"))
+	_ = viper.BindPFlag("output", checkCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("rules", checkCmd.Flags().Lookup("rules"))
+	_ = viper.BindPFlag("schema", checkCmd.Flags().Lookup("schema"))
+	_ = viper.BindPFlag("fail-on-error", checkCmd.Flags().Lookup("fail-on-error"))
+	_ = viper.BindPFlag("fail-on-warning", checkCmd.Flags().Lookup("fail-on-warning"))
 }
 
 func runCheck(cmd *cobra.Command, args []string) error {
@@ -317,7 +314,12 @@ func (c *catalogWrapper) GetFinder() *catalog.Finder {
 }
 
 // runSQLReview runs SQL review using the advisor system
-func runSQLReview(ctx context.Context, statements string, reviewRules []*types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func runSQLReview(
+	ctx context.Context,
+	statements string,
+	reviewRules []*types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	var allAdvices []*types.Advice
 
 	// Process each rule and check against the statements

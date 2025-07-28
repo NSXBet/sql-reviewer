@@ -129,7 +129,8 @@ func NormalizeMySQLTextStringLiteral(ctx parser.ITextStringLiteralContext) strin
 // NormalizeMySQLSignedLiteral normalize the given SignedLiteral.
 func NormalizeMySQLSignedLiteral(ctx parser.ISignedLiteralContext) string {
 	textString := ctx.GetText()
-	if (strings.HasPrefix(textString, "'") && strings.HasSuffix(textString, "'")) || (strings.HasPrefix(textString, "\"") && strings.HasSuffix(textString, "\"")) {
+	if (strings.HasPrefix(textString, "'") && strings.HasSuffix(textString, "'")) ||
+		(strings.HasPrefix(textString, "\"") && strings.HasSuffix(textString, "\"")) {
 		textString = textString[1 : len(textString)-1]
 	}
 	return textString

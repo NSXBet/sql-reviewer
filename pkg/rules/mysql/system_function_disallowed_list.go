@@ -8,7 +8,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -22,7 +21,11 @@ type SystemFunctionDisallowedListRule struct {
 }
 
 // NewSystemFunctionDisallowedListRule creates a new ANTLR-based system function disallowed list rule
-func NewSystemFunctionDisallowedListRule(level types.SQLReviewRuleLevel, title string, disallowList []string) *SystemFunctionDisallowedListRule {
+func NewSystemFunctionDisallowedListRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	disallowList []string,
+) *SystemFunctionDisallowedListRule {
 	return &SystemFunctionDisallowedListRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -77,7 +80,12 @@ func (r *SystemFunctionDisallowedListRule) checkFunctionCall(ctx *mysql.Function
 type SystemFunctionDisallowedListAdvisor struct{}
 
 // Check performs the ANTLR-based system function disallowed list check
-func (a *SystemFunctionDisallowedListAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *SystemFunctionDisallowedListAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)
@@ -93,7 +101,7 @@ func (a *SystemFunctionDisallowedListAdvisor) Check(ctx context.Context, stateme
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var disallowList []string
 	for _, fn := range payload.List {
 		disallowList = append(disallowList, strings.ToUpper(strings.TrimSpace(fn)))

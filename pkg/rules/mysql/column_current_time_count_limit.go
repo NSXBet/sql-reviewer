@@ -7,15 +7,14 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 const (
-	maxDefaultCurrentTimeColumnCount   = 2
+	maxDefaultCurrentTimeColumnCount  = 2
 	maxOnUpdateCurrentTimeColumnCount = 1
 )
 
@@ -71,7 +70,8 @@ func (r *ColumnCurrentTimeCountLimitRule) checkCreateTable(ctx *mysql.CreateTabl
 
 	_, tableName := mysqlparser.NormalizeMySQLTableName(ctx.TableName())
 	for _, tableElement := range ctx.TableElementList().AllTableElement() {
-		if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
+		if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil ||
+			tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
 			continue
 		}
 		_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -110,7 +110,8 @@ func (r *ColumnCurrentTimeCountLimitRule) checkAlterTable(ctx *mysql.AlterTableC
 				r.checkTime(tableName, columnName, item.FieldDefinition())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -211,19 +212,29 @@ func (r *ColumnCurrentTimeCountLimitRule) generateAdvice() {
 	for _, table := range tableList {
 		if table.defaultCurrentTimeCount > maxDefaultCurrentTimeColumnCount {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.DefaultCurrentTimeColumnCountExceedsLimit),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Table `%s` has %d DEFAULT CURRENT_TIMESTAMP() columns. The count greater than %d.", table.tableName, table.defaultCurrentTimeCount, maxDefaultCurrentTimeColumnCount),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.DefaultCurrentTimeColumnCountExceedsLimit),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Table `%s` has %d DEFAULT CURRENT_TIMESTAMP() columns. The count greater than %d.",
+					table.tableName,
+					table.defaultCurrentTimeCount,
+					maxDefaultCurrentTimeColumnCount,
+				),
 				StartPosition: ConvertANTLRLineToPosition(table.line),
 			})
 		}
 		if table.onUpdateCurrentTimeCount > maxOnUpdateCurrentTimeColumnCount {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.OnUpdateCurrentTimeColumnCountExceedsLimit),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Table `%s` has %d ON UPDATE CURRENT_TIMESTAMP() columns. The count greater than %d.", table.tableName, table.onUpdateCurrentTimeCount, maxOnUpdateCurrentTimeColumnCount),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.OnUpdateCurrentTimeColumnCountExceedsLimit),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Table `%s` has %d ON UPDATE CURRENT_TIMESTAMP() columns. The count greater than %d.",
+					table.tableName,
+					table.onUpdateCurrentTimeCount,
+					maxOnUpdateCurrentTimeColumnCount,
+				),
 				StartPosition: ConvertANTLRLineToPosition(table.line),
 			})
 		}
@@ -234,7 +245,12 @@ func (r *ColumnCurrentTimeCountLimitRule) generateAdvice() {
 type ColumnCurrentTimeCountLimitAdvisor struct{}
 
 // Check performs the ANTLR-based column current time count limit check
-func (a *ColumnCurrentTimeCountLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnCurrentTimeCountLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

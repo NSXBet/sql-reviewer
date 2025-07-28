@@ -366,7 +366,7 @@ func (s *SchemaState) getTable(tableName string) (*TableState, bool) {
 	if table, exists := s.tableSet[tableName]; exists {
 		return table, true
 	}
-	
+
 	// If direct lookup fails, try case insensitive search for MySQL-style engines
 	if s.ctx.IgnoreCaseSensitive {
 		for name, table := range s.tableSet {
@@ -375,7 +375,7 @@ func (s *SchemaState) getTable(tableName string) (*TableState, bool) {
 			}
 		}
 	}
-	
+
 	return nil, false
 }
 

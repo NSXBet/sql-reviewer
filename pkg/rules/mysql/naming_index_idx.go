@@ -8,7 +8,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -31,7 +30,13 @@ type NamingIndexIdxRule struct {
 }
 
 // NewNamingIndexIdxRule creates a new ANTLR-based regular index naming rule
-func NewNamingIndexIdxRule(level types.SQLReviewRuleLevel, title string, format string, maxLength int, templateList []string) *NamingIndexIdxRule {
+func NewNamingIndexIdxRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	format string,
+	maxLength int,
+	templateList []string,
+) *NamingIndexIdxRule {
 	return &NamingIndexIdxRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -191,19 +196,29 @@ func (r *NamingIndexIdxRule) handleIndexList(indexDataList []*indexMetaData) {
 		}
 		if !regex.MatchString(indexData.indexName) {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingIndexConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Index in table `%s` mismatches the naming convention, expect %q but found `%s`", indexData.tableName, regex, indexData.indexName),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingIndexConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Index in table `%s` mismatches the naming convention, expect %q but found `%s`",
+					indexData.tableName,
+					regex,
+					indexData.indexName,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
 		if r.maxLength > 0 && len(indexData.indexName) > r.maxLength {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingIndexConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Index `%s` in table `%s` mismatches the naming convention, its length should be within %d characters", indexData.indexName, indexData.tableName, r.maxLength),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingIndexConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Index `%s` in table `%s` mismatches the naming convention, its length should be within %d characters",
+					indexData.indexName,
+					indexData.tableName,
+					r.maxLength,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
@@ -212,7 +227,8 @@ func (r *NamingIndexIdxRule) handleIndexList(indexDataList []*indexMetaData) {
 
 func (r *NamingIndexIdxRule) handleConstraintDef(tableName string, ctx mysql.ITableConstraintDefContext) *indexMetaData {
 	// we only focus on normal index, not unique, fulltext, spatial, primary, or foreign keys
-	if ctx.UNIQUE_SYMBOL() != nil || ctx.FULLTEXT_SYMBOL() != nil || ctx.SPATIAL_SYMBOL() != nil || ctx.PRIMARY_SYMBOL() != nil || ctx.FOREIGN_SYMBOL() != nil {
+	if ctx.UNIQUE_SYMBOL() != nil || ctx.FULLTEXT_SYMBOL() != nil || ctx.SPATIAL_SYMBOL() != nil || ctx.PRIMARY_SYMBOL() != nil ||
+		ctx.FOREIGN_SYMBOL() != nil {
 		return nil
 	}
 	if ctx.KeyListVariants() == nil {
@@ -238,7 +254,11 @@ func (r *NamingIndexIdxRule) handleConstraintDef(tableName string, ctx mysql.ITa
 }
 
 // getTemplateRegexp returns the regexp for the given template format and metadata
-func (r *NamingIndexIdxRule) getTemplateRegexp(format string, templateList []string, metaData map[string]string) (*regexp.Regexp, error) {
+func (r *NamingIndexIdxRule) getTemplateRegexp(
+	format string,
+	templateList []string,
+	metaData map[string]string,
+) (*regexp.Regexp, error) {
 	regexpPattern := format
 	for _, templateToken := range templateList {
 		value, exists := metaData[templateToken]
@@ -254,7 +274,12 @@ func (r *NamingIndexIdxRule) getTemplateRegexp(format string, templateList []str
 type NamingIndexIdxAdvisor struct{}
 
 // Check performs the ANTLR-based regular index naming check using payload
-func (a *NamingIndexIdxAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *NamingIndexIdxAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

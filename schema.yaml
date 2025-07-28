@@ -1,23 +1,18 @@
 - type: engine.mysql.use-innodb
   category: ENGINE
   engine: MYSQL
-
 - type: table.require-pk
   category: TABLE
   engine: MYSQL
-
 - type: table.require-pk
   category: TABLE
   engine: POSTGRES
-
 - type: table.no-foreign-key
   category: TABLE
   engine: MYSQL
-
 - type: table.no-foreign-key
   category: TABLE
   engine: POSTGRES
-
 - type: table.drop-naming-convention
   category: TABLE
   componentList:
@@ -26,7 +21,6 @@
         type: STRING
         default: _del$
   engine: MYSQL
-
 - type: table.drop-naming-convention
   category: TABLE
   componentList:
@@ -35,7 +29,6 @@
         type: STRING
         default: _del$
   engine: POSTGRES
-
 - type: table.comment
   category: TABLE
   componentList:
@@ -52,7 +45,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: table.comment
   category: TABLE
   componentList:
@@ -69,23 +61,18 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: table.disallow-partition
   category: TABLE
   engine: MYSQL
-
 - type: table.disallow-partition
   category: TABLE
   engine: POSTGRES
-
 - type: table.disallow-trigger
   category: TABLE
   engine: MYSQL
-
 - type: table.no-duplicate-index
   category: TABLE
   engine: MYSQL
-
 - type: table.text-fields-total-length
   category: TABLE
   componentList:
@@ -94,11 +81,9 @@
         type: NUMBER
         default: 1000
   engine: MYSQL
-
 - type: table.disallow-set-charset
   category: TABLE
   engine: MYSQL
-
 - type: table.disallow-ddl
   category: TABLE
   componentList:
@@ -107,7 +92,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: table.disallow-dml
   category: TABLE
   componentList:
@@ -116,7 +100,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: table.limit-size
   category: TABLE
   componentList:
@@ -125,79 +108,60 @@
         type: NUMBER
         default: 10000000
   engine: MYSQL
-
 - type: table.require-charset
   category: TABLE
   engine: MYSQL
-
 - type: table.require-collation
   category: TABLE
   engine: MYSQL
-
 - type: statement.select.no-select-all
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.select.no-select-all
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.where.require.select
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.where.require.select
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.where.require.update-delete
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.where.require.update-delete
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.where.no-leading-wildcard-like
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.where.no-leading-wildcard-like
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-on-del-cascade
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-rm-tbl-cascade
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-commit
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-commit
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-limit
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-order-by
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.merge-alter-table
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.merge-alter-table
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.insert.row-limit
   category: STATEMENT
   componentList:
@@ -206,7 +170,6 @@
         type: NUMBER
         default: 1000
   engine: MYSQL
-
 - type: statement.insert.row-limit
   category: STATEMENT
   componentList:
@@ -215,23 +178,18 @@
         type: NUMBER
         default: 1000
   engine: POSTGRES
-
 - type: statement.insert.must-specify-column
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.insert.must-specify-column
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.insert.disallow-order-by-rand
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.insert.disallow-order-by-rand
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.affected-row-limit
   category: STATEMENT
   componentList:
@@ -240,7 +198,6 @@
         type: NUMBER
         default: 1000
   engine: MYSQL
-
 - type: statement.affected-row-limit
   category: STATEMENT
   componentList:
@@ -249,55 +206,42 @@
         type: NUMBER
         default: 1000
   engine: POSTGRES
-
 - type: statement.dml-dry-run
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.dml-dry-run
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-add-column-with-default
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.add-check-not-valid
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-add-not-null
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.select-full-table-scan
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.create-specify-schema
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.check-set-role-variable
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-using-temporary
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-using-filesort
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.where.no-equal-null
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.where.disallow-functions-and-calculations
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.query.minimum-plan-level
   category: STATEMENT
   componentList:
@@ -306,7 +250,6 @@
         type: STRING
         default: INDEX
   engine: MYSQL
-
 - type: statement.where.maximum-logical-operator-count
   category: STATEMENT
   componentList:
@@ -315,7 +258,6 @@
         type: NUMBER
         default: 10
   engine: MYSQL
-
 - type: statement.maximum-limit-value
   category: STATEMENT
   componentList:
@@ -324,7 +266,6 @@
         type: NUMBER
         default: 1000
   engine: MYSQL
-
 - type: statement.maximum-limit-value
   category: STATEMENT
   componentList:
@@ -333,7 +274,6 @@
         type: NUMBER
         default: 1000
   engine: POSTGRES
-
 - type: statement.maximum-join-table-count
   category: STATEMENT
   componentList:
@@ -342,7 +282,6 @@
         type: NUMBER
         default: 2
   engine: MYSQL
-
 - type: statement.maximum-statements-in-transaction
   category: STATEMENT
   componentList:
@@ -351,43 +290,33 @@
         type: NUMBER
         default: 10
   engine: MYSQL
-
 - type: statement.join-strict-column-attrs
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-mix-in-ddl
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-mix-in-ddl
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.disallow-mix-in-dml
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.disallow-mix-in-dml
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.max-execution-time
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.require-algorithm-option
   category: STATEMENT
   engine: MYSQL
-
 - type: statement.require-lock-option
   category: STATEMENT
   engine: MYSQL
-
 - type: naming.fully-qualified
   category: NAMING
   engine: POSTGRES
-
 - type: naming.table
   category: NAMING
   componentList:
@@ -400,7 +329,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.table
   category: NAMING
   componentList:
@@ -413,7 +341,6 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: naming.column
   category: NAMING
   componentList:
@@ -426,7 +353,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.column
   category: NAMING
   componentList:
@@ -439,7 +365,6 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: naming.index.uk
   category: NAMING
   componentList:
@@ -455,7 +380,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.index.uk
   category: NAMING
   componentList:
@@ -471,7 +395,6 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: naming.index.idx
   category: NAMING
   componentList:
@@ -487,7 +410,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.index.idx
   category: NAMING
   componentList:
@@ -503,7 +425,6 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: naming.index.fk
   category: NAMING
   componentList:
@@ -522,7 +443,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.index.fk
   category: NAMING
   componentList:
@@ -541,7 +461,6 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: naming.index.pk
   category: NAMING
   componentList:
@@ -557,7 +476,6 @@
         type: NUMBER
         default: 63
   engine: POSTGRES
-
 - type: naming.column.auto-increment
   category: NAMING
   componentList:
@@ -570,11 +488,9 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: naming.identifier.no-keyword
   category: NAMING
   engine: MYSQL
-
 - type: column.required
   category: COLUMN
   componentList:
@@ -588,7 +504,6 @@
           - creator_id
           - updater_id
   engine: MYSQL
-
 - type: column.required
   category: COLUMN
   componentList:
@@ -602,39 +517,30 @@
           - creator_id
           - updater_id
   engine: POSTGRES
-
 - type: column.no-null
   category: COLUMN
   engine: MYSQL
-
 - type: column.no-null
   category: COLUMN
   engine: POSTGRES
-
 - type: column.disallow-change-type
   category: COLUMN
   engine: MYSQL
-
 - type: column.disallow-change-type
   category: COLUMN
   engine: POSTGRES
-
 - type: column.set-default-for-not-null
   category: COLUMN
   engine: MYSQL
-
 - type: column.disallow-change
   category: COLUMN
   engine: MYSQL
-
 - type: column.disallow-changing-order
   category: COLUMN
   engine: MYSQL
-
 - type: column.disallow-drop-in-index
   category: COLUMN
   engine: MYSQL
-
 - type: column.comment
   category: COLUMN
   componentList:
@@ -651,7 +557,6 @@
         type: NUMBER
         default: 64
   engine: MYSQL
-
 - type: column.comment
   category: COLUMN
   componentList:
@@ -668,11 +573,9 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: column.auto-increment-must-integer
   category: COLUMN
   engine: MYSQL
-
 - type: column.type-disallow-list
   category: COLUMN
   componentList:
@@ -681,7 +584,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: column.type-disallow-list
   category: COLUMN
   componentList:
@@ -690,11 +592,9 @@
         type: STRING_ARRAY
         default: []
   engine: POSTGRES
-
 - type: column.disallow-set-charset
   category: COLUMN
   engine: MYSQL
-
 - type: column.maximum-character-length
   category: COLUMN
   componentList:
@@ -703,7 +603,6 @@
         type: NUMBER
         default: 20
   engine: MYSQL
-
 - type: column.maximum-character-length
   category: COLUMN
   componentList:
@@ -712,7 +611,6 @@
         type: NUMBER
         default: 20
   engine: POSTGRES
-
 - type: column.maximum-varchar-length
   category: COLUMN
   componentList:
@@ -721,7 +619,6 @@
         type: NUMBER
         default: 2560
   engine: MYSQL
-
 - type: column.auto-increment-initial-value
   category: COLUMN
   componentList:
@@ -730,55 +627,42 @@
         type: NUMBER
         default: 1
   engine: MYSQL
-
 - type: column.auto-increment-must-unsigned
   category: COLUMN
   engine: MYSQL
-
 - type: column.current-time-count-limit
   category: COLUMN
   engine: MYSQL
-
 - type: column.require-default
   category: COLUMN
   engine: MYSQL
-
 - type: column.require-default
   category: COLUMN
   engine: POSTGRES
-
 - type: column.default-disallow-volatile
   category: COLUMN
   engine: POSTGRES
-
 - type: column.require-charset
   category: COLUMN
   engine: MYSQL
-
 - type: column.require-collation
   category: COLUMN
   engine: MYSQL
-
 - type: schema.backward-compatibility
   category: SCHEMA
   engine: MYSQL
-
 - type: schema.backward-compatibility
   category: SCHEMA
   engine: POSTGRES
-
 - type: database.drop-empty-database
   category: DATABASE
   engine: MYSQL
-
 - type: index.no-duplicate-column
   category: INDEX
   engine: MYSQL
-
 - type: index.no-duplicate-column
   category: INDEX
   engine: POSTGRES
-
 - type: index.key-number-limit
   category: INDEX
   componentList:
@@ -787,7 +671,6 @@
         type: NUMBER
         default: 5
   engine: MYSQL
-
 - type: index.key-number-limit
   category: INDEX
   componentList:
@@ -796,15 +679,12 @@
         type: NUMBER
         default: 5
   engine: POSTGRES
-
 - type: index.pk-type-limit
   category: INDEX
   engine: MYSQL
-
 - type: index.type-no-blob
   category: INDEX
   engine: MYSQL
-
 - type: index.total-number-limit
   category: INDEX
   componentList:
@@ -813,7 +693,6 @@
         type: NUMBER
         default: 5
   engine: MYSQL
-
 - type: index.total-number-limit
   category: INDEX
   componentList:
@@ -822,7 +701,6 @@
         type: NUMBER
         default: 5
   engine: POSTGRES
-
 - type: index.primary-key-type-allowlist
   category: INDEX
   componentList:
@@ -831,7 +709,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: index.primary-key-type-allowlist
   category: INDEX
   componentList:
@@ -840,11 +717,9 @@
         type: STRING_ARRAY
         default: []
   engine: POSTGRES
-
 - type: index.create-concurrently
   category: INDEX
   engine: POSTGRES
-
 - type: index.type-allow-list
   category: INDEX
   componentList:
@@ -853,7 +728,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: system.charset.allowlist
   category: SYSTEM
   componentList:
@@ -862,7 +736,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: system.charset.allowlist
   category: SYSTEM
   componentList:
@@ -871,7 +744,6 @@
         type: STRING_ARRAY
         default: []
   engine: POSTGRES
-
 - type: system.collation.allowlist
   category: SYSTEM
   componentList:
@@ -880,7 +752,6 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
 - type: system.collation.allowlist
   category: SYSTEM
   componentList:
@@ -889,7 +760,6 @@
         type: STRING_ARRAY
         default: []
   engine: POSTGRES
-
 - type: system.comment.length
   category: SYSTEM
   componentList:
@@ -898,23 +768,18 @@
         type: NUMBER
         default: 64
   engine: POSTGRES
-
 - type: system.procedure.disallow-create
   category: SYSTEM
   engine: MYSQL
-
 - type: system.event.disallow-create
   category: SYSTEM
   engine: MYSQL
-
 - type: system.view.disallow-create
   category: SYSTEM
   engine: MYSQL
-
 - type: system.function.disallow-create
   category: SYSTEM
   engine: MYSQL
-
 - type: system.function.disallowed-list
   category: SYSTEM
   componentList:
@@ -923,17 +788,12 @@
         type: STRING_ARRAY
         default: []
   engine: MYSQL
-
-
 - type: statement.add-foreign-key-not-valid
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.non-transactional
   category: STATEMENT
   engine: POSTGRES
-
 - type: statement.object-owner-check
   category: STATEMENT
   engine: POSTGRES
-

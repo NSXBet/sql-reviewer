@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"gopkg.in/yaml.v3"
 )
 
 // SchemaRule represents a rule definition from schema.yaml

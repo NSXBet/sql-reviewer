@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementWhereRequireSelectRule is the ANTLR-based implementation for checking WHERE clause requirement in SELECT statements
@@ -74,7 +73,12 @@ func (r *StatementWhereRequireSelectRule) checkQuerySpecification(ctx *mysql.Que
 type StatementWhereRequireSelectAdvisor struct{}
 
 // Check performs the ANTLR-based WHERE requirement check for SELECT statements
-func (a *StatementWhereRequireSelectAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereRequireSelectAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

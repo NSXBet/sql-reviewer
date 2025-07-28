@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnAutoIncrementMustIntegerRule is the ANTLR-based implementation for checking auto-increment column type
@@ -56,7 +55,8 @@ func (r *ColumnAutoIncrementMustIntegerRule) checkCreateTable(ctx *mysql.CreateT
 
 	_, tableName := mysqlparser.NormalizeMySQLTableName(ctx.TableName())
 	for _, tableElement := range ctx.TableElementList().AllTableElement() {
-		if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
+		if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil ||
+			tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
 			continue
 		}
 		_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -95,7 +95,8 @@ func (r *ColumnAutoIncrementMustIntegerRule) checkAlterTable(ctx *mysql.AlterTab
 				r.checkFieldDefinition(tableName, columnName, item.FieldDefinition())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -120,7 +121,10 @@ func (r *ColumnAutoIncrementMustIntegerRule) checkAlterTable(ctx *mysql.AlterTab
 	}
 }
 
-func (r *ColumnAutoIncrementMustIntegerRule) checkFieldDefinition(tableName, columnName string, ctx mysql.IFieldDefinitionContext) {
+func (r *ColumnAutoIncrementMustIntegerRule) checkFieldDefinition(
+	tableName, columnName string,
+	ctx mysql.IFieldDefinitionContext,
+) {
 	if !r.isAutoIncrementColumnIsInteger(ctx) {
 		r.AddAdvice(&types.Advice{
 			Status:        types.Advice_Status(r.level),
@@ -150,7 +154,11 @@ func (*ColumnAutoIncrementMustIntegerRule) isAutoIncrementColumn(ctx mysql.IFiel
 
 func (*ColumnAutoIncrementMustIntegerRule) isIntegerType(ctx mysql.IDataTypeContext) bool {
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserINT_SYMBOL, mysql.MySQLParserTINYINT_SYMBOL, mysql.MySQLParserSMALLINT_SYMBOL, mysql.MySQLParserMEDIUMINT_SYMBOL, mysql.MySQLParserBIGINT_SYMBOL:
+	case mysql.MySQLParserINT_SYMBOL,
+		mysql.MySQLParserTINYINT_SYMBOL,
+		mysql.MySQLParserSMALLINT_SYMBOL,
+		mysql.MySQLParserMEDIUMINT_SYMBOL,
+		mysql.MySQLParserBIGINT_SYMBOL:
 		return true
 	default:
 		return false
@@ -161,7 +169,12 @@ func (*ColumnAutoIncrementMustIntegerRule) isIntegerType(ctx mysql.IDataTypeCont
 type ColumnAutoIncrementMustIntegerAdvisor struct{}
 
 // Check performs the ANTLR-based auto-increment column type check
-func (a *ColumnAutoIncrementMustIntegerAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnAutoIncrementMustIntegerAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

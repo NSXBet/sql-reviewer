@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -22,7 +21,11 @@ type StatementMaximumLimitValueRule struct {
 }
 
 // NewStatementMaximumLimitValueRule creates a new ANTLR-based statement maximum limit value rule
-func NewStatementMaximumLimitValueRule(level types.SQLReviewRuleLevel, title string, limitMaxValue int) *StatementMaximumLimitValueRule {
+func NewStatementMaximumLimitValueRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	limitMaxValue int,
+) *StatementMaximumLimitValueRule {
 	return &StatementMaximumLimitValueRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -82,10 +85,14 @@ func (r *StatementMaximumLimitValueRule) checkLimitClause(ctx *mysql.LimitClause
 
 		if limitValue > r.limitMaxValue {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.StatementExceedMaximumLimitValue),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The limit value %d exceeds the maximum allowed value %d", limitValue, r.limitMaxValue),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.StatementExceedMaximumLimitValue),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The limit value %d exceeds the maximum allowed value %d",
+					limitValue,
+					r.limitMaxValue,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 			})
 		}
@@ -96,7 +103,12 @@ func (r *StatementMaximumLimitValueRule) checkLimitClause(ctx *mysql.LimitClause
 type StatementMaximumLimitValueAdvisor struct{}
 
 // Check performs the ANTLR-based statement maximum limit value check
-func (a *StatementMaximumLimitValueAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *StatementMaximumLimitValueAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

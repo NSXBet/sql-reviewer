@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnRequireCharsetRule is the ANTLR-based implementation for checking require charset
@@ -84,7 +83,8 @@ func (r *ColumnRequireCharsetRule) checkCreateTable(ctx *mysql.CreateTableContex
 }
 
 func (r *ColumnRequireCharsetRule) checkAlterTable(ctx *mysql.AlterTableContext) {
-	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil || ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
+	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil ||
+		ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
 		return
 	}
 	for _, alterListItem := range ctx.AlterTableActions().AlterCommandList().AlterList().AllAlterListItem() {
@@ -123,7 +123,12 @@ func (*ColumnRequireCharsetRule) isCharsetDataType(dataType mysql.IDataTypeConte
 type ColumnRequireCharsetAdvisor struct{}
 
 // Check performs the ANTLR-based column require charset check
-func (a *ColumnRequireCharsetAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnRequireCharsetAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

@@ -7,10 +7,9 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // SQLReviewRuleType is the type of schema rule.
@@ -264,6 +263,7 @@ const (
 	// PostgreSQL has it's own naming length limit, will auto slice the name to make sure its length <= 63
 	// https://www.postgresql.org/docs/current/limits.html.
 	// While MySQL does not enforce the limit, thus we use PostgreSQL's 63 as the default limit.
+	//nolint:unused
 	defaultNameLengthLimit = 63
 )
 
@@ -297,22 +297,22 @@ func NewStatusBySQLReviewRuleLevel(level types.SQLReviewRuleLevel) (types.Advice
 // Context is the unified context for SQL review check and advisor.
 type Context struct {
 	// Common fields
-	ChangeType            types.PlanCheckRunConfig_ChangeDatabaseType
-	DBSchema              *types.DatabaseSchemaMetadata
-	EnablePriorBackup     bool
-	ClassificationConfig  *types.DataClassificationSetting_DataClassificationConfig
-	ListDatabaseNamesFunc func(ctx context.Context, instanceID string) ([]string, error)
-	InstanceID            string
-	IsObjectCaseSensitive bool
-	CurrentDatabase       string
+	ChangeType               types.PlanCheckRunConfig_ChangeDatabaseType
+	DBSchema                 *types.DatabaseSchemaMetadata
+	EnablePriorBackup        bool
+	ClassificationConfig     *types.DataClassificationSetting_DataClassificationConfig
+	ListDatabaseNamesFunc    func(ctx context.Context, instanceID string) ([]string, error)
+	InstanceID               string
+	IsObjectCaseSensitive    bool
+	CurrentDatabase          string
 	UsePostgresDatabaseOwner bool
 
 	// Database-specific fields
-	Charset    string
-	Collation  string
-	DBType     types.Engine
+	Charset   string
+	Collation string
+	DBType    types.Engine
 
-	// Catalog and driver  
+	// Catalog and driver
 	Catalog catalogInterface
 	Driver  *sql.DB
 

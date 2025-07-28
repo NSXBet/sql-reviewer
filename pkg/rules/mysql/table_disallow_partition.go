@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -74,7 +73,8 @@ func (r *TableDisallowPartitionRule) checkAlterTable(ctx *mysql.AlterTableContex
 	if !mysqlparser.IsTopMySQLRule(&ctx.BaseParserRuleContext) {
 		return
 	}
-	if ctx.AlterTableActions() != nil && ctx.AlterTableActions().PartitionClause() != nil && ctx.AlterTableActions().PartitionClause().PartitionTypeDef() != nil {
+	if ctx.AlterTableActions() != nil && ctx.AlterTableActions().PartitionClause() != nil &&
+		ctx.AlterTableActions().PartitionClause().PartitionTypeDef() != nil {
 		r.AddAdvice(&types.Advice{
 			Status:        types.Advice_Status(r.level),
 			Code:          int32(types.CreateTablePartition),
@@ -89,7 +89,12 @@ func (r *TableDisallowPartitionRule) checkAlterTable(ctx *mysql.AlterTableContex
 type TableDisallowPartitionAdvisor struct{}
 
 // Check performs the ANTLR-based table disallow partition check
-func (a *TableDisallowPartitionAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableDisallowPartitionAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

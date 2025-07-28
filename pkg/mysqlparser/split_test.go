@@ -7,11 +7,9 @@ import (
 	"time"
 
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/stretchr/testify/require"
-
 	parser "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/stretchr/testify/require"
 )
 
 type splitTestData struct {
@@ -25,7 +23,7 @@ type resData struct {
 }
 
 func generateOneMBInsert() string {
-	var rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	letterList := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]byte, 1024*1024)
 	for i := range b {
@@ -615,37 +613,65 @@ func TestMySQLSplitMultiSQL(t *testing.T) {
 		t.Run(fmt.Sprintf("test_%d", i), func(t *testing.T) {
 			lexer := parser.NewMySQLLexer(antlr.NewInputStream(test.statement))
 			stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-			
+
 			res, err := splitMySQLStatement(stream, test.statement)
 			errStr := ""
 			if err != nil {
 				errStr = err.Error()
 			}
-			
+
 			// For easier debugging, compare individual fields
 			require.Equal(t, test.want.err, errStr, "Error mismatch for test %d", i)
 			require.Equal(t, len(test.want.res), len(res), "Result count mismatch for test %d", i)
-			
+
 			for j, expectedSQL := range test.want.res {
 				if j >= len(res) {
 					break
 				}
 				actualSQL := res[j]
-				
+
 				require.Equal(t, expectedSQL.Text, actualSQL.Text, "Text mismatch for test %d, statement %d", i, j)
 				require.Equal(t, expectedSQL.BaseLine, actualSQL.BaseLine, "BaseLine mismatch for test %d, statement %d", i, j)
 				require.Equal(t, expectedSQL.Empty, actualSQL.Empty, "Empty mismatch for test %d, statement %d", i, j)
-				
+
 				if expectedSQL.Start != nil && actualSQL.Start != nil {
-					require.Equal(t, expectedSQL.Start.Line, actualSQL.Start.Line, "Start Line mismatch for test %d, statement %d", i, j)
-					require.Equal(t, expectedSQL.Start.Column, actualSQL.Start.Column, "Start Column mismatch for test %d, statement %d", i, j)
+					require.Equal(
+						t,
+						expectedSQL.Start.Line,
+						actualSQL.Start.Line,
+						"Start Line mismatch for test %d, statement %d",
+						i,
+						j,
+					)
+					require.Equal(
+						t,
+						expectedSQL.Start.Column,
+						actualSQL.Start.Column,
+						"Start Column mismatch for test %d, statement %d",
+						i,
+						j,
+					)
 				} else {
 					require.Equal(t, expectedSQL.Start, actualSQL.Start, "Start mismatch for test %d, statement %d", i, j)
 				}
-				
+
 				if expectedSQL.End != nil && actualSQL.End != nil {
-					require.Equal(t, expectedSQL.End.Line, actualSQL.End.Line, "End Line mismatch for test %d, statement %d", i, j)
-					require.Equal(t, expectedSQL.End.Column, actualSQL.End.Column, "End Column mismatch for test %d, statement %d", i, j)
+					require.Equal(
+						t,
+						expectedSQL.End.Line,
+						actualSQL.End.Line,
+						"End Line mismatch for test %d, statement %d",
+						i,
+						j,
+					)
+					require.Equal(
+						t,
+						expectedSQL.End.Column,
+						actualSQL.End.Column,
+						"End Column mismatch for test %d, statement %d",
+						i,
+						j,
+					)
 				} else {
 					require.Equal(t, expectedSQL.End, actualSQL.End, "End mismatch for test %d, statement %d", i, j)
 				}

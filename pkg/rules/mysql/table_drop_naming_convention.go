@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,11 @@ type TableDropNamingConventionRule struct {
 }
 
 // NewTableDropNamingConventionRule creates a new ANTLR-based table drop naming convention rule
-func NewTableDropNamingConventionRule(level types.SQLReviewRuleLevel, title string, format *regexp.Regexp) *TableDropNamingConventionRule {
+func NewTableDropNamingConventionRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	format *regexp.Regexp,
+) *TableDropNamingConventionRule {
 	return &TableDropNamingConventionRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -60,10 +63,14 @@ func (r *TableDropNamingConventionRule) checkDropTable(ctx *mysql.DropTableConte
 		_, tableName := mysqlparser.NormalizeMySQLTableRef(tableRef)
 		if !r.format.MatchString(tableName) {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.TableDropNamingConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("`%s` mismatches drop table naming convention, naming format should be %q", tableName, r.format),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.TableDropNamingConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"`%s` mismatches drop table naming convention, naming format should be %q",
+					tableName,
+					r.format,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 			})
 		}
@@ -74,7 +81,12 @@ func (r *TableDropNamingConventionRule) checkDropTable(ctx *mysql.DropTableConte
 type TableDropNamingConventionAdvisor struct{}
 
 // Check performs the ANTLR-based table drop naming convention check using payload
-func (a *TableDropNamingConventionAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *TableDropNamingConventionAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

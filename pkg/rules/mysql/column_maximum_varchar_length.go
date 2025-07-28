@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,11 @@ type ColumnMaximumVarcharLengthRule struct {
 }
 
 // NewColumnMaximumVarcharLengthRule creates a new ANTLR-based column maximum varchar length rule
-func NewColumnMaximumVarcharLengthRule(level types.SQLReviewRuleLevel, title string, maximum int) *ColumnMaximumVarcharLengthRule {
+func NewColumnMaximumVarcharLengthRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	maximum int,
+) *ColumnMaximumVarcharLengthRule {
 	return &ColumnMaximumVarcharLengthRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -60,7 +63,7 @@ func (r *ColumnMaximumVarcharLengthRule) checkCreateTable(ctx *mysql.CreateTable
 	if tableName == "" {
 		return
 	}
-	
+
 	for _, tableElement := range ctx.TableElementList().AllTableElement() {
 		if tableElement.ColumnDefinition() == nil {
 			continue
@@ -75,10 +78,15 @@ func (r *ColumnMaximumVarcharLengthRule) checkCreateTable(ctx *mysql.CreateTable
 		length := r.getVarcharLength(tableElement.ColumnDefinition().FieldDefinition().DataType())
 		if r.maximum > 0 && length > r.maximum {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.VarcharLengthExceedsLimit),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The length of the VARCHAR column `%s.%s` is bigger than %d", tableName, columnName, r.maximum),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.VarcharLengthExceedsLimit),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The length of the VARCHAR column `%s.%s` is bigger than %d",
+					tableName,
+					columnName,
+					r.maximum,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + tableElement.GetStart().GetLine()),
 			})
 		}
@@ -100,7 +108,7 @@ func (r *ColumnMaximumVarcharLengthRule) checkAlterTable(ctx *mysql.AlterTableCo
 	if tableName == "" {
 		return
 	}
-	
+
 	// alter table add column, change column, modify column.
 	for _, item := range ctx.AlterTableActions().AlterCommandList().AlterList().AllAlterListItem() {
 		if item == nil {
@@ -126,7 +134,8 @@ func (r *ColumnMaximumVarcharLengthRule) checkAlterTable(ctx *mysql.AlterTableCo
 					if tableElement.ColumnDefinition() == nil {
 						continue
 					}
-					if tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					if tableElement.ColumnDefinition().FieldDefinition().DataType() == nil {
@@ -153,14 +162,19 @@ func (r *ColumnMaximumVarcharLengthRule) checkAlterTable(ctx *mysql.AlterTableCo
 		default:
 			continue
 		}
-		
+
 		for _, columnName := range columnList {
 			if length, ok := varcharLengthMap[columnName]; ok && r.maximum > 0 && length > r.maximum {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.VarcharLengthExceedsLimit),
-					Title:         r.title,
-					Content:       fmt.Sprintf("The length of the VARCHAR column `%s.%s` is bigger than %d", tableName, columnName, r.maximum),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.VarcharLengthExceedsLimit),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"The length of the VARCHAR column `%s.%s` is bigger than %d",
+						tableName,
+						columnName,
+						r.maximum,
+					),
 					StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 				})
 			}
@@ -193,7 +207,12 @@ func (*ColumnMaximumVarcharLengthRule) getVarcharLength(ctx mysql.IDataTypeConte
 type ColumnMaximumVarcharLengthAdvisor struct{}
 
 // Check performs the ANTLR-based column maximum varchar length check using payload
-func (a *ColumnMaximumVarcharLengthAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *ColumnMaximumVarcharLengthAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

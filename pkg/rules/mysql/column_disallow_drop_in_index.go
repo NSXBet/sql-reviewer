@@ -6,12 +6,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnDisallowDropInIndexRule is the ANTLR-based implementation for checking disallow DROP COLUMN in index
@@ -22,7 +21,11 @@ type ColumnDisallowDropInIndexRule struct {
 }
 
 // NewColumnDisallowDropInIndexRule creates a new ANTLR-based column disallow drop in index rule
-func NewColumnDisallowDropInIndexRule(level types.SQLReviewRuleLevel, title string, catalogFinder *catalog.Finder) *ColumnDisallowDropInIndexRule {
+func NewColumnDisallowDropInIndexRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	catalogFinder *catalog.Finder,
+) *ColumnDisallowDropInIndexRule {
 	return &ColumnDisallowDropInIndexRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -67,9 +70,12 @@ func (r *ColumnDisallowDropInIndexRule) checkCreateTable(ctx *mysql.CreateTableC
 		if tableElement.TableConstraintDef().GetType_() == nil {
 			continue
 		}
-		
+
 		switch tableElement.TableConstraintDef().GetType_().GetTokenType() {
-		case mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL:
+		case mysql.MySQLParserINDEX_SYMBOL,
+			mysql.MySQLParserKEY_SYMBOL,
+			mysql.MySQLParserPRIMARY_SYMBOL,
+			mysql.MySQLParserUNIQUE_SYMBOL:
 			if tableElement.TableConstraintDef().KeyListVariants() == nil {
 				continue
 			}
@@ -108,7 +114,7 @@ func (r *ColumnDisallowDropInIndexRule) checkAlterTable(ctx *mysql.AlterTableCon
 	}
 
 	_, tableName := mysqlparser.NormalizeMySQLTableRef(ctx.TableRef())
-	
+
 	// Check existing indexes from catalog if available
 	if r.catalog != nil {
 		// Get existing indexes for this table from catalog
@@ -137,13 +143,13 @@ func (r *ColumnDisallowDropInIndexRule) loadExistingIndexes(tableName string) {
 	if r.catalog == nil {
 		return
 	}
-	
+
 	// Try to find existing indexes in the catalog
 	table := r.catalog.Origin.FindTable(&catalog.TableFind{
 		SchemaName: "", // MySQL doesn't have schema
 		TableName:  tableName,
 	})
-	
+
 	if table != nil {
 		indexMap := table.Index(&catalog.TableIndexFind{
 			SchemaName: "",
@@ -172,7 +178,12 @@ func (r *ColumnDisallowDropInIndexRule) canDrop(tableName, columnName string) bo
 type ColumnDisallowDropInIndexAdvisor struct{}
 
 // Check performs the ANTLR-based column disallow drop in index check
-func (a *ColumnDisallowDropInIndexAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnDisallowDropInIndexAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

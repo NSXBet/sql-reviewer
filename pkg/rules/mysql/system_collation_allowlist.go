@@ -7,16 +7,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type SystemCollationAllowlistAdvisor struct {
-}
+type SystemCollationAllowlistAdvisor struct{}
 
-func (a *SystemCollationAllowlistAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *SystemCollationAllowlistAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -158,7 +161,8 @@ func (r *CollationAllowlistRule) checkAlterDatabase(ctx *mysql.AlterDatabaseCont
 		return
 	}
 	for _, option := range ctx.AllAlterDatabaseOption() {
-		if option == nil || option.CreateDatabaseOption() == nil || option.CreateDatabaseOption().DefaultCollation() == nil || option.CreateDatabaseOption().DefaultCollation().CollationName() == nil {
+		if option == nil || option.CreateDatabaseOption() == nil || option.CreateDatabaseOption().DefaultCollation() == nil ||
+			option.CreateDatabaseOption().DefaultCollation().CollationName() == nil {
 			continue
 		}
 		collation := mysqlparser.NormalizeMySQLCollationName(option.CreateDatabaseOption().DefaultCollation().CollationName())

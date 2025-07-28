@@ -6,18 +6,17 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 type testCase struct {
-	Statement             string                 `yaml:"statement"`
-	IgnoreCaseSensitive   bool                   `yaml:"ignore_case_sensitive"`
-	Want                  string                 `yaml:"want"`
-	Err                   *testCaseErrorMetadata `yaml:"err"`
+	Statement           string                 `yaml:"statement"`
+	IgnoreCaseSensitive bool                   `yaml:"ignore_case_sensitive"`
+	Want                string                 `yaml:"want"`
+	Err                 *testCaseErrorMetadata `yaml:"err"`
 }
 
 type testCaseErrorMetadata struct {
@@ -75,7 +74,7 @@ func TestMySQLWalkThrough(t *testing.T) {
 			if tc.Err != nil {
 				// Expecting an error
 				require.Error(t, walkErr, "Test case %d should have error", i)
-				
+
 				walkThroughErr, ok := walkErr.(*WalkThroughError)
 				require.True(t, ok, "Error should be WalkThroughError")
 				require.Equal(t, WalkThroughErrorType(tc.Err.Type), walkThroughErr.Type)
@@ -143,7 +142,23 @@ func simplifyDatabaseMetadata(state *DatabaseState) map[string]interface{} {
 				// Add columns
 				if len(table.columnSet) > 0 {
 					var columns []map[string]interface{}
+
+					// Sort columns by position to ensure consistent ordering
+					var sortedColumns []*ColumnState
 					for _, column := range table.columnSet {
+						sortedColumns = append(sortedColumns, column)
+					}
+					sort.Slice(sortedColumns, func(i, j int) bool {
+						if sortedColumns[i].position == nil {
+							return false
+						}
+						if sortedColumns[j].position == nil {
+							return true
+						}
+						return *sortedColumns[i].position < *sortedColumns[j].position
+					})
+
+					for _, column := range sortedColumns {
 						columnMap := map[string]interface{}{
 							"name":     column.name,
 							"position": *column.position,
@@ -174,14 +189,14 @@ func simplifyDatabaseMetadata(state *DatabaseState) map[string]interface{} {
 				// Add indexes
 				if len(table.indexSet) > 0 {
 					var indexes []map[string]interface{}
-					
+
 					// Sort indexes by name to ensure consistent ordering
 					var indexNames []string
 					for indexName := range table.indexSet {
 						indexNames = append(indexNames, indexName)
 					}
 					sort.Strings(indexNames)
-					
+
 					for _, indexName := range indexNames {
 						index := table.indexSet[indexName]
 						indexMap := map[string]interface{}{

@@ -6,16 +6,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type SchemaBackwardCompatibilityAdvisor struct {
-}
+type SchemaBackwardCompatibilityAdvisor struct{}
 
-func (a *SchemaBackwardCompatibilityAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *SchemaBackwardCompatibilityAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -204,7 +207,8 @@ func (r *SchemaBackwardCompatibilityRule) checkAlterTable(ctx *mysql.AlterTableC
 
 			// add check enforced.
 			// Check is only supported after 8.0.16 https://dev.mysql.com/doc/refman/8.0/en/create-table-check-constraints.html
-			if item.TableConstraintDef() != nil && item.TableConstraintDef().CheckConstraint() != nil && item.TableConstraintDef().ConstraintEnforcement() != nil {
+			if item.TableConstraintDef() != nil && item.TableConstraintDef().CheckConstraint() != nil &&
+				item.TableConstraintDef().ConstraintEnforcement() != nil {
 				r.code = int32(types.CompatibilityAddCheck)
 				return
 			}

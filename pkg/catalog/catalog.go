@@ -38,7 +38,10 @@ func NewFinder(database *types.DatabaseSchemaMetadata, ctx *FinderContext) *Find
 
 // NewEmptyFinder creates a finder with empty database.
 func NewEmptyFinder(ctx *FinderContext) *Finder {
-	return &Finder{Origin: newDatabaseState(&types.DatabaseSchemaMetadata{}, ctx), Final: newDatabaseState(&types.DatabaseSchemaMetadata{}, ctx)}
+	return &Finder{
+		Origin: newDatabaseState(&types.DatabaseSchemaMetadata{}, ctx),
+		Final:  newDatabaseState(&types.DatabaseSchemaMetadata{}, ctx),
+	}
 }
 
 // WalkThrough does the walk through.

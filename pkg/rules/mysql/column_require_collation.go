@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnRequireCollationRule is the ANTLR-based implementation for checking require collation
@@ -94,7 +93,8 @@ func (r *ColumnRequireCollationRule) checkCreateTable(ctx *mysql.CreateTableCont
 }
 
 func (r *ColumnRequireCollationRule) checkAlterTable(ctx *mysql.AlterTableContext) {
-	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil || ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
+	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil ||
+		ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
 		return
 	}
 	for _, alterListItem := range ctx.AlterTableActions().AlterCommandList().AlterList().AllAlterListItem() {
@@ -143,7 +143,12 @@ func (*ColumnRequireCollationRule) isCharsetDataType(dataType mysql.IDataTypeCon
 type ColumnRequireCollationAdvisor struct{}
 
 // Check performs the ANTLR-based column require collation check
-func (a *ColumnRequireCollationAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnRequireCollationAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

@@ -5,16 +5,19 @@ import (
 	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementDisallowMixInDMLAdvisor struct {
-}
+type StatementDisallowMixInDMLAdvisor struct{}
 
-func (a *StatementDisallowMixInDMLAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementDisallowMixInDMLAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	// Only check when change type is DML
 	switch checkContext.ChangeType {
 	case types.PlanCheckRunConfig_DML:

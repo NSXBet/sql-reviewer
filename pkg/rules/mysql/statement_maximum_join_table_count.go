@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -21,7 +20,11 @@ type StatementMaximumJoinTableCountRule struct {
 }
 
 // NewStatementMaximumJoinTableCountRule creates a new ANTLR-based statement maximum join table count rule
-func NewStatementMaximumJoinTableCountRule(level types.SQLReviewRuleLevel, title string, limitMaxValue int) *StatementMaximumJoinTableCountRule {
+func NewStatementMaximumJoinTableCountRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	limitMaxValue int,
+) *StatementMaximumJoinTableCountRule {
 	return &StatementMaximumJoinTableCountRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -73,7 +76,12 @@ func (r *StatementMaximumJoinTableCountRule) checkJoinedTable(ctx *mysql.JoinedT
 type StatementMaximumJoinTableCountAdvisor struct{}
 
 // Check performs the ANTLR-based statement maximum join table count check
-func (a *StatementMaximumJoinTableCountAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementMaximumJoinTableCountAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

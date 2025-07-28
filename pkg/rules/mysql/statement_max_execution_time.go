@@ -8,16 +8,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementMaxExecutionTimeAdvisor struct {
-}
+type StatementMaxExecutionTimeAdvisor struct{}
 
-func (a *StatementMaxExecutionTimeAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementMaxExecutionTimeAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -123,7 +126,10 @@ func (r *MaxExecutionTimeRule) checkSetStatement(ctx *mysql.SetStatementContext)
 	optionValueNoOptionType := startOptionValueList.OptionValueNoOptionType()
 	if optionValueNoOptionType != nil {
 		if optionValueNoOptionType.InternalVariableName() != nil && optionValueNoOptionType.SetExprOrDefault() != nil {
-			variable, value = optionValueNoOptionType.InternalVariableName().GetText(), optionValueNoOptionType.SetExprOrDefault().GetText()
+			variable, value = optionValueNoOptionType.InternalVariableName().
+				GetText(),
+				optionValueNoOptionType.SetExprOrDefault().
+					GetText()
 		}
 	}
 	_, err := strconv.Atoi(value)

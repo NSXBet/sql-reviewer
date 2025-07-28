@@ -7,11 +7,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // IndexTypeNoBlobRule is the ANTLR-based implementation for checking index type no blob
@@ -22,7 +21,11 @@ type IndexTypeNoBlobRule struct {
 }
 
 // NewIndexTypeNoBlobRule creates a new ANTLR-based index type no blob rule
-func NewIndexTypeNoBlobRule(level types.SQLReviewRuleLevel, title string, catalog *types.DatabaseSchemaMetadata) *IndexTypeNoBlobRule {
+func NewIndexTypeNoBlobRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	catalog *types.DatabaseSchemaMetadata,
+) *IndexTypeNoBlobRule {
 	return &IndexTypeNoBlobRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -112,7 +115,8 @@ func (r *IndexTypeNoBlobRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 			// add multi column.
 			case alterListItem.OPEN_PAR_SYMBOL() != nil && alterListItem.TableElementList() != nil:
 				for _, tableElement := range alterListItem.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					columnName := NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -144,7 +148,8 @@ func (r *IndexTypeNoBlobRule) checkCreateIndex(ctx *mysql.CreateIndexContext) {
 	case mysql.MySQLParserFULLTEXT_SYMBOL, mysql.MySQLParserSPATIAL_SYMBOL, mysql.MySQLParserFOREIGN_SYMBOL:
 		return
 	}
-	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil || ctx.CreateIndexTarget().KeyListVariants() == nil {
+	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil ||
+		ctx.CreateIndexTarget().KeyListVariants() == nil {
 		return
 	}
 
@@ -187,7 +192,10 @@ func (r *IndexTypeNoBlobRule) checkConstraintDef(tableName string, ctx mysql.ITa
 	}
 	var columnList []string
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL:
+	case mysql.MySQLParserINDEX_SYMBOL,
+		mysql.MySQLParserKEY_SYMBOL,
+		mysql.MySQLParserPRIMARY_SYMBOL,
+		mysql.MySQLParserUNIQUE_SYMBOL:
 		if ctx.KeyListVariants() == nil {
 			return
 		}
@@ -214,10 +222,15 @@ func (r *IndexTypeNoBlobRule) checkConstraintDef(tableName string, ctx mysql.ITa
 func (r *IndexTypeNoBlobRule) addAdvice(tableName, columnName, columnType string, lineNumber int) {
 	if r.isBlob(columnType) {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.IndexTypeNoBlob),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Columns in index must not be BLOB but `%s`.`%s` is %s", tableName, columnName, columnType),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.IndexTypeNoBlob),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Columns in index must not be BLOB but `%s`.`%s` is %s",
+				tableName,
+				columnName,
+				columnType,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + lineNumber),
 		})
 	}
@@ -258,7 +271,12 @@ func (r *IndexTypeNoBlobRule) getColumnType(tableName string, columnName string)
 type IndexTypeNoBlobAdvisor struct{}
 
 // Check performs the ANTLR-based index type no blob check
-func (a *IndexTypeNoBlobAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *IndexTypeNoBlobAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

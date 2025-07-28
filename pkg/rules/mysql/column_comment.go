@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnCommentRule is the ANTLR-based implementation for checking column comment requirements
@@ -106,7 +105,8 @@ func (r *ColumnCommentRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 				r.checkFieldDefinition(tableName, columnName, item.FieldDefinition())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -140,10 +140,15 @@ func (r *ColumnCommentRule) checkFieldDefinition(tableName, columnName string, c
 		comment = mysqlparser.NormalizeMySQLTextLiteral(attribute.TextLiteral())
 		if r.maxLength >= 0 && len(comment) > r.maxLength {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.ColumnCommentTooLong),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The length of column `%s`.`%s` comment should be within %d characters", tableName, columnName, r.maxLength),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.ColumnCommentTooLong),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The length of column `%s`.`%s` comment should be within %d characters",
+					tableName,
+					columnName,
+					r.maxLength,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 			})
 		}
@@ -166,7 +171,12 @@ func (r *ColumnCommentRule) checkFieldDefinition(tableName, columnName string, c
 type ColumnCommentAdvisor struct{}
 
 // Check performs the ANTLR-based column comment check
-func (a *ColumnCommentAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnCommentAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

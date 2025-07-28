@@ -7,16 +7,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type TableNoDuplicateIndexAdvisor struct {
-}
+type TableNoDuplicateIndexAdvisor struct{}
 
-func (a *TableNoDuplicateIndexAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableNoDuplicateIndexAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -133,7 +136,8 @@ func (r *TableNoDuplicateIndexRule) checkAlterTable(ctx *mysql.AlterTableContext
 	if ctx.TableRef() == nil {
 		return
 	}
-	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil || ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
+	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil ||
+		ctx.AlterTableActions().AlterCommandList().AlterList() == nil {
 		return
 	}
 
@@ -159,7 +163,12 @@ func (r *TableNoDuplicateIndexRule) checkAlterTable(ctx *mysql.AlterTableContext
 
 func (r *TableNoDuplicateIndexRule) handleConstraintDef(tableName string, ctx mysql.ITableConstraintDefContext) {
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL, mysql.MySQLParserFULLTEXT_SYMBOL, mysql.MySQLParserSPATIAL_SYMBOL:
+	case mysql.MySQLParserINDEX_SYMBOL,
+		mysql.MySQLParserKEY_SYMBOL,
+		mysql.MySQLParserPRIMARY_SYMBOL,
+		mysql.MySQLParserUNIQUE_SYMBOL,
+		mysql.MySQLParserFULLTEXT_SYMBOL,
+		mysql.MySQLParserSPATIAL_SYMBOL:
 	default:
 		return
 	}
@@ -194,7 +203,8 @@ func (r *TableNoDuplicateIndexRule) checkCreateIndex(ctx *mysql.CreateIndexConte
 	if !mysqlparser.IsTopMySQLRule(&ctx.BaseParserRuleContext) {
 		return
 	}
-	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil || ctx.CreateIndexTarget().KeyListVariants() == nil {
+	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil ||
+		ctx.CreateIndexTarget().KeyListVariants() == nil {
 		return
 	}
 

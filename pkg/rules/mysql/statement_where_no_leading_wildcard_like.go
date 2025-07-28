@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,10 @@ type StatementWhereNoLeadingWildcardLikeRule struct {
 }
 
 // NewStatementWhereNoLeadingWildcardLikeRule creates a new ANTLR-based statement where no leading wildcard like rule
-func NewStatementWhereNoLeadingWildcardLikeRule(level types.SQLReviewRuleLevel, title string) *StatementWhereNoLeadingWildcardLikeRule {
+func NewStatementWhereNoLeadingWildcardLikeRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+) *StatementWhereNoLeadingWildcardLikeRule {
 	return &StatementWhereNoLeadingWildcardLikeRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -61,7 +63,8 @@ func (r *StatementWhereNoLeadingWildcardLikeRule) checkPredicateExprLike(ctx *my
 
 	for _, expr := range ctx.AllSimpleExpr() {
 		pattern := expr.GetText()
-		if (strings.HasPrefix(pattern, "'%") && strings.HasSuffix(pattern, "'")) || (strings.HasPrefix(pattern, "\"%") && strings.HasSuffix(pattern, "\"")) {
+		if (strings.HasPrefix(pattern, "'%") && strings.HasSuffix(pattern, "'")) ||
+			(strings.HasPrefix(pattern, "\"%") && strings.HasSuffix(pattern, "\"")) {
 			r.AddAdvice(&types.Advice{
 				Status:        types.Advice_Status(r.level),
 				Code:          int32(types.StatementLeadingWildcardLike),
@@ -77,7 +80,12 @@ func (r *StatementWhereNoLeadingWildcardLikeRule) checkPredicateExprLike(ctx *my
 type StatementWhereNoLeadingWildcardLikeAdvisor struct{}
 
 // Check performs the ANTLR-based statement where no leading wildcard like check
-func (a *StatementWhereNoLeadingWildcardLikeAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereNoLeadingWildcardLikeAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

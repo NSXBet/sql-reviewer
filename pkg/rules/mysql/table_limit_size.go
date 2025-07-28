@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -22,7 +21,12 @@ type TableLimitSizeRule struct {
 }
 
 // NewTableLimitSizeRule creates a new TableLimitSizeRule.
-func NewTableLimitSizeRule(level types.Advice_Status, title string, maxRows int, dbSchema *types.DatabaseSchemaMetadata) *TableLimitSizeRule {
+func NewTableLimitSizeRule(
+	level types.Advice_Status,
+	title string,
+	maxRows int,
+	dbSchema *types.DatabaseSchemaMetadata,
+) *TableLimitSizeRule {
 	return &TableLimitSizeRule{
 		BaseRule: BaseRule{
 			level: level,
@@ -83,10 +87,14 @@ func (r *TableLimitSizeRule) generateAdvice() {
 			tableRows := getTabRowsByName(tabName, r.dbSchema.Schemas[0].Tables)
 			if tableRows >= int64(r.maxRows) {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.TableExceedLimitSize),
-					Title:         r.title,
-					Content:       fmt.Sprintf("Apply DDL on large table '%s' ( %d rows ) will lock table for a long time", tabName, tableRows),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.TableExceedLimitSize),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"Apply DDL on large table '%s' ( %d rows ) will lock table for a long time",
+						tabName,
+						tableRows,
+					),
 					StartPosition: ConvertANTLRLineToPosition(r.baseLine + r.statementBaseLine),
 				})
 			}
@@ -106,7 +114,12 @@ func getTabRowsByName(targetTabName string, tables []*types.TableMetadata) int64
 // TableLimitSizeAdvisor is the advisor checking for table size limits.
 type TableLimitSizeAdvisor struct{}
 
-func (a *TableLimitSizeAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableLimitSizeAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	payload, err := advisor.UnmarshalNumberTypeRulePayload(rule.Payload)
 	if err != nil {
 		return nil, err

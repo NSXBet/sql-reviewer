@@ -7,11 +7,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // NamingColumnRule is the ANTLR-based implementation for checking column naming convention
@@ -106,7 +105,8 @@ func (r *NamingColumnRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 				r.handleColumn(tableName, columnName, item.GetStart().GetLine())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					_, _, columnName := mysqlparser.NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -134,19 +134,29 @@ func (r *NamingColumnRule) handleColumn(tableName string, columnName string, lin
 	lineNumber += r.baseLine
 	if !r.format.MatchString(columnName) {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingColumnConvention),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s`.`%s` mismatches column naming convention, naming format should be %q", tableName, columnName, r.format),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingColumnConvention),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s`.`%s` mismatches column naming convention, naming format should be %q",
+				tableName,
+				columnName,
+				r.format,
+			),
 			StartPosition: ConvertANTLRLineToPosition(lineNumber),
 		})
 	}
 	if r.maxLength > 0 && len(columnName) > r.maxLength {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingColumnConvention),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s`.`%s` mismatches column naming convention, its length should be within %d characters", tableName, columnName, r.maxLength),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingColumnConvention),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s`.`%s` mismatches column naming convention, its length should be within %d characters",
+				tableName,
+				columnName,
+				r.maxLength,
+			),
 			StartPosition: ConvertANTLRLineToPosition(lineNumber),
 		})
 	}
@@ -156,7 +166,12 @@ func (r *NamingColumnRule) handleColumn(tableName string, columnName string, lin
 type NamingColumnAdvisor struct{}
 
 // Check performs the ANTLR-based column naming convention check
-func (a *NamingColumnAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *NamingColumnAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

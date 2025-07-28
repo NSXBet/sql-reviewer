@@ -8,11 +8,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementSelectFullTableScanRule checks for full table scan.
@@ -24,7 +23,12 @@ type StatementSelectFullTableScanRule struct {
 }
 
 // NewStatementSelectFullTableScanRule creates a new StatementSelectFullTableScanRule.
-func NewStatementSelectFullTableScanRule(ctx context.Context, level types.Advice_Status, title string, driver *sql.DB) *StatementSelectFullTableScanRule {
+func NewStatementSelectFullTableScanRule(
+	ctx context.Context,
+	level types.Advice_Status,
+	title string,
+	driver *sql.DB,
+) *StatementSelectFullTableScanRule {
 	return &StatementSelectFullTableScanRule{
 		BaseRule: BaseRule{
 			level: level,
@@ -168,7 +172,12 @@ func hasTableFullScan(res []any) (bool, string, error) {
 // StatementSelectFullTableScanAdvisor is the advisor checking for full table scan.
 type StatementSelectFullTableScanAdvisor struct{}
 
-func (a *StatementSelectFullTableScanAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementSelectFullTableScanAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)

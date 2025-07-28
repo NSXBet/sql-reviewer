@@ -7,11 +7,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // NamingColumnAutoIncrementAdvisor is the ANTLR-based implementation for checking auto-increment naming convention
@@ -22,7 +21,12 @@ type NamingColumnAutoIncrementAdvisor struct {
 }
 
 // NewNamingAutoIncrementColumnRule creates a new ANTLR-based auto-increment naming rule
-func NewNamingAutoIncrementColumnRule(level types.SQLReviewRuleLevel, title string, format *regexp.Regexp, maxLength int) *NamingColumnAutoIncrementAdvisor {
+func NewNamingAutoIncrementColumnRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	format *regexp.Regexp,
+	maxLength int,
+) *NamingColumnAutoIncrementAdvisor {
 	return &NamingColumnAutoIncrementAdvisor{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -103,7 +107,8 @@ func (r *NamingColumnAutoIncrementAdvisor) checkAlterTable(ctx *mysql.AlterTable
 				r.checkFieldDefinition(tableName, columnName, item.FieldDefinition())
 			case item.OPEN_PAR_SYMBOL() != nil && item.TableElementList() != nil:
 				for _, tableElement := range item.TableElementList().AllTableElement() {
-					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil || tableElement.ColumnDefinition().FieldDefinition() == nil {
+					if tableElement.ColumnDefinition() == nil || tableElement.ColumnDefinition().ColumnName() == nil ||
+						tableElement.ColumnDefinition().FieldDefinition() == nil {
 						continue
 					}
 					columnName := NormalizeMySQLColumnName(tableElement.ColumnDefinition().ColumnName())
@@ -129,19 +134,29 @@ func (r *NamingColumnAutoIncrementAdvisor) checkFieldDefinition(tableName, colum
 
 	if !r.format.MatchString(columnName) {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingAutoIncrementColumnConventionMismatch),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s`.`%s` mismatches auto_increment column naming convention, naming format should be %q", tableName, columnName, r.format),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingAutoIncrementColumnConventionMismatch),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s`.`%s` mismatches auto_increment column naming convention, naming format should be %q",
+				tableName,
+				columnName,
+				r.format,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
 	if r.maxLength > 0 && len(columnName) > r.maxLength {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NamingAutoIncrementColumnConventionMismatch),
-			Title:         r.title,
-			Content:       fmt.Sprintf("`%s`.`%s` mismatches auto_increment column naming convention, its length should be within %d characters", tableName, columnName, r.maxLength),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NamingAutoIncrementColumnConventionMismatch),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"`%s`.`%s` mismatches auto_increment column naming convention, its length should be within %d characters",
+				tableName,
+				columnName,
+				r.maxLength,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -160,7 +175,12 @@ func (*NamingColumnAutoIncrementAdvisor) isAutoIncrement(ctx mysql.IFieldDefinit
 type NamingAutoIncrementColumnAdvisor struct{}
 
 // Check performs the ANTLR-based auto-increment naming convention check using payload
-func (a *NamingAutoIncrementColumnAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *NamingAutoIncrementColumnAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

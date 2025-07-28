@@ -5,11 +5,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementDisallowUsingTemporaryRule is the ANTLR-based implementation for checking using temporary
@@ -63,7 +62,12 @@ func (r *StatementDisallowUsingTemporaryRule) checkSelectStatement(ctx *mysql.Se
 type StatementDisallowUsingTemporaryAdvisor struct{}
 
 // Check performs the ANTLR-based statement disallow using temporary check
-func (a *StatementDisallowUsingTemporaryAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementDisallowUsingTemporaryAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")
@@ -75,7 +79,10 @@ func (a *StatementDisallowUsingTemporaryAdvisor) Check(ctx context.Context, stat
 	}
 
 	// Create the rule
-	statementDisallowUsingTemporaryRule := NewStatementDisallowUsingTemporaryRule(types.SQLReviewRuleLevel(level), string(rule.Type))
+	statementDisallowUsingTemporaryRule := NewStatementDisallowUsingTemporaryRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{statementDisallowUsingTemporaryRule})

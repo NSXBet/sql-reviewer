@@ -7,12 +7,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 type columnName struct {
@@ -87,7 +86,7 @@ func (r *ColumnNoNullRule) checkCreateTable(ctx *mysql.CreateTableContext) {
 		if fieldDef == nil {
 			continue
 		}
-		
+
 		// Check if column is nullable (no NOT NULL constraint and not PRIMARY KEY)
 		if r.isColumnNullable(fieldDef) {
 			col := columnName{
@@ -232,7 +231,12 @@ func (r *ColumnNoNullRule) generateAdvice() {
 type ColumnNoNullAdvisor struct{}
 
 // Check performs the ANTLR-based non-null column check
-func (a *ColumnNoNullAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnNoNullAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

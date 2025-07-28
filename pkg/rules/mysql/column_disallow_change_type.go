@@ -7,12 +7,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ColumnDisallowChangeTypeRule is the ANTLR-based implementation for checking disallow changing column type
@@ -23,7 +22,11 @@ type ColumnDisallowChangeTypeRule struct {
 }
 
 // NewColumnDisallowChangeTypeRule creates a new ANTLR-based column disallow change type rule
-func NewColumnDisallowChangeTypeRule(level types.SQLReviewRuleLevel, title string, catalog *catalog.Finder) *ColumnDisallowChangeTypeRule {
+func NewColumnDisallowChangeTypeRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	catalog *catalog.Finder,
+) *ColumnDisallowChangeTypeRule {
 	return &ColumnDisallowChangeTypeRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -153,7 +156,12 @@ type CheckContext struct {
 }
 
 // Check performs the ANTLR-based column disallow change type check
-func (a *ColumnDisallowChangeTypeAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *ColumnDisallowChangeTypeAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

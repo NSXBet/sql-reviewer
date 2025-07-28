@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // IndexKeyNumberLimitRule is the ANTLR-based implementation for checking index key number limit
@@ -76,7 +75,10 @@ func (r *IndexKeyNumberLimitRule) checkCreateTable(ctx *mysql.CreateTableContext
 func (r *IndexKeyNumberLimitRule) handleConstraintDef(tableName string, ctx mysql.ITableConstraintDefContext) {
 	var columnList []string
 	switch ctx.GetType_().GetTokenType() {
-	case mysql.MySQLParserINDEX_SYMBOL, mysql.MySQLParserKEY_SYMBOL, mysql.MySQLParserPRIMARY_SYMBOL, mysql.MySQLParserUNIQUE_SYMBOL:
+	case mysql.MySQLParserINDEX_SYMBOL,
+		mysql.MySQLParserKEY_SYMBOL,
+		mysql.MySQLParserPRIMARY_SYMBOL,
+		mysql.MySQLParserUNIQUE_SYMBOL:
 		if ctx.KeyListVariants() == nil {
 			return
 		}
@@ -100,10 +102,15 @@ func (r *IndexKeyNumberLimitRule) handleConstraintDef(tableName string, ctx mysq
 
 	if r.max > 0 && len(columnList) > r.max {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.IndexKeyNumberExceedsLimit),
-			Title:         r.title,
-			Content:       fmt.Sprintf("The number of index `%s` in table `%s` should be not greater than %d", indexName, tableName, r.max),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.IndexKeyNumberExceedsLimit),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"The number of index `%s` in table `%s` should be not greater than %d",
+				indexName,
+				tableName,
+				r.max,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -114,7 +121,8 @@ func (r *IndexKeyNumberLimitRule) checkCreateIndex(ctx *mysql.CreateIndexContext
 	case mysql.MySQLParserFULLTEXT_SYMBOL, mysql.MySQLParserSPATIAL_SYMBOL:
 		return
 	}
-	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil || ctx.CreateIndexTarget().KeyListVariants() == nil {
+	if ctx.CreateIndexTarget() == nil || ctx.CreateIndexTarget().TableRef() == nil ||
+		ctx.CreateIndexTarget().KeyListVariants() == nil {
 		return
 	}
 
@@ -130,10 +138,15 @@ func (r *IndexKeyNumberLimitRule) checkCreateIndex(ctx *mysql.CreateIndexContext
 	columnList := mysqlparser.NormalizeKeyListVariants(ctx.CreateIndexTarget().KeyListVariants())
 	if r.max > 0 && len(columnList) > r.max {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.IndexKeyNumberExceedsLimit),
-			Title:         r.title,
-			Content:       fmt.Sprintf("The number of index `%s` in table `%s` should be not greater than %d", indexName, tableName, r.max),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.IndexKeyNumberExceedsLimit),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"The number of index `%s` in table `%s` should be not greater than %d",
+				indexName,
+				tableName,
+				r.max,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -173,7 +186,12 @@ func (r *IndexKeyNumberLimitRule) checkAlterTable(ctx *mysql.AlterTableContext) 
 type IndexKeyNumberLimitAdvisor struct{}
 
 // Check performs the ANTLR-based index key number limit check
-func (a *IndexKeyNumberLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *IndexKeyNumberLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

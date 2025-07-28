@@ -7,12 +7,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -138,7 +137,8 @@ func (r *TableRequirePKRule) checkAlterTable(ctx *mysql.AlterTableContext) {
 	if ctx.TableRef() == nil {
 		return
 	}
-	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil || ctx.AlterTableActions().AlterCommandList() == nil {
+	if ctx.AlterTableActions() == nil || ctx.AlterTableActions().AlterCommandList() == nil ||
+		ctx.AlterTableActions().AlterCommandList() == nil {
 		return
 	}
 	_, tableName := mysqlparser.NormalizeMySQLTableRef(ctx.TableRef())
@@ -250,7 +250,12 @@ func (r *TableRequirePKRule) getTableList() []string {
 type TableRequirePKAdvisor struct{}
 
 // Check performs the ANTLR-based table require PK check
-func (a *TableRequirePKAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableRequirePKAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

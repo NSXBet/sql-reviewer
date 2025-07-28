@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementWhereRequireUpdateDeleteRule is the ANTLR-based implementation for checking WHERE clause requirement in UPDATE/DELETE statements
@@ -20,7 +19,10 @@ type StatementWhereRequireUpdateDeleteRule struct {
 }
 
 // NewStatementWhereRequireUpdateDeleteRule creates a new ANTLR-based WHERE requirement rule for UPDATE/DELETE
-func NewStatementWhereRequireUpdateDeleteRule(level types.SQLReviewRuleLevel, title string) *StatementWhereRequireUpdateDeleteRule {
+func NewStatementWhereRequireUpdateDeleteRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+) *StatementWhereRequireUpdateDeleteRule {
 	return &StatementWhereRequireUpdateDeleteRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -88,7 +90,12 @@ func (r *StatementWhereRequireUpdateDeleteRule) handleWhereClause(lineNumber int
 type StatementWhereRequireUpdateDeleteAdvisor struct{}
 
 // Check performs the ANTLR-based WHERE requirement check for UPDATE/DELETE statements
-func (a *StatementWhereRequireUpdateDeleteAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereRequireUpdateDeleteAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

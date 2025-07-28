@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -17,7 +16,7 @@ type StatementDisallowLimitRule struct {
 	BaseAntlrRule
 	isInsertStmt bool
 	text         string
-	line         int
+	line         int //nolint:unused
 }
 
 // NewStatementDisallowLimitRule creates a new ANTLR-based statement disallow limit rule
@@ -97,7 +96,12 @@ func (r *StatementDisallowLimitRule) handleLimitClause(code int, lineNumber int)
 type StatementDisallowLimitAdvisor struct{}
 
 // Check performs the ANTLR-based statement disallow limit check
-func (a *StatementDisallowLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementDisallowLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

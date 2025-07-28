@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -20,7 +19,11 @@ type ColumnAutoIncrementInitialValueRule struct {
 }
 
 // NewColumnAutoIncrementInitialValueRule creates a new ANTLR-based auto-increment column initial value rule
-func NewColumnAutoIncrementInitialValueRule(level types.SQLReviewRuleLevel, title string, value int) *ColumnAutoIncrementInitialValueRule {
+func NewColumnAutoIncrementInitialValueRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	value int,
+) *ColumnAutoIncrementInitialValueRule {
 	return &ColumnAutoIncrementInitialValueRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -73,10 +76,15 @@ func (r *ColumnAutoIncrementInitialValueRule) checkCreateTable(ctx *mysql.Create
 		}
 		if value != uint64(r.value) {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.AutoIncrementInitialValueNotMatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("The initial auto-increment value in table `%s` is %v, which doesn't equal %v", tableName, value, r.value),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.AutoIncrementInitialValueNotMatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"The initial auto-increment value in table `%s` is %v, which doesn't equal %v",
+					tableName,
+					value,
+					r.value,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 			})
 		}
@@ -119,10 +127,15 @@ func (r *ColumnAutoIncrementInitialValueRule) checkAlterTable(ctx *mysql.AlterTa
 			}
 			if value != uint64(r.value) {
 				r.AddAdvice(&types.Advice{
-					Status:        types.Advice_Status(r.level),
-					Code:          int32(types.AutoIncrementInitialValueNotMatch),
-					Title:         r.title,
-					Content:       fmt.Sprintf("The initial auto-increment value in table `%s` is %v, which doesn't equal %v", tableName, value, r.value),
+					Status: types.Advice_Status(r.level),
+					Code:   int32(types.AutoIncrementInitialValueNotMatch),
+					Title:  r.title,
+					Content: fmt.Sprintf(
+						"The initial auto-increment value in table `%s` is %v, which doesn't equal %v",
+						tableName,
+						value,
+						r.value,
+					),
 					StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 				})
 			}
@@ -134,7 +147,12 @@ func (r *ColumnAutoIncrementInitialValueRule) checkAlterTable(ctx *mysql.AlterTa
 type ColumnAutoIncrementInitialValueAdvisor struct{}
 
 // Check performs the ANTLR-based auto-increment column initial value check
-func (a *ColumnAutoIncrementInitialValueAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *ColumnAutoIncrementInitialValueAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

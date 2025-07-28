@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -23,7 +22,10 @@ type StatementInsertDisallowOrderByRandRule struct {
 }
 
 // NewStatementInsertDisallowOrderByRandRule creates a new ANTLR-based statement insert disallow order by rand rule
-func NewStatementInsertDisallowOrderByRandRule(level types.SQLReviewRuleLevel, title string) *StatementInsertDisallowOrderByRandRule {
+func NewStatementInsertDisallowOrderByRandRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+) *StatementInsertDisallowOrderByRandRule {
 	return &StatementInsertDisallowOrderByRandRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -93,7 +95,12 @@ func (r *StatementInsertDisallowOrderByRandRule) checkQueryExpression(ctx *mysql
 type StatementInsertDisallowOrderByRandAdvisor struct{}
 
 // Check performs the ANTLR-based statement insert disallow order by rand check
-func (a *StatementInsertDisallowOrderByRandAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementInsertDisallowOrderByRandAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

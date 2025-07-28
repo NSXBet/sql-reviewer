@@ -6,16 +6,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementWhereMaximumLogicalOperatorCountAdvisor struct {
-}
+type StatementWhereMaximumLogicalOperatorCountAdvisor struct{}
 
-func (a *StatementWhereMaximumLogicalOperatorCountAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementWhereMaximumLogicalOperatorCountAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -66,7 +69,11 @@ type StatementWhereMaximumLogicalOperatorCountRule struct {
 }
 
 // NewStatementWhereMaximumLogicalOperatorCountRule creates a new StatementWhereMaximumLogicalOperatorCountRule.
-func NewStatementWhereMaximumLogicalOperatorCountRule(level types.Advice_Status, title string, maximum int) *StatementWhereMaximumLogicalOperatorCountRule {
+func NewStatementWhereMaximumLogicalOperatorCountRule(
+	level types.Advice_Status,
+	title string,
+	maximum int,
+) *StatementWhereMaximumLogicalOperatorCountRule {
 	return &StatementWhereMaximumLogicalOperatorCountRule{
 		BaseRule: BaseRule{
 			level: level,
@@ -131,10 +138,15 @@ func (r *StatementWhereMaximumLogicalOperatorCountRule) checkExprList(ctx *mysql
 	count := len(ctx.AllExpr())
 	if count > r.maximum {
 		r.AddAdvice(&types.Advice{
-			Status:        r.level,
-			Code:          int32(types.StatementWhereMaximumLogicalOperatorCount),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Number of tokens (%d) in IN predicate operation exceeds limit (%d) in statement \"%s\".", count, r.maximum, r.text),
+			Status: r.level,
+			Code:   int32(types.StatementWhereMaximumLogicalOperatorCount),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Number of tokens (%d) in IN predicate operation exceeds limit (%d) in statement \"%s\".",
+				count,
+				r.maximum,
+				r.text,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	}
@@ -152,10 +164,15 @@ func (r *StatementWhereMaximumLogicalOperatorCountRule) checkExprOr(ctx *mysql.E
 func (r *StatementWhereMaximumLogicalOperatorCountRule) checkOrConditions() {
 	if r.maxOrCount > r.maximum {
 		r.AddAdvice(&types.Advice{
-			Status:        r.level,
-			Code:          int32(types.StatementWhereMaximumLogicalOperatorCount),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Number of tokens (%d) in the OR predicate operation exceeds limit (%d) in statement \"%s\".", r.maxOrCount, r.maximum, r.text),
+			Status: r.level,
+			Code:   int32(types.StatementWhereMaximumLogicalOperatorCount),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Number of tokens (%d) in the OR predicate operation exceeds limit (%d) in statement \"%s\".",
+				r.maxOrCount,
+				r.maximum,
+				r.text,
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.maxOrCountLine),
 		})
 	}

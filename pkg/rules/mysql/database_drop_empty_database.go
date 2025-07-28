@@ -6,12 +6,11 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // DatabaseDropEmptyDatabaseRule is the ANTLR-based implementation for checking database drop only if empty
@@ -21,7 +20,11 @@ type DatabaseDropEmptyDatabaseRule struct {
 }
 
 // NewDatabaseDropEmptyDatabaseRule creates a new ANTLR-based database drop empty database rule
-func NewDatabaseDropEmptyDatabaseRule(level types.SQLReviewRuleLevel, title string, catalog *catalog.Finder) *DatabaseDropEmptyDatabaseRule {
+func NewDatabaseDropEmptyDatabaseRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	catalog *catalog.Finder,
+) *DatabaseDropEmptyDatabaseRule {
 	return &DatabaseDropEmptyDatabaseRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -55,7 +58,7 @@ func (r *DatabaseDropEmptyDatabaseRule) checkDropDatabase(ctx *mysql.DropDatabas
 	}
 
 	dbName := mysqlparser.NormalizeMySQLSchemaRef(ctx.SchemaRef())
-	
+
 	// If catalog is nil, we can't check the database state, so assume it's not empty to be safe
 	if r.catalog == nil {
 		r.AddAdvice(&types.Advice{
@@ -70,10 +73,14 @@ func (r *DatabaseDropEmptyDatabaseRule) checkDropDatabase(ctx *mysql.DropDatabas
 
 	if r.catalog.Origin.DatabaseName() != dbName {
 		r.AddAdvice(&types.Advice{
-			Status:        types.Advice_Status(r.level),
-			Code:          int32(types.NotCurrentDatabase),
-			Title:         r.title,
-			Content:       fmt.Sprintf("Database `%s` that is trying to be deleted is not the current database `%s`", dbName, r.catalog.Origin.DatabaseName()),
+			Status: types.Advice_Status(r.level),
+			Code:   int32(types.NotCurrentDatabase),
+			Title:  r.title,
+			Content: fmt.Sprintf(
+				"Database `%s` that is trying to be deleted is not the current database `%s`",
+				dbName,
+				r.catalog.Origin.DatabaseName(),
+			),
 			StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 		})
 	} else if !r.catalog.Origin.HasNoTable() {
@@ -91,7 +98,12 @@ func (r *DatabaseDropEmptyDatabaseRule) checkDropDatabase(ctx *mysql.DropDatabas
 type DatabaseDropEmptyDatabaseAdvisor struct{}
 
 // Check performs the ANTLR-based database drop empty database check
-func (a *DatabaseDropEmptyDatabaseAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *DatabaseDropEmptyDatabaseAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

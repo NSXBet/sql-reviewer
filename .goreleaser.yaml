@@ -1,11 +1,8 @@
 version: 2
-
 project_name: sql-reviewer
-
 before:
   hooks:
     - go mod tidy
-
 builds:
   - env:
       - CGO_ENABLED=0
@@ -30,7 +27,6 @@ builds:
     binary: sql-reviewer
     ldflags:
       - -s -w -X github.com/nsxbet/sql-reviewer-cli/cmd.version={{.Version}} -X github.com/nsxbet/sql-reviewer-cli/cmd.commit={{.Commit}} -X github.com/nsxbet/sql-reviewer-cli/cmd.date={{.Date}}
-
 archives:
   - formats: [tar.gz]
     name_template: >-
@@ -44,13 +40,10 @@ archives:
       - CHANGELOG*
       - docs/*
       - examples/*
-
 checksum:
   name_template: 'checksums.txt'
-
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
-
 changelog:
   sort: asc
   filters:

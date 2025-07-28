@@ -8,16 +8,19 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 )
 
-type StatementAffectedRowLimitAdvisor struct {
-}
+type StatementAffectedRowLimitAdvisor struct{}
 
-func (a *StatementAffectedRowLimitAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementAffectedRowLimitAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	stmtList, errAdvice := mysqlparser.ParseMySQL(statements)
 	if errAdvice != nil {
 		return ConvertSyntaxErrorToAdvice(errAdvice)
@@ -64,7 +67,13 @@ type StatementAffectedRowLimitRule struct {
 }
 
 // NewStatementAffectedRowLimitRule creates a new StatementAffectedRowLimitRule.
-func NewStatementAffectedRowLimitRule(ctx context.Context, level types.Advice_Status, title string, maxRow int, driver *sql.DB) *StatementAffectedRowLimitRule {
+func NewStatementAffectedRowLimitRule(
+	ctx context.Context,
+	level types.Advice_Status,
+	title string,
+	maxRow int,
+	driver *sql.DB,
+) *StatementAffectedRowLimitRule {
 	return &StatementAffectedRowLimitRule{
 		BaseRule: BaseRule{
 			level: level,
@@ -110,7 +119,7 @@ func (*StatementAffectedRowLimitRule) OnExit(_ antlr.ParserRuleContext, _ string
 func (r *StatementAffectedRowLimitRule) handleStmt(lineNumber int) {
 	lineNumber += r.baseLine
 	r.explainCount++
-	
+
 	if r.driver == nil {
 		// No database connection available, cannot run EXPLAIN
 		r.AddAdvice(&types.Advice{

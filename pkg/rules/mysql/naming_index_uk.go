@@ -8,7 +8,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -31,7 +30,13 @@ type NamingIndexUkAdvisor struct {
 }
 
 // NewNamingIndexUkAdvisor creates a new ANTLR-based unique key naming rule
-func NewNamingIndexUkAdvisor(level types.SQLReviewRuleLevel, title string, format string, maxLength int, templateList []string) *NamingIndexUkAdvisor {
+func NewNamingIndexUkAdvisor(
+	level types.SQLReviewRuleLevel,
+	title string,
+	format string,
+	maxLength int,
+	templateList []string,
+) *NamingIndexUkAdvisor {
 	return &NamingIndexUkAdvisor{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -191,19 +196,29 @@ func (r *NamingIndexUkAdvisor) handleIndexList(indexDataList []*ukIndexMetaData)
 		}
 		if !regex.MatchString(indexData.indexName) {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingUKConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Unique key in table `%s` mismatches the naming convention, expect %q but found `%s`", indexData.tableName, regex, indexData.indexName),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingUKConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Unique key in table `%s` mismatches the naming convention, expect %q but found `%s`",
+					indexData.tableName,
+					regex,
+					indexData.indexName,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
 		if r.maxLength > 0 && len(indexData.indexName) > r.maxLength {
 			r.AddAdvice(&types.Advice{
-				Status:        types.Advice_Status(r.level),
-				Code:          int32(types.NamingUKConventionMismatch),
-				Title:         r.title,
-				Content:       fmt.Sprintf("Unique key `%s` in table `%s` mismatches the naming convention, its length should be within %d characters", indexData.indexName, indexData.tableName, r.maxLength),
+				Status: types.Advice_Status(r.level),
+				Code:   int32(types.NamingUKConventionMismatch),
+				Title:  r.title,
+				Content: fmt.Sprintf(
+					"Unique key `%s` in table `%s` mismatches the naming convention, its length should be within %d characters",
+					indexData.indexName,
+					indexData.tableName,
+					r.maxLength,
+				),
 				StartPosition: ConvertANTLRLineToPosition(r.baseLine + indexData.line),
 			})
 		}
@@ -238,7 +253,11 @@ func (r *NamingIndexUkAdvisor) handleConstraintDef(tableName string, ctx mysql.I
 }
 
 // getTemplateRegexp returns the regexp for the given template format and metadata
-func (r *NamingIndexUkAdvisor) getTemplateRegexp(format string, templateList []string, metaData map[string]string) (*regexp.Regexp, error) {
+func (r *NamingIndexUkAdvisor) getTemplateRegexp(
+	format string,
+	templateList []string,
+	metaData map[string]string,
+) (*regexp.Regexp, error) {
 	regexpPattern := format
 	for _, templateToken := range templateList {
 		value, exists := metaData[templateToken]
@@ -254,7 +273,12 @@ func (r *NamingIndexUkAdvisor) getTemplateRegexp(format string, templateList []s
 type NamingIndexUKAdvisor struct{}
 
 // Check performs the ANTLR-based unique key naming check using payload
-func (a *NamingIndexUKAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.Context) ([]*types.Advice, error) {
+func (a *NamingIndexUKAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.Context,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)

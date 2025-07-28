@@ -6,12 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/antlr4-go/antlr/v4"
 	parser "github.com/bytebase/mysql-parser"
-	
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // ParseResult is the result of parsing a MySQL statement.
@@ -129,7 +127,10 @@ func mysqlAddSemicolonIfNeeded(sql string) string {
 		var result []string
 		result = append(result, stream.GetTextFromInterval(antlr.NewInterval(0, tokens[i].GetTokenIndex())))
 		result = append(result, ";")
-		result = append(result, stream.GetTextFromInterval(antlr.NewInterval(tokens[i].GetTokenIndex()+1, tokens[len(tokens)-1].GetTokenIndex())))
+		result = append(
+			result,
+			stream.GetTextFromInterval(antlr.NewInterval(tokens[i].GetTokenIndex()+1, tokens[len(tokens)-1].GetTokenIndex())),
+		)
 		return strings.Join(result, "")
 	}
 	return sql
@@ -178,7 +179,8 @@ func parseInputStream(input *antlr.InputStream, statement string) ([]*ParseResul
 
 func isEmptyStatement(tokens *antlr.CommonTokenStream) bool {
 	for _, token := range tokens.GetAllTokens() {
-		if token.GetChannel() == antlr.TokenDefaultChannel && token.GetTokenType() != parser.MySQLParserSEMICOLON_SYMBOL && token.GetTokenType() != parser.MySQLParserEOF {
+		if token.GetChannel() == antlr.TokenDefaultChannel && token.GetTokenType() != parser.MySQLParserSEMICOLON_SYMBOL &&
+			token.GetTokenType() != parser.MySQLParserEOF {
 			return false
 		}
 	}
@@ -219,13 +221,13 @@ func hasDelimiter(statement string) (bool, []SingleSQL, error) {
 	lines := strings.Split(statement, "\n")
 	var result []SingleSQL
 	baseLine := 0
-	
+
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" {
 			continue
 		}
-		
+
 		sql := SingleSQL{
 			Text:     line,
 			BaseLine: baseLine,
@@ -237,20 +239,18 @@ func hasDelimiter(statement string) (bool, []SingleSQL, error) {
 				Line:   int32(i + 1),
 				Column: 0,
 			},
-			Empty:    trimmed == "",
+			Empty: trimmed == "",
 		}
 		result = append(result, sql)
-		
+
 		if IsDelimiter(line) {
 			return true, result, nil
 		}
 		baseLine = i + 1
 	}
-	
+
 	return false, result, nil
 }
-
-
 
 // IsTopMySQLRule returns true if the given context is a top-level MySQL rule.
 func IsTopMySQLRule(ctx *antlr.BaseParserRuleContext) bool {

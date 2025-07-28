@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // StatementQueryMinumumPlanLevelRule is the ANTLR-based implementation for checking query minimum plan level
@@ -20,7 +19,11 @@ type StatementQueryMinumumPlanLevelRule struct {
 }
 
 // NewStatementQueryMinumumPlanLevelRule creates a new ANTLR-based statement query minimum plan level rule
-func NewStatementQueryMinumumPlanLevelRule(level types.SQLReviewRuleLevel, title string, explainType string) *StatementQueryMinumumPlanLevelRule {
+func NewStatementQueryMinumumPlanLevelRule(
+	level types.SQLReviewRuleLevel,
+	title string,
+	explainType string,
+) *StatementQueryMinumumPlanLevelRule {
 	return &StatementQueryMinumumPlanLevelRule{
 		BaseAntlrRule: BaseAntlrRule{
 			level: level,
@@ -54,10 +57,13 @@ func (r *StatementQueryMinumumPlanLevelRule) checkSelectStatement(ctx *mysql.Sel
 	// This is a simplified version that reports a warning for any SELECT statement
 	// advising users to check query plans manually
 	r.AddAdvice(&types.Advice{
-		Status:        types.Advice_Status(r.level),
-		Code:          int32(types.StatementUnwantedQueryPlanLevel),
-		Title:         r.title,
-		Content:       fmt.Sprintf("Query plan level check required. Please verify that this query meets the minimum plan level requirement (%s) using EXPLAIN.", r.explainType),
+		Status: types.Advice_Status(r.level),
+		Code:   int32(types.StatementUnwantedQueryPlanLevel),
+		Title:  r.title,
+		Content: fmt.Sprintf(
+			"Query plan level check required. Please verify that this query meets the minimum plan level requirement (%s) using EXPLAIN.",
+			r.explainType,
+		),
 		StartPosition: ConvertANTLRLineToPosition(r.baseLine + ctx.GetStart().GetLine()),
 	})
 }
@@ -66,7 +72,12 @@ func (r *StatementQueryMinumumPlanLevelRule) checkSelectStatement(ctx *mysql.Sel
 type StatementQueryMinumumPlanLevelAdvisor struct{}
 
 // Check performs the ANTLR-based statement query minimum plan level check
-func (a *StatementQueryMinumumPlanLevelAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementQueryMinumumPlanLevelAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")
@@ -83,7 +94,11 @@ func (a *StatementQueryMinumumPlanLevelAdvisor) Check(ctx context.Context, state
 	}
 
 	// Create the rule
-	statementQueryMinumumPlanLevelRule := NewStatementQueryMinumumPlanLevelRule(types.SQLReviewRuleLevel(level), string(rule.Type), payload.String)
+	statementQueryMinumumPlanLevelRule := NewStatementQueryMinumumPlanLevelRule(
+		types.SQLReviewRuleLevel(level),
+		string(rule.Type),
+		payload.String,
+	)
 
 	// Create the generic checker with the rule
 	checker := NewGenericAntlrChecker([]AntlrRule{statementQueryMinumumPlanLevelRule})

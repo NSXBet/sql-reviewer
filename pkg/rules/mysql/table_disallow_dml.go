@@ -6,11 +6,10 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-	"github.com/pkg/errors"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/pkg/errors"
 )
 
 // TableDisallowDMLRule is the ANTLR-based implementation for checking disallow DML on specific tables
@@ -78,7 +77,7 @@ func (r *TableDisallowDMLRule) checkSelectStatementWithInto(ctx *mysql.SelectSta
 	}
 	tableName := ctx.IntoClause().TextStringLiteral().GetText()
 	// Remove quotes if present
-	if len(tableName) > 2 && ((tableName[0] == '"' && tableName[len(tableName)-1] == '"') || 
+	if len(tableName) > 2 && ((tableName[0] == '"' && tableName[len(tableName)-1] == '"') ||
 		(tableName[0] == '\'' && tableName[len(tableName)-1] == '\'')) {
 		tableName = tableName[1 : len(tableName)-1]
 	}
@@ -119,7 +118,12 @@ func (r *TableDisallowDMLRule) checkTableName(tableName string, line int) {
 type TableDisallowDMLAdvisor struct{}
 
 // Check performs the ANTLR-based table disallow DML check
-func (a *TableDisallowDMLAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *TableDisallowDMLAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse MySQL statement")

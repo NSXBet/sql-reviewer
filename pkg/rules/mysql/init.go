@@ -93,15 +93,24 @@ func registerBasicMySQLRules() {
 	registerMySQLRule(&StatementMaxExecutionTimeAdvisor{}, advisor.SchemaRuleStatementMaxExecutionTime)
 	registerMySQLRule(&StatementMaximumJoinTableCountAdvisor{}, advisor.SchemaRuleStatementMaximumJoinTableCount)
 	registerMySQLRule(&StatementMaximumLimitValueAdvisor{}, advisor.SchemaRuleStatementMaximumLimitValue)
-	registerMySQLRule(&StatementMaximumStatementsInTransactionAdvisor{}, advisor.SchemaRuleStatementMaximumStatementsInTransaction)
+	registerMySQLRule(
+		&StatementMaximumStatementsInTransactionAdvisor{},
+		advisor.SchemaRuleStatementMaximumStatementsInTransaction,
+	)
 	registerMySQLRule(&StatementMergeAlterTableAdvisor{}, advisor.SchemaRuleStatementMergeAlterTable)
 	registerMySQLRule(&StatementQueryMinumumPlanLevelAdvisor{}, advisor.SchemaRuleStatementQueryMinumumPlanLevel)
 	registerMySQLRule(&StatementRequireAlgorithmOptionAdvisor{}, advisor.SchemaRuleStatementRequireAlgorithmOption)
 	registerMySQLRule(&StatementRequireLockOptionAdvisor{}, advisor.SchemaRuleStatementRequireLockOption)
 	registerMySQLRule(&StatementSelectFullTableScanAdvisor{}, advisor.SchemaRuleStatementSelectFullTableScan)
 	registerMySQLRule(&StatementSelectNoSelectAllAdvisor{}, advisor.SchemaRuleStatementNoSelectAll)
-	registerMySQLRule(&StatementWhereDisallowFunctionsAndCalculationsAdvisor{}, advisor.SchemaRuleStatementWhereDisallowFunctionsAndCaculations)
-	registerMySQLRule(&StatementWhereMaximumLogicalOperatorCountAdvisor{}, advisor.SchemaRuleStatementWhereMaximumLogicalOperatorCount)
+	registerMySQLRule(
+		&StatementWhereDisallowFunctionsAndCalculationsAdvisor{},
+		advisor.SchemaRuleStatementWhereDisallowFunctionsAndCaculations,
+	)
+	registerMySQLRule(
+		&StatementWhereMaximumLogicalOperatorCountAdvisor{},
+		advisor.SchemaRuleStatementWhereMaximumLogicalOperatorCount,
+	)
 	registerMySQLRule(&StatementWhereNoEqualNullAdvisor{}, advisor.SchemaRuleStatementWhereNoEqualNull)
 	registerMySQLRule(&StatementWhereNoLeadingWildcardLikeAdvisor{}, advisor.SchemaRuleStatementNoLeadingWildcardLike)
 	registerMySQLRule(&StatementWhereRequireSelectAdvisor{}, advisor.SchemaRuleStatementRequireWhereForSelect)

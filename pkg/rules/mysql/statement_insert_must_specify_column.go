@@ -6,7 +6,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/bytebase/mysql-parser"
-
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
@@ -68,7 +67,8 @@ func (r *StatementInsertMustSpecifyColumnRule) checkInsertStatement(ctx *mysql.I
 		return
 	}
 
-	if ctx.InsertFromConstructor() != nil && ctx.InsertFromConstructor().Fields() != nil && len(ctx.InsertFromConstructor().Fields().AllInsertIdentifier()) > 0 {
+	if ctx.InsertFromConstructor() != nil && ctx.InsertFromConstructor().Fields() != nil &&
+		len(ctx.InsertFromConstructor().Fields().AllInsertIdentifier()) > 0 {
 		// has columns.
 		return
 	}
@@ -97,7 +97,12 @@ func (r *StatementInsertMustSpecifyColumnRule) checkSelectItemList(ctx *mysql.Se
 type StatementInsertMustSpecifyColumnAdvisor struct{}
 
 // Check performs the ANTLR-based statement insert must specify column check
-func (a *StatementInsertMustSpecifyColumnAdvisor) Check(ctx context.Context, statements string, rule *types.SQLReviewRule, checkContext advisor.SQLReviewCheckContext) ([]*types.Advice, error) {
+func (a *StatementInsertMustSpecifyColumnAdvisor) Check(
+	ctx context.Context,
+	statements string,
+	rule *types.SQLReviewRule,
+	checkContext advisor.SQLReviewCheckContext,
+) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
 		return ConvertSyntaxErrorToAdvice(err)
