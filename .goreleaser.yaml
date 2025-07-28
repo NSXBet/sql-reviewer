@@ -11,17 +11,12 @@ builds:
       - windows
       - darwin
     goarch:
-      - "386"
       - amd64
-      - arm
       - arm64
-    goarm:
-      - "6"
-      - "7"
     ignore:
       - goos: windows
-        goarch: arm
-      - goos: windows
+        goarch: arm64
+      - goos: linux
         goarch: arm64
     main: ./main.go
     binary: sql-reviewer
@@ -43,7 +38,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
