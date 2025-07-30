@@ -332,7 +332,13 @@ func runSQLReview(
 		// Use the advisor system to run the check
 		advices, err := advisor.Check(ctx, checkContext.DBType, advisor.Type(rule.Type), ruleCheckContext)
 		if err != nil {
-			slog.Warn("Rule check failed", "rule_type", rule.Type, "error", err)
+			// Extract concise error message without stack trace
+			errMsg := err.Error()
+			if strings.Contains(errMsg, "unknown advisor") {
+				slog.Warn("Rule not implemented", "rule_type", rule.Type)
+			} else {
+				slog.Warn("Rule check failed", "rule_type", rule.Type, "error", errMsg)
+			}
 			continue
 		}
 
