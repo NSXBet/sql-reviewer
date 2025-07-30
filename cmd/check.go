@@ -11,7 +11,6 @@ import (
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/config"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/logger"
 	_ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 	"github.com/pkg/errors"
@@ -52,15 +51,6 @@ func init() {
 }
 
 func runCheck(cmd *cobra.Command, args []string) error {
-	// Initialize logger
-	logLevel := slog.LevelInfo
-	if viper.GetBool("debug") {
-		logLevel = slog.LevelDebug
-	} else if viper.GetBool("verbose") {
-		logLevel = slog.LevelInfo
-	}
-	_ = logger.NewWithLevel(logLevel)
-
 	slog.Debug("Starting check command", "args", args)
 
 	// Parse engine

@@ -1,14 +1,28 @@
 package cmd
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
+	"github.com/nsxbet/sql-reviewer-cli/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+
+// initializeLogger sets up the global slog logger based on viper configuration
+func initializeLogger() {
+	logLevel := slog.LevelInfo
+	if viper.GetBool("debug") {
+		logLevel = slog.LevelDebug
+	} else if viper.GetBool("verbose") {
+		logLevel = slog.LevelInfo
+	}
+	
+	customLogger := logger.NewWithLevel(logLevel)
+	slog.SetDefault(customLogger.GetSlogLogger())
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,6 +56,8 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	// Initialize logger early based on flags
+	initializeLogger()
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -62,10 +78,14 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		// Don't fail if config file is not found or has issues
-		// Just silently ignore the error for now
-		fmt.Fprintf(os.Stderr, "DEBUG: Config file error (ignoring): %v\n", err)
-		fmt.Fprintf(os.Stderr, "DEBUG: Config file used: %v\n", viper.ConfigFileUsed())
+		// Only show debug info if debug flag is enabled
+		if viper.GetBool("debug") {
+			slog.Debug("Config file error (ignoring)", "error", err)
+			slog.Debug("Config file used", "file", viper.ConfigFileUsed())
+		}
 	} else {
-		fmt.Fprintln(os.Stderr, "DEBUG: Using config file:", viper.ConfigFileUsed())
+		if viper.GetBool("debug") {
+			slog.Debug("Using config file", "file", viper.ConfigFileUsed())
+		}
 	}
 }

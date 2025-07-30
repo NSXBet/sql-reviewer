@@ -58,6 +58,11 @@ func (l *Logger) Debug(msg string, args ...any) {
 	l.logger.Debug(msg, args...)
 }
 
+// GetSlogLogger returns the underlying slog logger
+func (l *Logger) GetSlogLogger() *slog.Logger {
+	return l.logger
+}
+
 // Error creates a structured error field
 func Error(err error) slog.Attr {
 	return slog.Any("error", err)

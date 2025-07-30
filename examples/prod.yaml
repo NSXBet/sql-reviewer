@@ -1,5 +1,8 @@
 id: sql-review-prod
 rules:
+  - type: not.implemented.rule
+    level: ERROR
+    engine: MYSQL
   - type: engine.mysql.use-innodb
     level: ERROR
     engine: MYSQL
