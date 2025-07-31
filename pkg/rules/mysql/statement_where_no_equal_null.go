@@ -91,7 +91,7 @@ func (a *StatementWhereNoEqualNullAdvisor) Check(
 ) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse MySQL statement: %w", err)
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(rule.Level)

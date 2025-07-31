@@ -174,7 +174,7 @@ func (a *NamingColumnAdvisor) Check(
 ) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse MySQL statement")
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(rule.Level)

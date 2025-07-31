@@ -11,7 +11,6 @@ import (
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
-	"github.com/pkg/errors"
 )
 
 // ColumnDisallowChangeTypeRule is the ANTLR-based implementation for checking disallow changing column type
@@ -164,7 +163,7 @@ func (a *ColumnDisallowChangeTypeAdvisor) Check(
 ) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse MySQL statement")
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(rule.Level)
@@ -185,7 +184,7 @@ func (a *ColumnDisallowChangeTypeAdvisor) Check(
 		}
 		catalogFinder = catalog.NewFinder(checkContext.DBSchema, finderCtx)
 	} else {
-		return nil, errors.New("no catalog or database schema provided in context")
+		return nil, fmt.Errorf("no catalog or database schema provided in context")
 	}
 
 	// Create the rule with the catalog from context

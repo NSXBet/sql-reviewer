@@ -9,7 +9,6 @@ import (
 	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
-	"github.com/pkg/errors"
 )
 
 // ColumnCommentRule is the ANTLR-based implementation for checking column comment requirements
@@ -179,7 +178,7 @@ func (a *ColumnCommentAdvisor) Check(
 ) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse MySQL statement")
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(rule.Level)

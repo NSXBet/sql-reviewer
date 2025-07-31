@@ -11,7 +11,6 @@ import (
 	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
-	"github.com/pkg/errors"
 )
 
 type columnName struct {
@@ -239,7 +238,7 @@ func (a *ColumnNoNullAdvisor) Check(
 ) ([]*types.Advice, error) {
 	root, err := mysqlparser.ParseMySQL(statements)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse MySQL statement")
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(rule.Level)
