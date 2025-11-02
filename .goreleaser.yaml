@@ -21,7 +21,7 @@ builds:
     main: ./main.go
     binary: sql-reviewer
     ldflags:
-      - -s -w -X github.com/nsxbet/sql-reviewer-cli/cmd.version={{.Version}} -X github.com/nsxbet/sql-reviewer-cli/cmd.commit={{.Commit}} -X github.com/nsxbet/sql-reviewer-cli/cmd.date={{.Date}}
+      - -s -w -X github.com/nsxbet/sql-reviewer/cmd.version={{.Version}} -X github.com/nsxbet/sql-reviewer/cmd.commit={{.Commit}} -X github.com/nsxbet/sql-reviewer/cmd.date={{.Date}}
 archives:
   - formats: [tar.gz]
     name_template: >-

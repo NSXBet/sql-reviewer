@@ -16,7 +16,7 @@ SQL Reviewer provides a comprehensive API for reviewing SQL statements against c
 ## Installation
 
 ```bash
-go get github.com/nsxbet/sql-reviewer-cli
+go get github.com/nsxbet/sql-reviewer
 ```
 
 ## Quick Start
@@ -29,9 +29,9 @@ import (
     "fmt"
     "log"
 
-    "github.com/nsxbet/sql-reviewer-cli/pkg/reviewer"
-    "github.com/nsxbet/sql-reviewer-cli/pkg/types"
-    _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"  // Register MySQL rules
+    "github.com/nsxbet/sql-reviewer/pkg/reviewer"
+    "github.com/nsxbet/sql-reviewer/pkg/types"
+    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"  // Register MySQL rules
 )
 
 func main() {
@@ -196,8 +196,8 @@ Rules are automatically registered via `init()` functions. Import rule packages 
 
 ```go
 import (
-    _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
-    // _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/postgres"  // When available
+    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
+    // _ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"  // When available
 )
 ```
 
@@ -312,12 +312,12 @@ func main() {
 
 ## API Reference
 
-Full API documentation is available at [pkg.go.dev](https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg):
+Full API documentation is available at [pkg.go.dev](https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg):
 
-- [`pkg/reviewer`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg/reviewer) - High-level API
-- [`pkg/advisor`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg/advisor) - Low-level rule engine
-- [`pkg/types`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg/types) - Type definitions
-- [`pkg/config`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg/config) - Configuration management
+- [`pkg/reviewer`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg/reviewer) - High-level API
+- [`pkg/advisor`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg/advisor) - Low-level rule engine
+- [`pkg/types`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg/types) - Type definitions
+- [`pkg/config`](https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg/config) - Configuration management
 
 ## Migration from CLI
 
@@ -337,7 +337,7 @@ result, err := r.Review(ctx, string(sqlContent))
 
 ## Support
 
-- **Issues**: https://github.com/nsxbet/sql-reviewer-cli/issues
+- **Issues**: https://github.com/nsxbet/sql-reviewer/issues
 - **Documentation**: [Main README](../README.md)
 - **Examples**: [`examples/library-usage/`](../examples/library-usage/)
 

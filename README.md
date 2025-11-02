@@ -18,8 +18,8 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 
 ```bash
 # Clone the repository
-git clone https://github.com/NSXBet/sql-reviewer-cli.git
-cd sql-reviewer-cli
+git clone https://github.com/NSXBet/sql-reviewer.git
+cd sql-reviewer
 
 # Build the CLI
 go build -o sql-reviewer main.go
@@ -28,7 +28,7 @@ go build -o sql-reviewer main.go
 ### As a Go Library
 
 ```bash
-go get github.com/nsxbet/sql-reviewer-cli
+go get github.com/nsxbet/sql-reviewer
 ```
 
 ## Using as a Library
@@ -45,9 +45,9 @@ import (
     "fmt"
     "log"
 
-    "github.com/nsxbet/sql-reviewer-cli/pkg/reviewer"
-    "github.com/nsxbet/sql-reviewer-cli/pkg/types"
-    _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+    "github.com/nsxbet/sql-reviewer/pkg/reviewer"
+    "github.com/nsxbet/sql-reviewer/pkg/types"
+    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 )
 
 func main() {
