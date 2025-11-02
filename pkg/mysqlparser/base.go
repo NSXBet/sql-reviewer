@@ -2,7 +2,7 @@ package mysqlparser
 
 import (
 	"github.com/antlr4-go/antlr/v4"
-	parser "github.com/bytebase/mysql-parser"
+	parser "github.com/gedhean/mysql-parser"
 )
 
 // isEmptyTokenSequence checks if a token sequence is empty (only comments and semicolons)

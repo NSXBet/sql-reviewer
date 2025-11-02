@@ -1,7 +1,7 @@
 package mysqlparser
 
 import (
-	mysql "github.com/bytebase/mysql-parser"
+	mysql "github.com/gedhean/mysql-parser"
 )
 
 // StatementTypeChecker checks the type of SQL statements (DDL vs DML)

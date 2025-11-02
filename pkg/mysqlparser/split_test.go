@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/antlr4-go/antlr/v4"
-	parser "github.com/bytebase/mysql-parser"
+	parser "github.com/gedhean/mysql-parser"
 	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
 	"github.com/stretchr/testify/require"
 )

@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
-	github.com/bytebase/mysql-parser v0.0.0-20241224071214-cb9fd84811dd
+	github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
