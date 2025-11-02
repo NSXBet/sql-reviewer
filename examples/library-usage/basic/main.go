@@ -13,9 +13,6 @@ import (
 
 	"github.com/nsxbet/sql-reviewer/pkg/reviewer"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
-
-	// Import rule packages to register them
-	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 )
 
 func main() {

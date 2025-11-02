@@ -31,7 +31,6 @@ import (
 
     "github.com/nsxbet/sql-reviewer/pkg/reviewer"
     "github.com/nsxbet/sql-reviewer/pkg/types"
-    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"  // Register MySQL rules
 )
 
 func main() {
@@ -192,18 +191,18 @@ r := reviewer.New(types.Engine_MYSQL).WithConfigObject(cfg)
 
 ## Rule Registration
 
-Rules are automatically registered via `init()` functions. Import rule packages with blank imports:
+Rules are automatically registered when you import the `reviewer` package. No manual imports needed!
+
+The `reviewer` package automatically imports and registers all available rule packages:
+- MySQL rules (92 comprehensive rules)
+- PostgreSQL rules (when available)
+
+Simply create a reviewer and start using it:
 
 ```go
-import (
-    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
-    // _ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"  // When available
-)
+r := reviewer.New(types.Engine_MYSQL)
+// All MySQL rules are automatically available
 ```
-
-### Available Rule Packages
-
-- `pkg/rules/mysql` - 92 MySQL rules covering all aspects of SQL quality
 
 ## Advanced Usage
 

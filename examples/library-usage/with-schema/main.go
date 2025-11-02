@@ -13,8 +13,6 @@ import (
 
 	"github.com/nsxbet/sql-reviewer/pkg/reviewer"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
-
-	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 )
 
 func main() {
