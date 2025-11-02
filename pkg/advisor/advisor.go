@@ -1,3 +1,42 @@
+// Package advisor provides SQL review and validation functionality.
+//
+// The advisor package implements a flexible rule-based system for checking SQL statements
+// against configurable quality and style guidelines. It supports multiple database engines
+// (MySQL, PostgreSQL, etc.) and provides a comprehensive set of pre-defined rules covering:
+//
+//   - Naming conventions (tables, columns, indexes)
+//   - Schema design (primary keys, foreign keys, data types)
+//   - Query optimization (indexes, joins, WHERE clauses)
+//   - Security and safety (injection prevention, data protection)
+//   - Best practices (comments, charset/collation settings)
+//
+// # Basic Usage
+//
+// To use the advisor, first load a configuration and then call Check() for each rule:
+//
+//	cfg, _ := config.LoadFromFile("rules.yaml")
+//	rules := cfg.GetRulesForEngine(types.Engine_MYSQL)
+//
+//	ctx := context.Background()
+//	checkCtx := advisor.Context{
+//	    DBType:     types.Engine_MYSQL,
+//	    Statements: "CREATE TABLE users (id INT);",
+//	}
+//
+//	for _, rule := range rules {
+//	    checkCtx.Rule = rule
+//	    advices, err := advisor.Check(ctx, types.Engine_MYSQL, advisor.Type(rule.Type), checkCtx)
+//	    // Process advices...
+//	}
+//
+// # Rule Registration
+//
+// Rules are automatically registered via init() functions in engine-specific packages.
+// Import the rule packages with blank imports to register them:
+//
+//	import _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+//
+// Custom rules can be registered using the Register() function.
 package advisor
 
 import (
@@ -12,13 +51,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-// SQLReviewRuleType is the type of schema rule.
+// SQLReviewRuleType is the type identifier for SQL review rules.
+// Each rule type corresponds to a specific validation check.
 type SQLReviewRuleType string
 
+// Engine rules - Database engine and storage configuration
 const (
 	// SchemaRuleMySQLEngine require InnoDB as the storage engine.
 	SchemaRuleMySQLEngine SQLReviewRuleType = "engine.mysql.use-innodb"
+)
 
+// Naming rules - Enforce naming conventions for database objects
+const (
 	// SchemaRuleFullyQualifiedObjectName enforces using fully qualified object name.
 	SchemaRuleFullyQualifiedObjectName SQLReviewRuleType = "naming.fully-qualified"
 	// SchemaRuleTableNaming enforce the table name format.
@@ -41,7 +85,10 @@ const (
 	SchemaRuleIdentifierNoKeyword SQLReviewRuleType = "naming.identifier.no-keyword"
 	// SchemaRuleIdentifierCase enforce the identifier case.
 	SchemaRuleIdentifierCase SQLReviewRuleType = "naming.identifier.case"
+)
 
+// Statement rules - Validate SQL statement quality and safety
+const (
 	// SchemaRuleStatementNoSelectAll disallow 'SELECT *'.
 	SchemaRuleStatementNoSelectAll SQLReviewRuleType = "statement.select.no-select-all"
 	// SchemaRuleStatementRequireWhereForSelect require 'WHERE' clause for SELECT statements.
@@ -128,6 +175,10 @@ const (
 	SchemaRuleStatementRequireLockOption = "statement.require-lock-option"
 	// SchemaRuleStatementObjectOwnerCheck checks the object owner for the statement.
 	SchemaRuleStatementObjectOwnerCheck = "statement.object-owner-check"
+)
+
+// Table rules - Enforce table-level constraints and best practices
+const (
 	// SchemaRuleTableRequirePK require the table to have a primary key.
 	SchemaRuleTableRequirePK SQLReviewRuleType = "table.require-pk"
 	// SchemaRuleTableNoFK require the table disallow the foreign key.
@@ -156,6 +207,10 @@ const (
 	SchemaRuleTableRequireCharset SQLReviewRuleType = "table.require-charset"
 	// SchemaRuleTableRequireCollation enforce the table collation.
 	SchemaRuleTableRequireCollation SQLReviewRuleType = "table.require-collation"
+)
+
+// Column rules - Validate column definitions and constraints
+const (
 	// SchemaRuleRequiredColumn enforce the required columns in each table.
 	SchemaRuleRequiredColumn SQLReviewRuleType = "column.required"
 	// SchemaRuleColumnNotNull enforce the columns cannot have NULL value.
@@ -200,13 +255,19 @@ const (
 	SchemaRuleColumnRequireCharset SQLReviewRuleType = "column.require-charset"
 	// SchemaRuleColumnRequireCollation enforce the column require collation.
 	SchemaRuleColumnRequireCollation SQLReviewRuleType = "column.require-collation"
+)
 
+// Schema rules - Database schema-level validation
+const (
 	// SchemaRuleSchemaBackwardCompatibility enforce the MySQL and TiDB support check whether the schema change is backward compatible.
 	SchemaRuleSchemaBackwardCompatibility SQLReviewRuleType = "schema.backward-compatibility"
 
 	// SchemaRuleDropEmptyDatabase enforce the MySQL and TiDB support check if the database is empty before users drop it.
 	SchemaRuleDropEmptyDatabase SQLReviewRuleType = "database.drop-empty-database"
+)
 
+// Index rules - Index design and optimization
+const (
 	// SchemaRuleIndexNoDuplicateColumn require the index no duplicate column.
 	SchemaRuleIndexNoDuplicateColumn SQLReviewRuleType = "index.no-duplicate-column"
 	// SchemaRuleIndexKeyNumberLimit enforce the index key number limit.
@@ -225,7 +286,10 @@ const (
 	SchemaRuleIndexTypeAllowList SQLReviewRuleType = "index.type-allow-list"
 	// SchemaRuleIndexNotRedundant prohibits createing redundant indices.
 	SchemaRuleIndexNotRedundant SQLReviewRuleType = "index.not-redundant"
+)
 
+// System rules - System-level configurations and restrictions
+const (
 	// SchemaRuleCharsetAllowlist enforce the charset allowlist.
 	SchemaRuleCharsetAllowlist SQLReviewRuleType = "system.charset.allowlist"
 	// SchemaRuleCollationAllowlist enforce the collation allowlist.
@@ -242,10 +306,16 @@ const (
 	SchemaRuleFunctionDisallowCreate SQLReviewRuleType = "system.function.disallow-create"
 	// SchemaRuleFunctionDisallowList enforce the disallowed function list.
 	SchemaRuleFunctionDisallowList SQLReviewRuleType = "system.function.disallowed-list"
+)
 
+// Advice rules - Suggestions and best practices
+const (
 	// SchemaRuleOnlineMigration advises using online migration to migrate large tables.
 	SchemaRuleOnlineMigration SQLReviewRuleType = "advice.online-migration"
+)
 
+// Template tokens for dynamic rule messages
+const (
 	// TableNameTemplateToken is the token for table name.
 	TableNameTemplateToken = "{{table}}"
 	// ColumnListTemplateToken is the token for column name list.
@@ -272,18 +342,26 @@ const (
 	SyntaxErrorTitle string = "Syntax error"
 )
 
-// Type is the type of advisor.
+// Type is the type of advisor, corresponding to a SQLReviewRuleType.
+// It is used for advisor registration and lookup.
 type Type string
 
 // SQLReviewCheckContext is an alias for Context for backward compatibility.
+// Deprecated: Use Context instead.
 type SQLReviewCheckContext = Context
 
-// catalogInterface is the interface for catalog.
+// catalogInterface is the interface for catalog access.
+// It provides access to database schema metadata through a Finder.
 type catalogInterface interface {
 	GetFinder() *catalog.Finder
 }
 
-// NewStatusBySQLReviewRuleLevel returns status by SQLReviewRuleLevel.
+// NewStatusBySQLReviewRuleLevel converts a SQLReviewRuleLevel to an Advice_Status.
+// It returns an error if the rule level is not recognized.
+//
+// Supported levels:
+//   - SQLReviewRuleLevel_ERROR   -> Advice_ERROR
+//   - SQLReviewRuleLevel_WARNING -> Advice_WARNING
 func NewStatusBySQLReviewRuleLevel(level types.SQLReviewRuleLevel) (types.Advice_Status, error) {
 	switch level {
 	case types.SQLReviewRuleLevel_ERROR:
@@ -294,7 +372,32 @@ func NewStatusBySQLReviewRuleLevel(level types.SQLReviewRuleLevel) (types.Advice
 	return types.Advice_STATUS_UNSPECIFIED, errors.Errorf("unexpected rule level type: %v", level)
 }
 
-// Context is the unified context for SQL review check and advisor.
+// Context contains all the information needed to perform SQL review checks.
+// It provides database metadata, connection details, and rule-specific configuration.
+//
+// # Basic Usage
+//
+//	ctx := advisor.Context{
+//	    DBType:     types.Engine_MYSQL,
+//	    Statements: "CREATE TABLE users (id INT);",
+//	    Rule:       &types.SQLReviewRule{...},
+//	}
+//
+// # Schema Context
+//
+// For rules that need schema information (e.g., checking column existence):
+//
+//	ctx.DBSchema = &types.DatabaseSchemaMetadata{
+//	    Name: "mydb",
+//	    Schemas: []*types.SchemaMetadata{...},
+//	}
+//
+// # Database Connection
+//
+// For rules that need to execute queries (e.g., dry-run checks):
+//
+//	ctx.Driver = db // *sql.DB connection
+//	ctx.Catalog = catalogWrapper
 type Context struct {
 	// Common fields
 	ChangeType               types.PlanCheckRunConfig_ChangeDatabaseType
@@ -325,8 +428,34 @@ type Context struct {
 	NoAppendBuiltin bool
 }
 
-// Advisor is the interface for advisor.
+// Advisor is the interface that all SQL review rules must implement.
+// Each advisor checks SQL statements against a specific rule and returns a list of findings.
+//
+// Advisors are registered using the Register function and are typically organized
+// by database engine (MySQL, PostgreSQL, etc.).
+//
+// # Implementation Example
+//
+//	type MyAdvisor struct{}
+//
+//	func (a *MyAdvisor) Check(ctx context.Context, checkCtx advisor.Context) ([]*types.Advice, error) {
+//	    // Parse and validate SQL
+//	    if violatesRule {
+//	        return []*types.Advice{{
+//	            Status:  types.Advice_ERROR,
+//	            Title:   "Rule violation",
+//	            Content: "Description of the issue",
+//	        }}, nil
+//	    }
+//	    return nil, nil
+//	}
 type Advisor interface {
+	// Check validates SQL statements against a specific rule.
+	// It returns a list of advice (findings) or an error if the check cannot be performed.
+	//
+	// The context.Context parameter supports cancellation for long-running checks.
+	// The Context parameter provides all necessary information including the SQL statements,
+	// database schema, and rule configuration.
 	Check(ctx context.Context, checkCtx Context) ([]*types.Advice, error)
 }
 
@@ -335,9 +464,18 @@ var (
 	advisors  = make(map[types.Engine]map[Type]Advisor)
 )
 
-// Register makes an advisor available by the provided id.
-// If Register is called twice with the same name or if advisor is nil,
-// it panics.
+// Register makes an advisor available for a specific database engine and rule type.
+// It is typically called from init() functions in rule packages.
+//
+// This function panics if:
+//   - The advisor is nil
+//   - An advisor is registered twice for the same engine and type
+//
+// # Example
+//
+//	func init() {
+//	    advisor.Register(types.Engine_MYSQL, "naming.table", &TableNamingAdvisor{})
+//	}
 func Register(dbType types.Engine, advType Type, f Advisor) {
 	advisorMu.Lock()
 	defer advisorMu.Unlock()
@@ -357,7 +495,44 @@ func Register(dbType types.Engine, advType Type, f Advisor) {
 	}
 }
 
-// Check runs the advisor and returns the advices.
+// Check runs a specific SQL review rule and returns the validation results.
+// This is the main entry point for performing SQL validation.
+//
+// # Parameters
+//
+//   - ctx: Context for cancellation and timeout control
+//   - dbType: Database engine (e.g., types.Engine_MYSQL, types.Engine_POSTGRES)
+//   - advType: The specific rule to check (e.g., "naming.table", "column.no-null")
+//   - checkCtx: Context containing SQL statements, schema, and rule configuration
+//
+// # Returns
+//
+//   - adviceList: List of findings/violations, empty if no issues found
+//   - err: Error if the check cannot be performed (e.g., unknown rule, parse error)
+//
+// # Example
+//
+//	advices, err := advisor.Check(
+//	    context.Background(),
+//	    types.Engine_MYSQL,
+//	    "naming.table",
+//	    advisor.Context{
+//	        DBType:     types.Engine_MYSQL,
+//	        Statements: "CREATE TABLE users (id INT);",
+//	        Rule:       &types.SQLReviewRule{...},
+//	    },
+//	)
+//	if err != nil {
+//	    // Handle error
+//	}
+//	for _, advice := range advices {
+//	    fmt.Printf("%s: %s\n", advice.Status, advice.Content)
+//	}
+//
+// # Error Handling
+//
+// Check includes panic recovery to handle unexpected errors in rule implementations.
+// Panics are converted to errors and logged.
 func Check(ctx context.Context, dbType types.Engine, advType Type, checkCtx Context) (adviceList []*types.Advice, err error) {
 	defer func() {
 		if panicErr := recover(); panicErr != nil {

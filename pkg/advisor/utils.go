@@ -65,7 +65,9 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	columnNames, err := rows.Columns()
 	if err != nil {

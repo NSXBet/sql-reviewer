@@ -719,7 +719,9 @@ func runRuleTest(t *testing.T, ruleName string, mapping RuleMapping, record bool
 		return
 	}
 	require.NoError(t, err)
-	defer yamlFile.Close()
+	defer func() {
+		_ = yamlFile.Close()
+	}()
 
 	byteValue, err := io.ReadAll(yamlFile)
 	require.NoError(t, err)
@@ -922,7 +924,9 @@ func TestMySQLColumnDisallowChangeTypeRule(t *testing.T) {
 	testFile := filepath.Join("testdata", "column_disallow_change_type.yaml")
 	yamlFile, err := os.Open(testFile)
 	require.NoError(t, err)
-	defer yamlFile.Close()
+	defer func() {
+		_ = yamlFile.Close()
+	}()
 
 	byteValue, err := io.ReadAll(yamlFile)
 	require.NoError(t, err)
@@ -1124,7 +1128,9 @@ func TestMySQLIndexTotalNumberLimitRule(t *testing.T) {
 	testFile := filepath.Join("testdata", "index_total_number_limit.yaml")
 	yamlFile, err := os.Open(testFile)
 	require.NoError(t, err)
-	defer yamlFile.Close()
+	defer func() {
+		_ = yamlFile.Close()
+	}()
 
 	byteValue, err := io.ReadAll(yamlFile)
 	require.NoError(t, err)

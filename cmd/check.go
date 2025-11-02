@@ -126,9 +126,10 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	hasErrors := false
 	hasWarnings := false
 	for _, advice := range advices {
-		if advice.Status == types.Advice_ERROR {
+		switch advice.Status {
+		case types.Advice_ERROR:
 			hasErrors = true
-		} else if advice.Status == types.Advice_WARNING {
+		case types.Advice_WARNING:
 			hasWarnings = true
 		}
 	}
@@ -250,7 +251,11 @@ func outputJSON(advices []*types.Advice) error {
 
 func outputYAML(advices []*types.Advice) error {
 	encoder := yaml.NewEncoder(os.Stdout)
-	defer encoder.Close()
+	defer func() {
+		if err := encoder.Close(); err != nil {
+			slog.Warn("Failed to close YAML encoder", "error", err)
+		}
+	}()
 	return encoder.Encode(map[string]interface{}{
 		"advices": advices,
 	})
@@ -314,6 +319,13 @@ func runSQLReview(
 
 	// Process each rule and check against the statements
 	for _, rule := range reviewRules {
+		// Check for context cancellation
+		select {
+		case <-ctx.Done():
+			return allAdvices, ctx.Err()
+		default:
+		}
+
 		// Skip rules for different engines
 		if rule.Engine != types.Engine_ENGINE_UNSPECIFIED && rule.Engine != checkContext.DBType {
 			continue

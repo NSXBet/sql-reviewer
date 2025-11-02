@@ -14,6 +14,8 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 
 ## Installation
 
+### As a CLI Tool
+
 ```bash
 # Clone the repository
 git clone https://github.com/NSXBet/sql-reviewer-cli.git
@@ -23,7 +25,79 @@ cd sql-reviewer-cli
 go build -o sql-reviewer main.go
 ```
 
-## Quick Start
+### As a Go Library
+
+```bash
+go get github.com/nsxbet/sql-reviewer-cli
+```
+
+## Using as a Library
+
+SQL Reviewer can be used as a Go library in your applications. This is the recommended approach for integrating SQL validation into your codebase.
+
+### Quick Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/nsxbet/sql-reviewer-cli/pkg/reviewer"
+    "github.com/nsxbet/sql-reviewer-cli/pkg/types"
+    _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+)
+
+func main() {
+    // Create a reviewer for MySQL
+    r := reviewer.New(types.Engine_MYSQL)
+
+    // Review SQL statements
+    sql := "CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(100));"
+    result, err := r.Review(context.Background(), sql)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Check results
+    fmt.Printf("Found %d issues\n", result.Summary.Total)
+    if result.HasErrors() {
+        for _, advice := range result.FilterByStatus(types.Advice_ERROR) {
+            fmt.Printf("ERROR: %s\n", advice.Content)
+        }
+    }
+}
+```
+
+### Library Features
+
+- **High-level API**: Simple `reviewer.New()` and `Review()` methods
+- **Low-level API**: Direct access to `advisor.Check()` for advanced use cases
+- **Context support**: Full support for cancellation and timeouts
+- **Custom configuration**: Load rules from YAML/JSON or configure programmatically
+- **Schema-aware validation**: Validate against existing database schema
+- **Result filtering**: Easy filtering by severity, error code, etc.
+
+### Complete Documentation
+
+See **[pkg/README.md](pkg/README.md)** for complete library documentation including:
+- API reference and examples
+- Configuration guide
+- Schema-aware validation
+- Custom rule implementation
+- CI/CD integration patterns
+
+### Library Examples
+
+Complete working examples are available in [`examples/library-usage/`](examples/library-usage/):
+- **[basic/](examples/library-usage/basic/)** - Simple usage with defaults
+- **[with-config/](examples/library-usage/with-config/)** - Custom configuration
+- **[with-schema/](examples/library-usage/with-schema/)** - Schema-aware validation
+- **[filtering/](examples/library-usage/filtering/)** - Advanced result processing
+
+## Quick Start (CLI)
 
 ```bash
 # Check a SQL file with default MySQL rules

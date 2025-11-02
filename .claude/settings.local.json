@@ -4,7 +4,9 @@
       "Bash(make lint:*)",
       "Bash(make:*)",
       "Bash(go run:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(go mod tidy:*)",
+      "Bash(go test:*)"
     ],
     "deny": []
   }

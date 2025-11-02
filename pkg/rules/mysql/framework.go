@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 
@@ -136,8 +136,11 @@ func (g *GenericChecker) EnterEveryRule(ctx antlr.ParserRuleContext) {
 	nodeType := g.getNodeType(ctx)
 	for _, rule := range g.rules {
 		if err := rule.OnEnter(ctx, nodeType); err != nil {
-			// Log error if needed
-			fmt.Printf("Rule %s error on enter %s: %v\n", rule.Name(), nodeType, err)
+			// Log error using slog for library-friendly logging
+			slog.Debug("Rule error on enter",
+				"rule", rule.Name(),
+				"nodeType", nodeType,
+				"error", err)
 		}
 	}
 }
@@ -148,8 +151,11 @@ func (g *GenericChecker) ExitEveryRule(ctx antlr.ParserRuleContext) {
 	nodeType := g.getNodeType(ctx)
 	for _, rule := range g.rules {
 		if err := rule.OnExit(ctx, nodeType); err != nil {
-			// Log error if needed
-			fmt.Printf("Rule %s error on exit %s: %v\n", rule.Name(), nodeType, err)
+			// Log error using slog for library-friendly logging
+			slog.Debug("Rule error on exit",
+				"rule", rule.Name(),
+				"nodeType", nodeType,
+				"error", err)
 		}
 	}
 }
