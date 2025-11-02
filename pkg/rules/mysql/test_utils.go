@@ -3,9 +3,9 @@ package mysql
 import (
 	"encoding/json"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // MockTableName is the mock table name for tests

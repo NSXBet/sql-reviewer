@@ -34,7 +34,7 @@
 // Rules are automatically registered via init() functions in engine-specific packages.
 // Import the rule packages with blank imports to register them:
 //
-//	import _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+//	import _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 //
 // Custom rules can be registered using the Register() function.
 package advisor
@@ -46,8 +46,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"github.com/pkg/errors"
 )
 

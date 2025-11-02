@@ -3,8 +3,8 @@ package rules
 import (
 	"context"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // Rule defines the interface for SQL review rules

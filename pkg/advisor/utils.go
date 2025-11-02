@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"github.com/pkg/errors"
 )
 

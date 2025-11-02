@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // SyntaxError is a syntax error.

@@ -6,7 +6,8 @@
       "Bash(go run:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(go mod tidy:*)",
-      "Bash(go test:*)"
+      "Bash(go test:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

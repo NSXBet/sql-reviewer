@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 func newDatabaseState(d *types.DatabaseSchemaMetadata, context *FinderContext) *DatabaseState {

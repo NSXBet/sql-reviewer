@@ -3,8 +3,8 @@ package mysql
 import (
 	"context"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // init registers MySQL rules with the advisor system

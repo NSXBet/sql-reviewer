@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/nsxbet/sql-reviewer-cli/cmd"
+	"github.com/nsxbet/sql-reviewer/cmd"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/nsxbet/sql-reviewer-cli
+module github.com/nsxbet/sql-reviewer
 
 go 1.24
 

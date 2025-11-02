@@ -21,9 +21,9 @@
 // For most use cases, start with the reviewer package:
 //
 //	import (
-//	    "github.com/nsxbet/sql-reviewer-cli/pkg/reviewer"
-//	    "github.com/nsxbet/sql-reviewer-cli/pkg/types"
-//	    _ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+//	    "github.com/nsxbet/sql-reviewer/pkg/reviewer"
+//	    "github.com/nsxbet/sql-reviewer/pkg/types"
+//	    _ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 //	)
 //
 //	func main() {
@@ -162,7 +162,7 @@
 // # Documentation
 //
 // Complete documentation and examples:
-//   - Package documentation: https://pkg.go.dev/github.com/nsxbet/sql-reviewer-cli/pkg
+//   - Package documentation: https://pkg.go.dev/github.com/nsxbet/sql-reviewer/pkg
 //   - Library guide: pkg/README.md
 //   - Examples: examples/library-usage/
 //   - Main README: README.md

@@ -3,7 +3,7 @@ package catalog
 import (
 	"fmt"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // WalkThroughErrorType is the type of WalkThroughError.

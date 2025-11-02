@@ -42,9 +42,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/config"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/config"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // Reviewer provides a high-level API for SQL review operations.

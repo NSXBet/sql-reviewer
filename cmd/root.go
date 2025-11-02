@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/logger"
+	"github.com/nsxbet/sql-reviewer/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

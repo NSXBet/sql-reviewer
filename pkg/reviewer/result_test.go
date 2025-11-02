@@ -3,7 +3,7 @@ package reviewer
 import (
 	"testing"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 func TestReviewResult_HasErrors(t *testing.T) {

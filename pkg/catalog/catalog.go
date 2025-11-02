@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // FinderContext is the context for finder.

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"gopkg.in/yaml.v3"
 )
 

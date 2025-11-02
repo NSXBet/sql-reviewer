@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/mysqlparser"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 type StatementDisallowMixInDMLAdvisor struct{}

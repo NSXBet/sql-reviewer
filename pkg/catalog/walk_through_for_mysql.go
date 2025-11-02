@@ -6,7 +6,7 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/gedhean/mysql-parser"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/mysqlparser"
+	"github.com/nsxbet/sql-reviewer/pkg/mysqlparser"
 )
 
 type mysqlParseResult struct {

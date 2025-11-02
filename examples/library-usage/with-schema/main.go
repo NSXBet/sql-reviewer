@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/reviewer"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/reviewer"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 
-	_ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 )
 
 func main() {

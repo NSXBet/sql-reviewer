@@ -3,8 +3,8 @@ package reviewer
 import (
 	"database/sql"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // ReviewOption is a functional option for customizing review behavior.

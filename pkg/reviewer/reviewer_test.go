@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/config"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/config"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 
-	_ "github.com/nsxbet/sql-reviewer-cli/pkg/rules/mysql"
+	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 )
 
 func TestNew(t *testing.T) {

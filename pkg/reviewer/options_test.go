@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/nsxbet/sql-reviewer-cli/pkg/catalog"
-	"github.com/nsxbet/sql-reviewer-cli/pkg/types"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // mockCatalog implements catalogInterface for testing
