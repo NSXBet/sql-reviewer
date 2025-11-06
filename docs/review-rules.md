@@ -31,6 +31,9 @@ SQL Reviewer provides customizable SQL lint rules to check common issues in data
   * [Disallow add column with default](./review-rules.md#statement.disallow-add-column-with-default)
   * [Add CHECK constraints with NOT VALID option](./review-rules.md#statement.add-check-not-valid)
   * [Disallow add NOT NULL constraints to an existing column](./review-rules.md#statement.disallow-add-not-null)
+  * [Disallow ON DELETE CASCADE](./review-rules.md#statement.disallow-on-del-cascade)
+  * [Disallow CASCADE when removing tables](./review-rules.md#statement.disallow-rm-tbl-cascade)
+  * [Require explicit schema specification](./review-rules.md#statement.create-specify-schema)
 * Table
   * [Limit DDL operations on tables with large data volumes](./review-rules.md#table.limit-size)
   * [Require primary key](./review-rules.md#table.require-pk)
@@ -501,9 +504,8 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 <div id="statement.merge-alter-table" />
 
@@ -661,6 +663,62 @@ It can cause downtime because it blocks reads and writes. You can add CHECK(colu
 #### How the rule works
 
 SQL Reviewer checks all `ALTER TABLE ADD CONSTRAINT` statements.
+
+#### Support database engine
+
+* PostgreSQL
+
+<div id="statement.disallow-on-del-cascade" />
+
+### Disallow ON DELETE CASCADE
+
+Disallow using the CASCADE option in ON DELETE clauses of foreign key constraints. CASCADE can lead to unintended data deletion when a referenced row is removed, potentially causing data loss if not carefully managed.
+
+#### How the rule works
+
+SQL Reviewer checks for ON DELETE CASCADE in foreign key definitions.
+
+Specifically, SQL Reviewer checks:
+
+* `CREATE TABLE` statements with foreign key constraints
+* `ALTER TABLE ADD CONSTRAINT` statements with foreign keys
+
+#### Support database engine
+
+* PostgreSQL
+
+<div id="statement.disallow-rm-tbl-cascade" />
+
+### Disallow CASCADE when removing tables
+
+Disallow using the CASCADE option when dropping or truncating tables. CASCADE automatically drops dependent objects (views, foreign keys, etc.), which can lead to unintended consequences if not carefully reviewed.
+
+#### How the rule works
+
+SQL Reviewer checks for CASCADE option in table removal statements.
+
+Specifically, SQL Reviewer checks:
+
+* `DROP TABLE` statements
+* `TRUNCATE TABLE` statements
+
+#### Support database engine
+
+* PostgreSQL
+
+<div id="statement.create-specify-schema" />
+
+### Require explicit schema specification
+
+Require explicit schema specification when creating tables. This ensures clarity about which schema objects are being created in and prevents accidental creation in the default (public) schema.
+
+#### How the rule works
+
+SQL Reviewer checks if table names include an explicit schema specification (e.g., `schema_name.table_name`).
+
+Specifically, SQL Reviewer checks:
+
+* `CREATE TABLE` statements
 
 #### Support database engine
 
@@ -927,10 +985,9 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * Oracle
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 <div id="column.disallow-change" />
 
@@ -991,9 +1048,8 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 <div id="column.disallow-set-charset" />
 
@@ -1286,9 +1342,8 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 <div id="index.type-no-blob" />
 
@@ -1311,9 +1366,8 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 <div id="index.total-number-limit" />
 
@@ -1401,9 +1455,8 @@ Specifically, SQL Reviewer checks:
 
 * MySQL
 * TiDB
+* PostgreSQL
 * OceanBase
-
-Support for PostgreSQL is coming soon.
 
 ## System
 
