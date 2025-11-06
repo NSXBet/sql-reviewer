@@ -52,9 +52,9 @@ func main() {
 						},
 						Indexes: []*types.IndexMetadata{
 							{
-								Name:    "PRIMARY",
-								Primary: true,
-								Unique:  true,
+								Name:        "PRIMARY",
+								Primary:     true,
+								Unique:      true,
 								Expressions: []string{"id"},
 							},
 							{

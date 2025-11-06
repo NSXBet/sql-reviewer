@@ -12,6 +12,7 @@ import (
 	"github.com/nsxbet/sql-reviewer/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer/pkg/config"
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
+	_ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

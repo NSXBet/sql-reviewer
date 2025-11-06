@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/nsxbet/sql-reviewer/pkg/config"
-	"github.com/nsxbet/sql-reviewer/pkg/types"
-
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 func TestNew(t *testing.T) {

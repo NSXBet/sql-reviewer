@@ -92,19 +92,8 @@ func buildPayloadFromComponents(components []SchemaRulePayload) (map[string]inte
 		return buildSinglePayload(comp)
 	}
 
-	// Handle multi-component rules - need special handling for naming rules
-	// Naming rules expect only the "format" field as a "string" payload
-	for _, comp := range components {
-		if comp.Key == "format" && (comp.Payload.Type == "STRING" || comp.Payload.Type == "TEMPLATE") {
-			// For naming rules, only use the format field as string payload
-			payload := advisor.StringTypeRulePayload{
-				String: fmt.Sprintf("%v", comp.Payload.Default),
-			}
-			return marshalToMap(payload)
-		}
-	}
-
-	// Fallback to composite payload for other multi-component rules
+	// Handle multi-component rules
+	// Build a composite payload map with all components
 	payload := make(map[string]interface{})
 	for _, comp := range components {
 		payload[comp.Key] = comp.Payload.Default

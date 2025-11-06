@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 
 	"github.com/nsxbet/sql-reviewer/pkg/types"
@@ -285,4 +286,187 @@ func UnmarshalBooleanTypeRulePayload(payload map[string]interface{}) (*BooleanTy
 // BooleanTypeRulePayload represents a payload with a boolean field
 type BooleanTypeRulePayload struct {
 	Boolean bool `json:"boolean"`
+}
+
+// NamingRulePayload represents a payload for naming rules with format and maxLength
+type NamingRulePayload struct {
+	Format    string `json:"format"`
+	MaxLength int    `json:"maxLength"`
+}
+
+// UnmarshalNamingRulePayload unmarshals a naming rule payload with format and maxLength
+func UnmarshalNamingRulePayload(payload map[string]interface{}) (*NamingRulePayload, error) {
+	if payload == nil {
+		return nil, errors.New("payload is nil")
+	}
+
+	result := &NamingRulePayload{}
+
+	// Extract format
+	if formatInterface, ok := payload["format"]; ok {
+		if formatStr, ok := formatInterface.(string); ok {
+			result.Format = formatStr
+		} else {
+			return nil, errors.New("'format' field is not a string")
+		}
+	} else {
+		return nil, errors.New("missing 'format' field in payload")
+	}
+
+	// Extract maxLength (optional)
+	if maxLengthInterface, ok := payload["maxLength"]; ok {
+		switch v := maxLengthInterface.(type) {
+		case int:
+			result.MaxLength = v
+		case float64:
+			result.MaxLength = int(v)
+		default:
+			return nil, errors.New("'maxLength' field is not a number")
+		}
+	}
+
+	return result, nil
+}
+
+// NamingRulePayloadRegexp represents a naming rule payload with compiled regexp
+type NamingRulePayloadRegexp struct {
+	Format    *regexp.Regexp
+	MaxLength int
+}
+
+// UnmarshalNamingRulePayloadAsRegexp unmarshals a naming rule payload and returns a compiled regexp
+func UnmarshalNamingRulePayloadAsRegexp(payload map[string]interface{}) (*NamingRulePayloadRegexp, error) {
+	result, err := UnmarshalNamingRulePayload(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	// Compile the format as a regular expression
+	format, err := regexp.Compile(result.Format)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to compile regular expression %q", result.Format)
+	}
+
+	return &NamingRulePayloadRegexp{
+		Format:    format,
+		MaxLength: result.MaxLength,
+	}, nil
+}
+
+// UnmarshalNamingRulePayloadAsTemplate unmarshals a naming rule payload and returns format template, template list, and maxLength.
+// This is used for template-based naming rules that support token replacement (e.g., {{table}}, {{column_list}}).
+func UnmarshalNamingRulePayloadAsTemplate(payload map[string]interface{}) (string, []string, int, error) {
+	if payload == nil {
+		return "", nil, 0, errors.New("payload is nil")
+	}
+
+	var format string
+	var templateList []string
+	var maxLength int
+
+	// Extract format (string template)
+	if formatInterface, ok := payload["format"]; ok {
+		if formatStr, ok := formatInterface.(string); ok {
+			format = formatStr
+		} else {
+			return "", nil, 0, errors.New("'format' field is not a string")
+		}
+	}
+
+	// Extract templateList (array of string templates)
+	if templateListInterface, ok := payload["templateList"]; ok {
+		switch v := templateListInterface.(type) {
+		case []interface{}:
+			for _, item := range v {
+				if str, ok := item.(string); ok {
+					templateList = append(templateList, str)
+				} else {
+					return "", nil, 0, errors.New("'templateList' contains non-string element")
+				}
+			}
+		case []string:
+			templateList = v
+		default:
+			return "", nil, 0, errors.New("'templateList' field is not an array")
+		}
+	}
+
+	// At least one of format or templateList must be provided
+	if format == "" && len(templateList) == 0 {
+		return "", nil, 0, errors.New("either 'format' or 'templateList' must be provided")
+	}
+
+	// Extract maxLength (optional)
+	if maxLengthInterface, ok := payload["maxLength"]; ok {
+		switch v := maxLengthInterface.(type) {
+		case int:
+			maxLength = v
+		case float64:
+			maxLength = int(v)
+		default:
+			return "", nil, 0, errors.New("'maxLength' field is not a number")
+		}
+	}
+
+	return format, templateList, maxLength, nil
+}
+
+// CommentConventionRulePayload represents a payload for comment convention rules
+type CommentConventionRulePayload struct {
+	Required               bool `json:"required"`
+	RequiredClassification bool `json:"requiredClassification"`
+	MaxLength              int  `json:"maxLength"`
+}
+
+// UnmarshalCommentConventionRulePayload unmarshals a comment convention rule payload
+func UnmarshalCommentConventionRulePayload(payload map[string]interface{}) (*CommentConventionRulePayload, error) {
+	if payload == nil {
+		return nil, errors.New("payload is nil")
+	}
+
+	result := &CommentConventionRulePayload{}
+
+	// Extract required (optional)
+	if requiredInterface, ok := payload["required"]; ok {
+		if required, ok := requiredInterface.(bool); ok {
+			result.Required = required
+		} else {
+			return nil, errors.New("'required' field is not a boolean")
+		}
+	}
+
+	// Extract requiredClassification (optional)
+	if requiredClassificationInterface, ok := payload["requiredClassification"]; ok {
+		if requiredClassification, ok := requiredClassificationInterface.(bool); ok {
+			result.RequiredClassification = requiredClassification
+		} else {
+			return nil, errors.New("'requiredClassification' field is not a boolean")
+		}
+	}
+
+	// Extract maxLength (optional)
+	if maxLengthInterface, ok := payload["maxLength"]; ok {
+		switch v := maxLengthInterface.(type) {
+		case int:
+			result.MaxLength = v
+		case float64:
+			result.MaxLength = int(v)
+		default:
+			return nil, errors.New("'maxLength' field is not a number")
+		}
+	}
+
+	return result, nil
+}
+
+// UnmarshalRequiredColumnList unmarshals a payload and parses the required column list
+func UnmarshalRequiredColumnList(payload map[string]interface{}) ([]string, error) {
+	stringArrayRulePayload, err := UnmarshalStringArrayTypeRulePayload(payload)
+	if err != nil {
+		return nil, err
+	}
+	if len(stringArrayRulePayload.List) != 0 {
+		return stringArrayRulePayload.List, nil
+	}
+	return nil, nil
 }

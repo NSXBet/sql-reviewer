@@ -94,12 +94,9 @@ func normalizePayload(ruleType string, payload map[string]interface{}) map[strin
 			}
 		}
 	case "naming.table", "naming.column":
-		// These have format + maxLength but we only need format for string type
-		if format, ok := payload["format"]; ok {
-			return map[string]interface{}{
-				"string": format,
-			}
-		}
+		// These have format + maxLength - keep both for PostgreSQL compatibility
+		// PostgreSQL rules expect format and maxLength directly in the payload
+		return payload
 	case "naming.index.uk", "naming.index.idx", "naming.index.fk", "naming.column.auto-increment":
 		// These also have format + maxLength but need string format
 		if format, ok := payload["format"]; ok {

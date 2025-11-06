@@ -243,6 +243,8 @@ const (
 	PostgreSQLCollationAllowlistViolation    Code = 20703
 	PostgreSQLMigrationHasRiskySQLStatement  Code = 20704
 	PostgreSQLCommentTooLong                 Code = 20705
+	PostgreSQLCommentEmpty                   Code = 20706
+	PostgreSQLCommentMissingClassification   Code = 20707
 
 	// 30001 ~ 39999 Oracle error.
 

@@ -1,8 +1,6 @@
 module github.com/nsxbet/sql-reviewer
 
-go 1.24
-
-toolchain go1.24.2
+go 1.24.5
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
@@ -10,11 +8,12 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

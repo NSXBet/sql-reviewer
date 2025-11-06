@@ -5,11 +5,12 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 ## Features
 
 - **Complete MySQL Support**: 92 comprehensive rules covering naming conventions, schema constraints, and statement analysis
+- **Complete PostgreSQL Support**: 55 comprehensive rules for PostgreSQL best practices and standards
 - **Schema.yaml Integration**: Default rule configurations with automatic payload generation
 - **Flexible Configuration**: Support for both config/schema.yaml defaults and custom YAML/JSON config files
 - **Multiple Output Formats**: Clean text, structured JSON, and YAML output options
 - **ANTLR-based Parsing**: Robust SQL parsing with detailed error reporting and line/column information
-- **Zero-config Operation**: Works out-of-the-box with sensible defaults for MySQL
+- **Zero-config Operation**: Works out-of-the-box with sensible defaults for MySQL and PostgreSQL
 - **Extensible Architecture**: Modular design supporting easy addition of new database engines and rules
 
 ## Installation
@@ -50,8 +51,9 @@ import (
 )
 
 func main() {
-    // Create a reviewer for MySQL
+    // Create a reviewer for MySQL or PostgreSQL
     r := reviewer.New(types.Engine_MYSQL)
+    // r := reviewer.New(types.Engine_POSTGRES) // For PostgreSQL
 
     // Review SQL statements
     sql := "CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(100));"
@@ -120,7 +122,7 @@ Complete working examples are available in [`examples/library-usage/`](examples/
 # Check with custom rules configuration
 ./sql-reviewer check -e mysql -r custom-rules.yaml migration.sql
 
-# Check PostgreSQL with JSON output (when PostgreSQL rules are implemented)
+# Check PostgreSQL with JSON output
 ./sql-reviewer check -e postgres -o json schema.sql
 ```
 
@@ -238,13 +240,16 @@ Usage with schema file:
 ## Supported Database Engines
 
 - **MySQL** (`mysql`) - ✅ Complete implementation (92 rules)
-- **PostgreSQL** (`postgres`, `postgresql`) - 🚧 Framework ready, rules pending implementation
+- **PostgreSQL** (`postgres`, `postgresql`) - ✅ Complete implementation (55 rules)
 
 ## Rule Categories
 
 The tool supports comprehensive SQL review rules organized into categories:
 
 ### MySQL Rules (92 total)
+
+<details>
+<summary>Click to expand MySQL rules</summary>
 
 #### Naming Conventions (7 rules)
 - Table naming patterns
@@ -273,13 +278,76 @@ The tool supports comprehensive SQL review rules organized into categories:
 - System object creation restrictions
 - Performance and optimization rules
 
+</details>
+
+### PostgreSQL Rules (55 total)
+
+#### Naming Conventions (10 rules)
+- Table naming patterns with regex support
+- Column naming patterns
+- Index naming conventions (PK, UK, FK, IDX)
+- Fully qualified object names
+- DROP TABLE naming patterns
+- Table and column comment requirements
+
+#### Column Rules (10 rules)
+- Required columns enforcement
+- NOT NULL constraints
+- Default value requirements
+- Column type change restrictions
+- Disallowed column types
+- Maximum character length limits
+- Volatile default value restrictions
+- Auto-increment constraints (PostgreSQL SERIAL types)
+- Default values for NOT NULL columns
+
+#### Index Rules (7 rules)
+- No duplicate columns in indexes
+- Index key number limits
+- Primary key type restrictions
+- Total index count limits
+- Concurrent index creation requirements
+- Primary key requirements
+- Foreign key restrictions
+
+#### Statement Rules (18 rules)
+- SELECT * restrictions
+- WHERE clause requirements for SELECT/UPDATE/DELETE
+- Leading wildcard LIKE restrictions
+- INSERT column specification requirements
+- INSERT row count limits
+- ORDER BY RANDOM() restrictions
+- COMMIT statement restrictions
+- LIMIT value constraints
+- Merge ALTER TABLE recommendations
+- ADD COLUMN with DEFAULT restrictions
+- CHECK constraint NOT VALID requirements
+- Foreign key NOT VALID requirements
+- ADD NOT NULL restrictions
+- Schema specification requirements
+- Mixed DDL/DML restrictions
+- Affected row limits
+
+#### Table & System Rules (10 rules)
+- Partitioned table restrictions
+- ON DELETE CASCADE restrictions
+- DROP TABLE CASCADE restrictions
+- Character set allowlists
+- Collation allowlists
+- DML dry-run validation
+- Prior backup checks
+- Non-transactional statement detection
+- SET ROLE variable checks
+- Object ownership validation
+
 ### Rule Examples
 
+#### MySQL Examples
 ```sql
 -- ❌ Fails naming.table rule
 CREATE TABLE UserData (id INT);
 
--- ✅ Passes naming.table rule  
+-- ✅ Passes naming.table rule
 CREATE TABLE user_data (id INT);
 
 -- ❌ Fails table.require-pk rule
@@ -287,6 +355,27 @@ CREATE TABLE logs (message TEXT);
 
 -- ✅ Passes table.require-pk rule
 CREATE TABLE logs (id INT PRIMARY KEY, message TEXT);
+```
+
+#### PostgreSQL Examples
+```sql
+-- ❌ Fails naming.column rule
+CREATE TABLE book (id INT, "creatorId" INT);
+
+-- ✅ Passes naming.column rule
+CREATE TABLE book (id INT, creator_id INT);
+
+-- ❌ Fails statement.add-fk-not-valid rule
+ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);
+
+-- ✅ Passes statement.add-fk-not-valid rule
+ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) NOT VALID;
+
+-- ❌ Fails statement.select.no-select-all rule
+SELECT * FROM users WHERE id = 1;
+
+-- ✅ Passes statement.select.no-select-all rule
+SELECT id, name, email FROM users WHERE id = 1;
 ```
 
 ## Architecture
@@ -300,9 +389,11 @@ sql-reviewer-cli/
 │   ├── advisor/           # Core rule engine and registration
 │   ├── config/            # Configuration handling and schema.yaml
 │   ├── rules/
-│   │   └── mysql/         # MySQL-specific rule implementations
+│   │   ├── mysql/         # MySQL-specific rule implementations (92 rules)
+│   │   └── postgres/      # PostgreSQL-specific rule implementations (55 rules)
 │   ├── catalog/           # Database schema metadata handling
 │   ├── mysqlparser/       # ANTLR-based MySQL SQL parser
+│   ├── pgparser/          # ANTLR-based PostgreSQL SQL parser
 │   ├── types/             # Shared type definitions
 │   └── logger/            # Logging utilities
 ├── config/
@@ -325,10 +416,18 @@ See [CLAUDE.md](CLAUDE.md) for comprehensive development guidelines.
 
 ### Adding New Rules
 
+For MySQL:
 1. **Create rule implementation** in `pkg/rules/mysql/`
 2. **Add test data** in `pkg/rules/mysql/testdata/`
 3. **Register the rule** in `pkg/rules/mysql/init.go`
 4. **Update config/schema.yaml** with default configuration
+5. **Test thoroughly** with various SQL patterns
+
+For PostgreSQL:
+1. **Create rule implementation** in `pkg/rules/postgres/`
+2. **Add test data** in `pkg/rules/postgres/testdata/`
+3. **Register the rule** in `pkg/rules/postgres/init.go`
+4. **Create test file** in `pkg/rules/postgres/*_test.go`
 5. **Test thoroughly** with various SQL patterns
 
 ### Rule Implementation Example
@@ -358,8 +457,14 @@ go test ./...
 # Run MySQL rule tests specifically
 go test ./pkg/rules/mysql/
 
-# Test with debug output
+# Run PostgreSQL rule tests specifically
+go test ./pkg/rules/postgres/
+
+# Test with debug output (MySQL)
 go run main.go check -e mysql examples/test.sql --debug
+
+# Test with debug output (PostgreSQL)
+go run main.go check -e postgres examples/postgres-test.sql --debug
 ```
 
 ## Contributing
@@ -377,9 +482,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Roadmap
 
-- [ ] **PostgreSQL Engine**: Complete PostgreSQL rule implementation
+- [x] **PostgreSQL Engine**: Complete PostgreSQL rule implementation (55 rules)
 - [ ] **Performance Optimization**: Parallel rule execution
 - [ ] **Rule Management**: CLI commands for listing and validating rules
 - [ ] **CI/CD Integration**: GitHub Actions and pipeline examples
 - [ ] **VS Code Extension**: IDE integration for real-time SQL review
 - [ ] **Additional Engines**: Oracle, SQL Server, and Snowflake support
+- [ ] **PostgreSQL Advanced Rules**: Implement remaining 5 database-dependent rules

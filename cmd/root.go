@@ -19,7 +19,7 @@ func initializeLogger() {
 	} else if viper.GetBool("verbose") {
 		logLevel = slog.LevelInfo
 	}
-	
+
 	customLogger := logger.NewWithLevel(logLevel)
 	slog.SetDefault(customLogger.GetSlogLogger())
 }

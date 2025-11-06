@@ -44,9 +44,8 @@ import (
 
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/config"
-	"github.com/nsxbet/sql-reviewer/pkg/types"
-
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // Reviewer provides a high-level API for SQL review operations.
@@ -193,7 +192,12 @@ func (r *Reviewer) Review(ctx context.Context, sql string, opts ...ReviewOption)
 //	    },
 //	}
 //	result, err := r.ReviewWithSchema(ctx, sql, schema)
-func (r *Reviewer) ReviewWithSchema(ctx context.Context, sql string, schema *types.DatabaseSchemaMetadata, opts ...ReviewOption) (*ReviewResult, error) {
+func (r *Reviewer) ReviewWithSchema(
+	ctx context.Context,
+	sql string,
+	schema *types.DatabaseSchemaMetadata,
+	opts ...ReviewOption,
+) (*ReviewResult, error) {
 	// Get rules for the configured engine
 	rules := r.config.GetRulesForEngine(r.engine)
 
