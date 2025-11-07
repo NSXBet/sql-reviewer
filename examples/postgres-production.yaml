@@ -61,12 +61,12 @@ rules:
       list:
         - MONEY # Use NUMERIC instead for better precision
     engine: POSTGRES
-  # ============================================================================
-  # PERFORMANCE & SAFETY RULES (WARNING level)
-  # ============================================================================
-
   # Disallow leading % in LIKE (can't use index)
   - type: statement.where.no-leading-wildcard-like
+    # ============================================================================
+    # PERFORMANCE & SAFETY RULES (WARNING level)
+    # ============================================================================
+
     level: WARNING
     engine: POSTGRES
   # Create indexes concurrently to avoid blocking writes
@@ -111,12 +111,12 @@ rules:
     payload:
       number: 5000
     engine: POSTGRES
-  # ============================================================================
-  # CODE QUALITY RULES (WARNING level)
-  # ============================================================================
-
   # Table naming convention - snake_case
   - type: naming.table
+    # ============================================================================
+    # CODE QUALITY RULES (WARNING level)
+    # ============================================================================
+
     level: WARNING
     payload:
       format: "^[a-z][a-z0-9]*(_[a-z0-9]+)*$"
