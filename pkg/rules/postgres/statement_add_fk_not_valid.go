@@ -12,7 +12,11 @@ import (
 var _ advisor.Advisor = (*StatementAddFKNotValidAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementAddFKNotValid), &StatementAddFKNotValidAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementAddFKNotValid),
+		&StatementAddFKNotValidAdvisor{},
+	)
 }
 
 type StatementAddFKNotValidAdvisor struct{}

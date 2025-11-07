@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*IndexPrimaryKeyTypeAllowlistAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleIndexPrimaryKeyTypeAllowlist), &IndexPrimaryKeyTypeAllowlistAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleIndexPrimaryKeyTypeAllowlist),
+		&IndexPrimaryKeyTypeAllowlistAdvisor{},
+	)
 }
 
 type IndexPrimaryKeyTypeAllowlistAdvisor struct{}
@@ -109,7 +113,11 @@ func (*indexPrimaryKeyTypeAllowlistChecker) hasColumnPrimaryKeyConstraint(colDef
 	return false
 }
 
-func (c *indexPrimaryKeyTypeAllowlistChecker) checkTablePrimaryKey(constraint parser.ITableconstraintContext, columnTypes map[string]string, columnLines map[string]int) {
+func (c *indexPrimaryKeyTypeAllowlistChecker) checkTablePrimaryKey(
+	constraint parser.ITableconstraintContext,
+	columnTypes map[string]string,
+	columnLines map[string]int,
+) {
 	if constraint == nil || constraint.Constraintelem() == nil {
 		return
 	}
@@ -148,10 +156,14 @@ func (c *indexPrimaryKeyTypeAllowlistChecker) isTypeAllowed(columnType string) b
 
 func (c *indexPrimaryKeyTypeAllowlistChecker) addAdvice(columnName, columnType string, line int) {
 	c.adviceList = append(c.adviceList, &types.Advice{
-		Status:  c.level,
-		Code:    int32(advisor.PostgreSQLPrimaryKeyTypeAllowlist),
-		Title:   c.title,
-		Content: fmt.Sprintf("The column %q is one of the primary key, but its type %q is not in allowlist", columnName, columnType),
+		Status: c.level,
+		Code:   int32(advisor.PostgreSQLPrimaryKeyTypeAllowlist),
+		Title:  c.title,
+		Content: fmt.Sprintf(
+			"The column %q is one of the primary key, but its type %q is not in allowlist",
+			columnName,
+			columnType,
+		),
 		StartPosition: &types.Position{
 			Line: int32(line),
 		},

@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*ColumnDisallowChangeTypeAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnDisallowChangeType), &ColumnDisallowChangeTypeAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnDisallowChangeType),
+		&ColumnDisallowChangeTypeAdvisor{},
+	)
 }
 
 type ColumnDisallowChangeTypeAdvisor struct{}

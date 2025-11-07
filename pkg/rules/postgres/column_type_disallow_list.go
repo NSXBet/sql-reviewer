@@ -15,7 +15,11 @@ import (
 var _ advisor.Advisor = (*ColumnTypeDisallowListAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnTypeDisallowList), &ColumnTypeDisallowListAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnTypeDisallowList),
+		&ColumnTypeDisallowListAdvisor{},
+	)
 }
 
 type ColumnTypeDisallowListAdvisor struct{}
@@ -143,10 +147,15 @@ func (c *columnTypeDisallowListChecker) checkType(tableName, columnName string, 
 
 	if matchedDisallowedType != "" {
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLDisallowedColumnType),
-			Title:   c.title,
-			Content: fmt.Sprintf("Disallow column type %s but column %q.%q is", strings.ToUpper(matchedDisallowedType), tableName, columnName),
+			Status: c.level,
+			Code:   int32(advisor.PostgreSQLDisallowedColumnType),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"Disallow column type %s but column %q.%q is",
+				strings.ToUpper(matchedDisallowedType),
+				tableName,
+				columnName,
+			),
 			StartPosition: &types.Position{
 				Line: int32(line),
 			},

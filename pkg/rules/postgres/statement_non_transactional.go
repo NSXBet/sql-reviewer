@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*StatementNonTransactionalAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementNonTransactional), &StatementNonTransactionalAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementNonTransactional),
+		&StatementNonTransactionalAdvisor{},
+	)
 }
 
 // StatementNonTransactionalAdvisor is the advisor checking for non-transactional statements.

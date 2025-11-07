@@ -85,7 +85,10 @@ func (c *collationAllowlistChecker) EnterAltertablestmt(ctx *parser.Altertablest
 	}
 }
 
-func (c *collationAllowlistChecker) checkTableElementList(listCtx parser.IOpttableelementlistContext, stmtCtx antlr.ParserRuleContext) {
+func (c *collationAllowlistChecker) checkTableElementList(
+	listCtx parser.IOpttableelementlistContext,
+	stmtCtx antlr.ParserRuleContext,
+) {
 	if listCtx == nil || listCtx.Tableelementlist() == nil {
 		return
 	}
@@ -132,7 +135,8 @@ func (c *collationAllowlistChecker) checkAlterTableCmds(cmds parser.IAlter_table
 		// ALTER COLUMN TYPE with COLLATE
 		// Check if this is ALTER COLUMN ... TYPE ...
 		// Grammar: ALTER opt_column? colid opt_set_data? TYPE_P typename opt_collate_clause? alter_using?
-		if cmd.ALTER() != nil && cmd.TYPE_P() != nil && cmd.Opt_collate_clause() != nil && cmd.Opt_collate_clause().Any_name() != nil {
+		if cmd.ALTER() != nil && cmd.TYPE_P() != nil && cmd.Opt_collate_clause() != nil &&
+			cmd.Opt_collate_clause().Any_name() != nil {
 			collName := c.extractCollationNameFromAnyName(cmd.Opt_collate_clause().Any_name())
 			if collName != "" && !c.allowlist[collName] {
 				c.addAdvice(collName, stmtCtx)

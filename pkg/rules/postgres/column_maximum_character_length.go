@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*ColumnMaximumCharacterLengthAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnMaximumCharacterLength), &ColumnMaximumCharacterLengthAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnMaximumCharacterLength),
+		&ColumnMaximumCharacterLengthAdvisor{},
+	)
 }
 
 type ColumnMaximumCharacterLengthAdvisor struct{}
@@ -177,7 +181,8 @@ func (*columnMaximumCharacterLengthChecker) getCharLength(typename parser.ITypen
 		return 0
 	}
 
-	if (characterC.CHARACTER() != nil || characterC.CHAR_P() != nil || characterC.NCHAR() != nil) && characterC.Opt_varying() != nil {
+	if (characterC.CHARACTER() != nil || characterC.CHAR_P() != nil || characterC.NCHAR() != nil) &&
+		characterC.Opt_varying() != nil {
 		return 0
 	}
 
@@ -194,10 +199,15 @@ func (*columnMaximumCharacterLengthChecker) getCharLength(typename parser.ITypen
 
 func (c *columnMaximumCharacterLengthChecker) addAdvice(tableName, columnName string, line int) {
 	c.adviceList = append(c.adviceList, &types.Advice{
-		Status:  c.level,
-		Code:    int32(types.CharLengthExceedsLimit),
-		Title:   c.title,
-		Content: fmt.Sprintf("The length of the CHAR column %q in table %s is bigger than %d, please use VARCHAR instead", columnName, tableName, c.maximum),
+		Status: c.level,
+		Code:   int32(types.CharLengthExceedsLimit),
+		Title:  c.title,
+		Content: fmt.Sprintf(
+			"The length of the CHAR column %q in table %s is bigger than %d, please use VARCHAR instead",
+			columnName,
+			tableName,
+			c.maximum,
+		),
 		StartPosition: &types.Position{
 			Line: int32(line),
 		},

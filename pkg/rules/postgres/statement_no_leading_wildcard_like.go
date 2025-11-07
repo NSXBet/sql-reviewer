@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*StatementNoLeadingWildcardLikeAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementNoLeadingWildcardLike), &StatementNoLeadingWildcardLikeAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementNoLeadingWildcardLike),
+		&StatementNoLeadingWildcardLikeAdvisor{},
+	)
 }
 
 // StatementNoLeadingWildcardLikeAdvisor is the advisor checking for no leading wildcard LIKE.

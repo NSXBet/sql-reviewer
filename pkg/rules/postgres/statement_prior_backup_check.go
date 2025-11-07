@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*StatementPriorBackupCheckAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementPriorBackupCheck), &StatementPriorBackupCheckAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementPriorBackupCheck),
+		&StatementPriorBackupCheckAdvisor{},
+	)
 }
 
 // StatementPriorBackupCheckAdvisor is the advisor checking for prior backup.

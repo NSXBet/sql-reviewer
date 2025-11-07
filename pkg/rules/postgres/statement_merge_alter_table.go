@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*StatementMergeAlterTableAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementMergeAlterTable), &StatementMergeAlterTableAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementMergeAlterTable),
+		&StatementMergeAlterTableAdvisor{},
+	)
 }
 
 type StatementMergeAlterTableAdvisor struct{}

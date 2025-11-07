@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*SchemaBackwardCompatibilityAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleSchemaBackwardCompatibility), &SchemaBackwardCompatibilityAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleSchemaBackwardCompatibility),
+		&SchemaBackwardCompatibilityAdvisor{},
+	)
 }
 
 // SchemaBackwardCompatibilityAdvisor checks for schema backward compatibility.

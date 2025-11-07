@@ -12,7 +12,11 @@ import (
 var _ advisor.Advisor = (*StatementDisallowRemoveTblCascadeAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowRemoveTblCascade), &StatementDisallowRemoveTblCascadeAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowRemoveTblCascade),
+		&StatementDisallowRemoveTblCascadeAdvisor{},
+	)
 }
 
 // StatementDisallowRemoveTblCascadeAdvisor is the advisor checking for disallow CASCADE option when removing tables.

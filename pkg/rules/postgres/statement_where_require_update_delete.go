@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementWhereRequireUpdateDeleteAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementRequireWhereForUpdateDelete), &StatementWhereRequireUpdateDeleteAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementRequireWhereForUpdateDelete),
+		&StatementWhereRequireUpdateDeleteAdvisor{},
+	)
 }
 
 // StatementWhereRequireUpdateDeleteAdvisor is the advisor checking for WHERE clause requirement in UPDATE/DELETE.

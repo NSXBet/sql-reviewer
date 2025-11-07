@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*ColumnSetDefaultForNotNullAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnSetDefaultForNotNull), &ColumnSetDefaultForNotNullAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnSetDefaultForNotNull),
+		&ColumnSetDefaultForNotNullAdvisor{},
+	)
 }
 
 type ColumnSetDefaultForNotNullAdvisor struct{}

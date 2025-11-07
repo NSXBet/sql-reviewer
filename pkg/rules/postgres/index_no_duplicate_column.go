@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*IndexNoDuplicateColumnAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleIndexNoDuplicateColumn), &IndexNoDuplicateColumnAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleIndexNoDuplicateColumn),
+		&IndexNoDuplicateColumnAdvisor{},
+	)
 }
 
 type IndexNoDuplicateColumnAdvisor struct{}
@@ -120,7 +124,11 @@ func (c *indexNoDuplicateColumnChecker) EnterAltertablestmt(ctx *parser.Altertab
 	}
 }
 
-func (c *indexNoDuplicateColumnChecker) checkTableConstraint(constraint parser.ITableconstraintContext, tableName string, line int) {
+func (c *indexNoDuplicateColumnChecker) checkTableConstraint(
+	constraint parser.ITableconstraintContext,
+	tableName string,
+	line int,
+) {
 	if constraint == nil {
 		return
 	}

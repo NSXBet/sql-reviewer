@@ -15,7 +15,11 @@ import (
 var _ advisor.Advisor = (*StatementMaximumLimitValueAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementMaximumLimitValue), &StatementMaximumLimitValueAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementMaximumLimitValue),
+		&StatementMaximumLimitValueAdvisor{},
+	)
 }
 
 // StatementMaximumLimitValueAdvisor is the advisor checking for maximum LIMIT value.

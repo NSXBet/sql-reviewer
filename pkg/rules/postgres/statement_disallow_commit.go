@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementDisallowCommitAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowCommit), &StatementDisallowCommitAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowCommit),
+		&StatementDisallowCommitAdvisor{},
+	)
 }
 
 // StatementDisallowCommitAdvisor is the advisor checking for disallowing COMMIT statements.

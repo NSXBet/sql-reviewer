@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementInsertRowLimitAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementInsertRowLimit), &StatementInsertRowLimitAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementInsertRowLimit),
+		&StatementInsertRowLimitAdvisor{},
+	)
 }
 
 // StatementInsertRowLimitAdvisor is the advisor checking for to limit INSERT rows.

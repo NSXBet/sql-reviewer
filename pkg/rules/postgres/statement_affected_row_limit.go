@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*StatementAffectedRowLimitAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementAffectedRowLimit), &StatementAffectedRowLimitAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementAffectedRowLimit),
+		&StatementAffectedRowLimitAdvisor{},
+	)
 }
 
 type StatementAffectedRowLimitAdvisor struct{}
@@ -112,7 +116,6 @@ func (c *statementAffectedRowLimitChecker) checkAffectedRows(ctx antlr.ParserRul
 		UsePostgresDatabaseOwner: c.usePostgresDatabaseOwner,
 		PreExecutions:            c.setRoles,
 	}, c.driver, types.Engine_POSTGRES, fmt.Sprintf("EXPLAIN %s", stmtText))
-
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
@@ -142,10 +145,15 @@ func (c *statementAffectedRowLimitChecker) checkAffectedRows(ctx antlr.ParserRul
 
 	if rowCount > int64(c.maxRow) {
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementAffectedRowLimit),
-			Title:   c.title,
-			Content: fmt.Sprintf("The statement \"%s\" affected %d rows (estimated). The count exceeds %d.", normalizedStmt, rowCount, c.maxRow),
+			Status: c.level,
+			Code:   int32(advisor.PostgreSQLStatementAffectedRowLimit),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"The statement \"%s\" affected %d rows (estimated). The count exceeds %d.",
+				normalizedStmt,
+				rowCount,
+				c.maxRow,
+			),
 			StartPosition: &types.Position{
 				Line: int32(ctx.GetStart().GetLine()),
 			},

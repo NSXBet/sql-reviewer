@@ -3,7 +3,6 @@
 # Organized by category: Naming, Statement, Table, Column, Index, and System rules
 
 id: postgres-all-rules
-
 rules:
   # ============================================================================
   # NAMING RULES
@@ -13,23 +12,20 @@ rules:
   - type: naming.fully-qualified
     level: WARNING
     engine: POSTGRES
-
   # Table naming convention
   - type: naming.table
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
+      format: "^[a-z]+(_[a-z]+)*$" # snake_case
       maxLength: 63
     engine: POSTGRES
-
   # Column naming convention
   - type: naming.column
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
+      format: "^[a-z]+(_[a-z]+)*$" # snake_case
       maxLength: 63
     engine: POSTGRES
-
   # Primary key naming convention
   - type: naming.index.pk
     level: WARNING
@@ -37,7 +33,6 @@ rules:
       format: "^$|^pk_{{table}}_{{column_list}}$"
       maxLength: 63
     engine: POSTGRES
-
   # Unique key naming convention
   - type: naming.index.uk
     level: WARNING
@@ -45,7 +40,6 @@ rules:
       format: "^$|^uk_{{table}}_{{column_list}}$"
       maxLength: 63
     engine: POSTGRES
-
   # Index naming convention
   - type: naming.index.idx
     level: WARNING
@@ -53,7 +47,6 @@ rules:
       format: "^$|^idx_{{table}}_{{column_list}}$"
       maxLength: 63
     engine: POSTGRES
-
   # Foreign key naming convention
   - type: naming.index.fk
     level: WARNING
@@ -61,7 +54,6 @@ rules:
       format: "^$|^fk_{{referencing_table}}_{{referencing_column}}_{{referenced_table}}_{{referenced_column}}$"
       maxLength: 63
     engine: POSTGRES
-
   # ============================================================================
   # STATEMENT RULES
   # ============================================================================
@@ -70,133 +62,108 @@ rules:
   - type: statement.select.no-select-all
     level: ERROR
     engine: POSTGRES
-
   # Require WHERE clause for SELECT statements
   - type: statement.where.require.select
     level: WARNING
     engine: POSTGRES
-
   # Require WHERE clause for UPDATE/DELETE statements
   - type: statement.where.require.update-delete
     level: ERROR
     engine: POSTGRES
-
   # Disallow leading % in LIKE
   - type: statement.where.no-leading-wildcard-like
     level: WARNING
     engine: POSTGRES
-
   # Disallow COMMIT statements
   - type: statement.disallow-commit
     level: ERROR
     engine: POSTGRES
-
   # Disallow ON DELETE CASCADE in foreign keys
   - type: statement.disallow-on-del-cascade
     level: WARNING
     engine: POSTGRES
-
   # Disallow CASCADE when dropping/truncating tables
   - type: statement.disallow-rm-tbl-cascade
     level: ERROR
     engine: POSTGRES
-
   # Merge ALTER TABLE statements
   - type: statement.merge-alter-table
     level: WARNING
     engine: POSTGRES
-
   # INSERT must specify columns
   - type: statement.insert.must-specify-column
     level: ERROR
     engine: POSTGRES
-
   # Disallow ORDER BY RAND() in INSERT
   - type: statement.insert.disallow-order-by-rand
     level: WARNING
     engine: POSTGRES
-
   # Limit inserted rows
   - type: statement.insert.row-limit
     level: WARNING
     payload:
       number: 1000
     engine: POSTGRES
-
   # Limit affected rows for UPDATE/DELETE
   - type: statement.affected-row-limit
     level: WARNING
     payload:
       number: 1000
     engine: POSTGRES
-
   # Maximum LIMIT value
   - type: statement.maximum-limit-value
     level: WARNING
     payload:
       number: 1000
     engine: POSTGRES
-
   # Dry run DML statements
   - type: statement.dml-dry-run
     level: WARNING
     engine: POSTGRES
-
   # Disallow adding column with DEFAULT (causes table rewrite)
   - type: statement.disallow-add-column-with-default
     level: WARNING
     engine: POSTGRES
-
   # Require NOT VALID when adding CHECK constraints
   - type: statement.add-check-not-valid
     level: WARNING
     engine: POSTGRES
-
   # Require NOT VALID when adding foreign keys
   - type: statement.add-foreign-key-not-valid
     level: WARNING
     engine: POSTGRES
-
   # Disallow adding NOT NULL to existing columns
   - type: statement.disallow-add-not-null
     level: WARNING
     engine: POSTGRES
-
   # Require explicit schema specification in CREATE TABLE
   - type: statement.create-specify-schema
     level: WARNING
     engine: POSTGRES
-
   # Check SET ROLE variable usage
   - type: statement.check-set-role-variable
     level: WARNING
     engine: POSTGRES
-
   # Disallow mixing DDL in DDL statements
   - type: statement.disallow-mix-in-ddl
     level: WARNING
     engine: POSTGRES
-
   # Disallow mixing DML in DML statements
   - type: statement.disallow-mix-in-dml
     level: WARNING
     engine: POSTGRES
-
   # Prior backup check before dangerous operations
   - type: statement.prior-backup-check
     level: ERROR
     engine: POSTGRES
-
   # Check for non-transactional statements
   - type: statement.non-transactional
     level: WARNING
     engine: POSTGRES
-
   # Object owner check for statements
   - type: statement.object-owner-check
     level: ERROR
     engine: POSTGRES
-
   # ============================================================================
   # TABLE RULES
   # ============================================================================
@@ -205,19 +172,16 @@ rules:
   - type: table.require-pk
     level: ERROR
     engine: POSTGRES
-
   # Disallow foreign keys
   - type: table.no-foreign-key
     level: WARNING
     engine: POSTGRES
-
   # Drop naming convention - tables must be renamed with suffix before drop
   - type: table.drop-naming-convention
     level: ERROR
     payload:
       format: "_del$"
     engine: POSTGRES
-
   # Table comment convention
   - type: table.comment
     level: WARNING
@@ -225,12 +189,10 @@ rules:
       required: true
       maxLength: 1024
     engine: POSTGRES
-
   # Disallow partition tables
   - type: table.disallow-partition
     level: WARNING
     engine: POSTGRES
-
   # ============================================================================
   # COLUMN RULES
   # ============================================================================
@@ -244,31 +206,26 @@ rules:
         - created_at
         - updated_at
     engine: POSTGRES
-
   # Column type disallow list
   - type: column.type-disallow-list
     level: ERROR
     payload:
       list:
-        - MONEY  # Use NUMERIC instead
+        - MONEY # Use NUMERIC instead
         # - JSON  # Uncomment to disallow JSON type
     engine: POSTGRES
-
   # Columns cannot be NULL
   - type: column.no-null
     level: WARNING
     engine: POSTGRES
-
   # Disallow changing column type
   - type: column.disallow-change-type
     level: ERROR
     engine: POSTGRES
-
   # Set DEFAULT for NOT NULL columns
   - type: column.set-default-for-not-null
     level: WARNING
     engine: POSTGRES
-
   # Column comment convention
   - type: column.comment
     level: WARNING
@@ -276,34 +233,28 @@ rules:
       required: true
       maxLength: 1024
     engine: POSTGRES
-
   # Maximum CHAR length
   - type: column.maximum-character-length
     level: WARNING
     payload:
       number: 255
     engine: POSTGRES
-
   # Require column default value
   - type: column.require-default
     level: WARNING
     engine: POSTGRES
-
   # Disallow volatile default values (e.g., clock_timestamp())
   - type: column.default-disallow-volatile
     level: WARNING
     engine: POSTGRES
-
   # Auto-increment columns must be integer (SERIAL/BIGSERIAL)
   - type: column.auto-increment-must-integer
     level: ERROR
     engine: POSTGRES
-
   # Auto-increment columns must be unsigned (not applicable for PostgreSQL, but kept for completeness)
   - type: column.auto-increment-must-unsigned
     level: DISABLED
     engine: POSTGRES
-
   # ============================================================================
   # INDEX RULES
   # ============================================================================
@@ -312,21 +263,18 @@ rules:
   - type: index.no-duplicate-column
     level: ERROR
     engine: POSTGRES
-
   # Limit index key count
   - type: index.key-number-limit
     level: WARNING
     payload:
       number: 5
     engine: POSTGRES
-
   # Limit total index count per table
   - type: index.total-number-limit
     level: WARNING
     payload:
       number: 10
     engine: POSTGRES
-
   # Primary key type allowlist
   - type: index.primary-key-type-allowlist
     level: ERROR
@@ -341,12 +289,10 @@ rules:
         - int8
         - uuid
     engine: POSTGRES
-
   # Create indexes concurrently to avoid blocking writes
   - type: index.create-concurrently
     level: WARNING
     engine: POSTGRES
-
   # ============================================================================
   # SYSTEM RULES
   # ============================================================================
@@ -359,7 +305,6 @@ rules:
         - UTF8
         - UTF-8
     engine: POSTGRES
-
   # Collation allowlist
   - type: system.collation.allowlist
     level: WARNING
@@ -369,14 +314,12 @@ rules:
         - C
         - POSIX
     engine: POSTGRES
-
   # Comment length limit (for COMMENT ON statements) - not implemented yet
   - type: system.comment.length
     level: DISABLED
     payload:
       number: 2048
     engine: POSTGRES
-
   # ============================================================================
   # BACKWARD COMPATIBILITY
   # ============================================================================

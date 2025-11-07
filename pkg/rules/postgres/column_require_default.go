@@ -73,10 +73,15 @@ func (c *columnRequireDefaultChecker) EnterCreatestmt(ctx *parser.CreatestmtCont
 					columnName := pgparser.NormalizePostgreSQLColid(colDef.Colid())
 					if !c.hasDefault(colDef) {
 						c.adviceList = append(c.adviceList, &types.Advice{
-							Status:  c.level,
-							Code:    int32(types.ColumnRequireDefault),
-							Title:   c.title,
-							Content: fmt.Sprintf("Column %q.%q in schema %q doesn't have DEFAULT", tableName, columnName, "public"),
+							Status: c.level,
+							Code:   int32(types.ColumnRequireDefault),
+							Title:  c.title,
+							Content: fmt.Sprintf(
+								"Column %q.%q in schema %q doesn't have DEFAULT",
+								tableName,
+								columnName,
+								"public",
+							),
 							StartPosition: &types.Position{
 								Line: int32(colDef.GetStart().GetLine()),
 							},
@@ -111,10 +116,15 @@ func (c *columnRequireDefaultChecker) EnterAltertablestmt(ctx *parser.Altertable
 					columnName := pgparser.NormalizePostgreSQLColid(colDef.Colid())
 					if !c.hasDefault(colDef) {
 						c.adviceList = append(c.adviceList, &types.Advice{
-							Status:  c.level,
-							Code:    int32(types.ColumnRequireDefault),
-							Title:   c.title,
-							Content: fmt.Sprintf("Column %q.%q in schema %q doesn't have DEFAULT", tableName, columnName, "public"),
+							Status: c.level,
+							Code:   int32(types.ColumnRequireDefault),
+							Title:  c.title,
+							Content: fmt.Sprintf(
+								"Column %q.%q in schema %q doesn't have DEFAULT",
+								tableName,
+								columnName,
+								"public",
+							),
 							StartPosition: &types.Position{
 								Line: int32(colDef.GetStart().GetLine()),
 							},

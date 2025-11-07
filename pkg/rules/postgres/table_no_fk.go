@@ -132,10 +132,15 @@ func (c *tableNoFKChecker) EnterAltertablestmt(ctx *parser.AltertablestmtContext
 func (c *tableNoFKChecker) addFKAdvice(schemaName, tableName string, ctx antlr.ParserRuleContext) {
 	stmtText := extractStatementTextForNoFK(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 	c.adviceList = append(c.adviceList, &types.Advice{
-		Status:  c.level,
-		Code:    int32(types.TableHasFK),
-		Title:   c.title,
-		Content: fmt.Sprintf("Foreign key is not allowed in the table %q.%q, related statement: \"%s\"", schemaName, tableName, stmtText),
+		Status: c.level,
+		Code:   int32(types.TableHasFK),
+		Title:  c.title,
+		Content: fmt.Sprintf(
+			"Foreign key is not allowed in the table %q.%q, related statement: \"%s\"",
+			schemaName,
+			tableName,
+			stmtText,
+		),
 		StartPosition: &types.Position{
 			Line: int32(ctx.GetStart().GetLine()),
 		},

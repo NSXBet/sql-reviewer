@@ -12,7 +12,11 @@ import (
 var _ advisor.Advisor = (*StatementDisallowOnDelCascadeAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowOnDelCascade), &StatementDisallowOnDelCascadeAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowOnDelCascade),
+		&StatementDisallowOnDelCascadeAdvisor{},
+	)
 }
 
 // StatementDisallowOnDelCascadeAdvisor is the advisor checking for ON DELETE CASCADE.

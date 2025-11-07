@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*TableDisallowPartitionAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleTableDisallowPartition), &TableDisallowPartitionAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleTableDisallowPartition),
+		&TableDisallowPartitionAdvisor{},
+	)
 }
 
 // TableDisallowPartitionAdvisor is the advisor checking for disallow table partition.
@@ -86,7 +90,11 @@ func (c *tableDisallowPartitionChecker) EnterPartition_cmd(ctx *parser.Partition
 		parent := ctx.GetParent()
 		for parent != nil {
 			if alterTableCtx, ok := parent.(*parser.AltertablestmtContext); ok {
-				stmtText := extractStatementText(c.statementsText, alterTableCtx.GetStart().GetLine(), alterTableCtx.GetStop().GetLine())
+				stmtText := extractStatementText(
+					c.statementsText,
+					alterTableCtx.GetStart().GetLine(),
+					alterTableCtx.GetStop().GetLine(),
+				)
 				c.adviceList = append(c.adviceList, &types.Advice{
 					Status:  c.level,
 					Code:    int32(advisor.PostgreSQLTableDisallowPartition),
