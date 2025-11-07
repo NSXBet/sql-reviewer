@@ -258,28 +258,28 @@ func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, 
 	switch rule {
 	case advisor.SchemaRuleTableNaming,
 		advisor.SchemaRuleColumnNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*$",
 		}
 	case advisor.SchemaRulePKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_pkey$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*_pkey$",
 		}
 	case advisor.SchemaRuleUKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_uk$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*_uk$",
 		}
 	case advisor.SchemaRuleFKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_fkey$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*_fkey$",
 		}
 	case advisor.SchemaRuleIDXNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_idx$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*_idx$",
 		}
 	case advisor.SchemaRuleTableDropNamingConvention:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_del$",
+		payload = advisor.NamingRulePayload{
+			Format: "^[a-z]+(_[a-z]+)*_del$",
 		}
 	case advisor.SchemaRuleRequiredColumn:
 		payload = advisor.StringArrayTypeRulePayload{
@@ -418,6 +418,34 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 						Indexes: []*types.IndexMetadata{
 							{
 								Name:   "orders_pkey",
+								Type:   "PRIMARY KEY",
+								Unique: true,
+								Expressions: []string{
+									"id",
+								},
+								Primary: true,
+							},
+						},
+					},
+					{
+						Name: "tech_book",
+						Columns: []*types.ColumnMetadata{
+							{
+								Name:     "id",
+								Position: 1,
+								Type:     "integer",
+								Nullable: false,
+							},
+							{
+								Name:     "name",
+								Position: 2,
+								Type:     "varchar(255)",
+								Nullable: false,
+							},
+						},
+						Indexes: []*types.IndexMetadata{
+							{
+								Name:   "tech_book_pkey",
 								Type:   "PRIMARY KEY",
 								Unique: true,
 								Expressions: []string{
