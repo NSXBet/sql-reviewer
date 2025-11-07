@@ -499,10 +499,14 @@ rules:
     level: ERROR
     payload:
       list:
-        - SERIAL
-        - BIGSERIAL
-        - INT
-        - BIGINT
+        - serial
+        - bigserial
+        - int
+        - integer
+        - bigint
+        - int4
+        - int8
+        - uuid
     engine: POSTGRES
   - type: index.create-concurrently
     level: WARNING

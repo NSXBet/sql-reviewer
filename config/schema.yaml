@@ -70,6 +70,9 @@
 - type: table.disallow-trigger
   category: TABLE
   engine: MYSQL
+- type: table.disallow-trigger
+  category: TABLE
+  engine: POSTGRES
 - type: table.no-duplicate-index
   category: TABLE
   engine: MYSQL
@@ -153,9 +156,15 @@
 - type: statement.disallow-limit
   category: STATEMENT
   engine: MYSQL
+- type: statement.disallow-limit
+  category: STATEMENT
+  engine: POSTGRES
 - type: statement.disallow-order-by
   category: STATEMENT
   engine: MYSQL
+- type: statement.disallow-order-by
+  category: STATEMENT
+  engine: POSTGRES
 - type: statement.merge-alter-table
   category: STATEMENT
   engine: MYSQL
@@ -221,6 +230,9 @@
 - type: statement.disallow-add-not-null
   category: STATEMENT
   engine: POSTGRES
+- type: statement.add-column-without-position
+  category: STATEMENT
+  engine: MYSQL
 - type: statement.select-full-table-scan
   category: STATEMENT
   engine: MYSQL
@@ -538,6 +550,9 @@
 - type: column.disallow-changing-order
   category: COLUMN
   engine: MYSQL
+- type: column.disallow-drop
+  category: COLUMN
+  engine: MYSQL
 - type: column.disallow-drop-in-index
   category: COLUMN
   engine: MYSQL
@@ -636,10 +651,22 @@
 - type: column.require-default
   category: COLUMN
   engine: MYSQL
+- type: column.require-charset
+  category: COLUMN
+  engine: MYSQL
 - type: column.require-default
   category: COLUMN
   engine: POSTGRES
 - type: column.default-disallow-volatile
+  category: COLUMN
+  engine: POSTGRES
+- type: column.set-default-for-not-null
+  category: COLUMN
+  engine: POSTGRES
+- type: column.auto-increment-must-integer
+  category: COLUMN
+  engine: POSTGRES
+- type: column.auto-increment-must-unsigned
   category: COLUMN
   engine: POSTGRES
 - type: column.require-charset
@@ -777,6 +804,9 @@
 - type: system.view.disallow-create
   category: SYSTEM
   engine: MYSQL
+- type: system.view.disallow-create
+  category: SYSTEM
+  engine: POSTGRES
 - type: system.function.disallow-create
   category: SYSTEM
   engine: MYSQL
@@ -795,5 +825,8 @@
   category: STATEMENT
   engine: POSTGRES
 - type: statement.object-owner-check
+  category: STATEMENT
+  engine: POSTGRES
+- type: statement.prior-backup-check
   category: STATEMENT
   engine: POSTGRES

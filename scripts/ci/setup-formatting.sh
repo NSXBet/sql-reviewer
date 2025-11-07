@@ -30,10 +30,4 @@ if ! command -v buf &>/dev/null; then
     go install github.com/bufbuild/buf/cmd/buf@latest
 fi
 
-if ! command -v bufx &>/dev/null; then
-    echo "bufx could not be found! Installing..."
-
-    go install github.com/NSXBet/bufx@latest
-fi
-
 echo "✅ Setup formatting complete."
