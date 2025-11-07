@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementDisallowMixInDDLAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowMixInDDL), &StatementDisallowMixInDDLAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowMixInDDL),
+		&StatementDisallowMixInDDLAdvisor{},
+	)
 }
 
 type StatementDisallowMixInDDLAdvisor struct{}

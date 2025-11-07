@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*ColumnAutoIncrementMustIntegerAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnAutoIncrementMustInteger), &ColumnAutoIncrementMustIntegerAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnAutoIncrementMustInteger),
+		&ColumnAutoIncrementMustIntegerAdvisor{},
+	)
 }
 
 type ColumnAutoIncrementMustIntegerAdvisor struct{}

@@ -15,7 +15,11 @@ import (
 var _ advisor.Advisor = (*IndexTotalNumberLimitAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleIndexTotalNumberLimit), &IndexTotalNumberLimitAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleIndexTotalNumberLimit),
+		&IndexTotalNumberLimitAdvisor{},
+	)
 }
 
 type IndexTotalNumberLimitAdvisor struct{}
@@ -102,10 +106,16 @@ func (c *indexTotalNumberLimitChecker) generateAdvice() []*types.Advice {
 		})
 		if tableInfo != nil && tableInfo.CountIndex() > c.max {
 			c.adviceList = append(c.adviceList, &types.Advice{
-				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLIndexTotalNumberExceedsLimit),
-				Title:   c.title,
-				Content: fmt.Sprintf("The count of index in table %q.%q should be no more than %d, but found %d", table.schema, table.table, c.max, tableInfo.CountIndex()),
+				Status: c.level,
+				Code:   int32(advisor.PostgreSQLIndexTotalNumberExceedsLimit),
+				Title:  c.title,
+				Content: fmt.Sprintf(
+					"The count of index in table %q.%q should be no more than %d, but found %d",
+					table.schema,
+					table.table,
+					c.max,
+					tableInfo.CountIndex(),
+				),
 				StartPosition: &types.Position{
 					Line: int32(table.line),
 				},

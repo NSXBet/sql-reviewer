@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*StatementInsertDisallowOrderByRandAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementInsertDisallowOrderByRand), &StatementInsertDisallowOrderByRandAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementInsertDisallowOrderByRand),
+		&StatementInsertDisallowOrderByRandAdvisor{},
+	)
 }
 
 // StatementInsertDisallowOrderByRandAdvisor is the advisor checking for to disallow order by rand in INSERT statements.
@@ -67,10 +71,13 @@ func (c *statementInsertDisallowOrderByRandChecker) EnterInsertstmt(ctx *parser.
 		stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLInsertDisallowOrderByRand),
-			Title:   c.title,
-			Content: fmt.Sprintf("The INSERT statement uses ORDER BY random() or random_between(), related statement \"%s\"", stmtText),
+			Status: c.level,
+			Code:   int32(advisor.PostgreSQLInsertDisallowOrderByRand),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"The INSERT statement uses ORDER BY random() or random_between(), related statement \"%s\"",
+				stmtText,
+			),
 			StartPosition: &types.Position{
 				Line: int32(ctx.GetStart().GetLine()),
 			},

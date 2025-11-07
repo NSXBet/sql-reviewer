@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*StatementObjectOwnerCheckAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementObjectOwnerCheck), &StatementObjectOwnerCheckAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementObjectOwnerCheck),
+		&StatementObjectOwnerCheckAdvisor{},
+	)
 }
 
 // StatementObjectOwnerCheckAdvisor checks object ownership for statements.

@@ -162,10 +162,15 @@ func (c *namingColumnChecker) checkColumnName(tableName, columnName string, line
 	// Check format
 	if c.format != nil && !c.format.MatchString(columnName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(types.NamingColumnConvention),
-			Title:   c.title,
-			Content: fmt.Sprintf("\"%s\".\"%s\" mismatches column naming convention, naming format should be %q", tableName, columnName, c.format.String()),
+			Status: c.level,
+			Code:   int32(types.NamingColumnConvention),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"\"%s\".\"%s\" mismatches column naming convention, naming format should be %q",
+				tableName,
+				columnName,
+				c.format.String(),
+			),
 			StartPosition: &types.Position{
 				Line: int32(line),
 			},
@@ -175,10 +180,15 @@ func (c *namingColumnChecker) checkColumnName(tableName, columnName string, line
 	// Check max length
 	if c.maxLength > 0 && len(columnName) > c.maxLength {
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(types.NamingColumnConvention),
-			Title:   c.title,
-			Content: fmt.Sprintf("\"%s\".\"%s\" mismatches column naming convention, its length should be within %d characters", tableName, columnName, c.maxLength),
+			Status: c.level,
+			Code:   int32(types.NamingColumnConvention),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"\"%s\".\"%s\" mismatches column naming convention, its length should be within %d characters",
+				tableName,
+				columnName,
+				c.maxLength,
+			),
 			StartPosition: &types.Position{
 				Line: int32(line),
 			},

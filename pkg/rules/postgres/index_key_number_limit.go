@@ -74,10 +74,15 @@ func (c *indexKeyNumberLimitChecker) EnterIndexstmt(ctx *parser.IndexstmtContext
 			}
 
 			c.adviceList = append(c.adviceList, &types.Advice{
-				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLIndexCountExceedsLimit),
-				Title:   c.title,
-				Content: fmt.Sprintf("The number of keys of index %q in table %q should be not greater than %d", indexName, tableName, c.max),
+				Status: c.level,
+				Code:   int32(advisor.PostgreSQLIndexCountExceedsLimit),
+				Title:  c.title,
+				Content: fmt.Sprintf(
+					"The number of keys of index %q in table %q should be not greater than %d",
+					indexName,
+					tableName,
+					c.max,
+				),
 				StartPosition: &types.Position{
 					Line: int32(ctx.GetStart().GetLine()),
 				},
@@ -168,10 +173,15 @@ func (c *indexKeyNumberLimitChecker) checkTableConstraint(constraint parser.ITab
 
 	if c.max > 0 && keyCount > c.max {
 		c.adviceList = append(c.adviceList, &types.Advice{
-			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLIndexCountExceedsLimit),
-			Title:   c.title,
-			Content: fmt.Sprintf("The number of keys of index %q in table %q should be not greater than %d", constraintName, tableName, c.max),
+			Status: c.level,
+			Code:   int32(advisor.PostgreSQLIndexCountExceedsLimit),
+			Title:  c.title,
+			Content: fmt.Sprintf(
+				"The number of keys of index %q in table %q should be not greater than %d",
+				constraintName,
+				tableName,
+				c.max,
+			),
 			StartPosition: &types.Position{
 				Line: int32(line),
 			},

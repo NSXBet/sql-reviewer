@@ -15,7 +15,11 @@ import (
 var _ advisor.Advisor = (*ColumnDefaultDisallowVolatileAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleColumnDefaultDisallowVolatile), &ColumnDefaultDisallowVolatileAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleColumnDefaultDisallowVolatile),
+		&ColumnDefaultDisallowVolatileAdvisor{},
+	)
 }
 
 type ColumnDefaultDisallowVolatileAdvisor struct{}

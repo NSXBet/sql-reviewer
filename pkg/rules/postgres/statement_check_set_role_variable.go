@@ -10,7 +10,11 @@ import (
 var _ advisor.Advisor = (*StatementCheckSetRoleVariableAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementCheckSetRoleVariable), &StatementCheckSetRoleVariableAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementCheckSetRoleVariable),
+		&StatementCheckSetRoleVariableAdvisor{},
+	)
 }
 
 // StatementCheckSetRoleVariableAdvisor checks for SET ROLE variable requirements.

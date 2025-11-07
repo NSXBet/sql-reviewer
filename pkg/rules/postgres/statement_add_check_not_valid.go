@@ -12,7 +12,11 @@ import (
 var _ advisor.Advisor = (*StatementAddCheckNotValidAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementAddCheckNotValid), &StatementAddCheckNotValidAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementAddCheckNotValid),
+		&StatementAddCheckNotValidAdvisor{},
+	)
 }
 
 type StatementAddCheckNotValidAdvisor struct{}

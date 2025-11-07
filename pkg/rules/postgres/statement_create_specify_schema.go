@@ -12,7 +12,11 @@ import (
 var _ advisor.Advisor = (*StatementCreateSpecifySchemaAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementCreateSpecifySchema), &StatementCreateSpecifySchemaAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementCreateSpecifySchema),
+		&StatementCreateSpecifySchemaAdvisor{},
+	)
 }
 
 type StatementCreateSpecifySchemaAdvisor struct{}

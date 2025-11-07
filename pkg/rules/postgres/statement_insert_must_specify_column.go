@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementInsertMustSpecifyColumnAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementInsertMustSpecifyColumn), &StatementInsertMustSpecifyColumnAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementInsertMustSpecifyColumn),
+		&StatementInsertMustSpecifyColumnAdvisor{},
+	)
 }
 
 // StatementInsertMustSpecifyColumnAdvisor is the advisor checking for to enforce column specified.

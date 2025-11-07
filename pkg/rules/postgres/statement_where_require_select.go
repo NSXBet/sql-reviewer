@@ -13,7 +13,11 @@ import (
 var _ advisor.Advisor = (*StatementWhereRequireSelectAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementRequireWhereForSelect), &StatementWhereRequireSelectAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementRequireWhereForSelect),
+		&StatementWhereRequireSelectAdvisor{},
+	)
 }
 
 // StatementWhereRequireSelectAdvisor is the advisor checking for WHERE clause requirement in SELECT statements.
@@ -120,7 +124,9 @@ func (*statementWhereRequireSelectChecker) findTopLevelLine(ctx antlr.ParserRule
 }
 
 // checkSelectWithParensForWhere checks a select_with_parens for WHERE and FROM
-func (c *statementWhereRequireSelectChecker) checkSelectWithParensForWhere(ctx parser.ISelect_with_parensContext) (hasWhere bool, hasFrom bool) {
+func (c *statementWhereRequireSelectChecker) checkSelectWithParensForWhere(
+	ctx parser.ISelect_with_parensContext,
+) (hasWhere bool, hasFrom bool) {
 	if ctx == nil {
 		return false, false
 	}
@@ -159,7 +165,9 @@ func (c *statementWhereRequireSelectChecker) checkSelectClauses(ctx *parser.Sele
 }
 
 // checkSelectClause checks a select_clause for WHERE and FROM
-func (*statementWhereRequireSelectChecker) checkSelectClause(selectClause parser.ISelect_clauseContext) (hasWhere bool, hasFrom bool) {
+func (*statementWhereRequireSelectChecker) checkSelectClause(
+	selectClause parser.ISelect_clauseContext,
+) (hasWhere bool, hasFrom bool) {
 	if selectClause == nil {
 		return false, false
 	}

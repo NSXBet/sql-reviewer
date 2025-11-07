@@ -12,12 +12,19 @@ import (
 var _ advisor.Advisor = (*StatementDisallowAddColumnWithDefaultAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowAddColumnWithDefault), &StatementDisallowAddColumnWithDefaultAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowAddColumnWithDefault),
+		&StatementDisallowAddColumnWithDefaultAdvisor{},
+	)
 }
 
 type StatementDisallowAddColumnWithDefaultAdvisor struct{}
 
-func (*StatementDisallowAddColumnWithDefaultAdvisor) Check(ctx context.Context, checkCtx advisor.Context) ([]*types.Advice, error) {
+func (*StatementDisallowAddColumnWithDefaultAdvisor) Check(
+	ctx context.Context,
+	checkCtx advisor.Context,
+) ([]*types.Advice, error) {
 	tree, err := getANTLRTree(checkCtx)
 	if err != nil {
 		return nil, err

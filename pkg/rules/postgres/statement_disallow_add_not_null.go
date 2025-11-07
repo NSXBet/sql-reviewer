@@ -14,7 +14,11 @@ import (
 var _ advisor.Advisor = (*StatementDisallowAddNotNullAdvisor)(nil)
 
 func init() {
-	advisor.Register(types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleStatementDisallowAddNotNull), &StatementDisallowAddNotNullAdvisor{})
+	advisor.Register(
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleStatementDisallowAddNotNull),
+		&StatementDisallowAddNotNullAdvisor{},
+	)
 }
 
 type StatementDisallowAddNotNullAdvisor struct{}
@@ -62,10 +66,13 @@ func (c *statementDisallowAddNotNullChecker) EnterAltertablestmt(ctx *parser.Alt
 				if len(allColIDs) > 0 {
 					columnName := pgparser.NormalizePostgreSQLColid(allColIDs[0])
 					c.adviceList = append(c.adviceList, &types.Advice{
-						Status:  c.level,
-						Code:    int32(advisor.PostgreSQLDisallowAddNotNull),
-						Title:   c.title,
-						Content: fmt.Sprintf("Setting NOT NULL will block reads and writes. You can use CHECK (%q IS NOT NULL) instead", columnName),
+						Status: c.level,
+						Code:   int32(advisor.PostgreSQLDisallowAddNotNull),
+						Title:  c.title,
+						Content: fmt.Sprintf(
+							"Setting NOT NULL will block reads and writes. You can use CHECK (%q IS NOT NULL) instead",
+							columnName,
+						),
 						StartPosition: &types.Position{
 							Line: int32(ctx.GetStart().GetLine() - 1),
 						},

@@ -103,13 +103,13 @@ func TestPostgreSQLRules(t *testing.T) {
 // These rules interact with existing database schema (e.g., checking existing indexes,
 // primary keys, or object ownership).
 var rulesNeedingMetadata = map[advisor.SQLReviewRuleType]bool{
-	advisor.SchemaRuleColumnNotNull:            true, // PRIMARY KEY USING INDEX
-	advisor.SchemaRuleTableRequirePK:           true, // DROP CONSTRAINT/COLUMN checks
-	advisor.SchemaRuleIndexTotalNumberLimit:    true, // Count existing indexes
-	advisor.SchemaRulePKNaming:                 true, // PRIMARY KEY USING INDEX
-	advisor.SchemaRuleUKNaming:                 true, // UNIQUE USING INDEX
-	advisor.SchemaRuleIDXNaming:                true, // ALTER INDEX RENAME
-	advisor.SchemaRuleFullyQualifiedObjectName: true, // SELECT statement checks
+	advisor.SchemaRuleColumnNotNull:             true, // PRIMARY KEY USING INDEX
+	advisor.SchemaRuleTableRequirePK:            true, // DROP CONSTRAINT/COLUMN checks
+	advisor.SchemaRuleIndexTotalNumberLimit:     true, // Count existing indexes
+	advisor.SchemaRulePKNaming:                  true, // PRIMARY KEY USING INDEX
+	advisor.SchemaRuleUKNaming:                  true, // UNIQUE USING INDEX
+	advisor.SchemaRuleIDXNaming:                 true, // ALTER INDEX RENAME
+	advisor.SchemaRuleFullyQualifiedObjectName:  true, // SELECT statement checks
 	advisor.SchemaRuleStatementObjectOwnerCheck: true, // Ownership checks
 }
 
