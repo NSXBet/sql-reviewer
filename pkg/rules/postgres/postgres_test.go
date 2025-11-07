@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -253,92 +252,102 @@ func loadTestCases(filename string) ([]TestCase, error) {
 
 // getDefaultPayload returns the default payload for a PostgreSQL rule.
 func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, error) {
-	var payload interface{}
-
 	switch rule {
-	case advisor.SchemaRuleTableNaming,
-		advisor.SchemaRuleColumnNaming:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*$",
-		}
+	case advisor.SchemaRuleTableNaming:
+		return map[string]interface{}{
+			"format":    "^[a-z]+(_[a-z]+)*$",
+			"maxLength": 64,
+		}, nil
+	case advisor.SchemaRuleColumnNaming:
+		return map[string]interface{}{
+			"format":    "^[a-z]+(_[a-z]+)*$",
+			"maxLength": 64,
+		}, nil
 	case advisor.SchemaRulePKNaming:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*_pkey$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^pk_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleUKNaming:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*_uk$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^uk_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleFKNaming:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*_fkey$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^fk_{{referencing_table}}_{{referencing_column}}_{{referenced_table}}_{{referenced_column}}$",
+			"maxLength":    64,
+			"templateList": []string{"referencing_table", "referencing_column", "referenced_table", "referenced_column"},
+		}, nil
 	case advisor.SchemaRuleIDXNaming:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*_idx$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^idx_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleTableDropNamingConvention:
-		payload = advisor.NamingRulePayload{
-			Format: "^[a-z]+(_[a-z]+)*_del$",
-		}
+		return map[string]interface{}{
+			"format":    "^[a-z]+(_[a-z]+)*_del$",
+			"maxLength": 64,
+		}, nil
 	case advisor.SchemaRuleRequiredColumn:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"id", "created_at", "updated_at"},
-		}
+		return map[string]interface{}{
+			"list": []string{"created_ts", "creator_id", "updated_ts", "updater_id"},
+		}, nil
 	case advisor.SchemaRuleColumnTypeDisallowList:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"text", "json"},
-		}
+		return map[string]interface{}{
+			"list": []string{"text", "json"},
+		}, nil
 	case advisor.SchemaRuleIndexPrimaryKeyTypeAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"int", "bigint"},
-		}
+		return map[string]interface{}{
+			"list": []string{"int", "bigint"},
+		}, nil
 	case advisor.SchemaRuleCharsetAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"utf8", "utf8mb4"},
-		}
+		return map[string]interface{}{
+			"list": []string{"utf8", "utf8mb4"},
+		}, nil
 	case advisor.SchemaRuleCollationAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"utf8mb4_0900_ai_ci", "utf8mb4_general_ci"},
-		}
-	case advisor.SchemaRuleColumnMaximumCharacterLength,
-		advisor.SchemaRuleColumnCommentConvention,
-		advisor.SchemaRuleTableCommentConvention:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 20,
-		}
-	case advisor.SchemaRuleIndexKeyNumberLimit,
-		advisor.SchemaRuleIndexTotalNumberLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 5,
-		}
+		return map[string]interface{}{
+			"list": []string{"utf8mb4_0900_ai_ci", "utf8mb4_general_ci"},
+		}, nil
+	case advisor.SchemaRuleColumnMaximumCharacterLength:
+		return map[string]interface{}{
+			"number": 20,
+		}, nil
+	case advisor.SchemaRuleColumnCommentConvention:
+		return map[string]interface{}{
+			"number": 20,
+		}, nil
+	case advisor.SchemaRuleTableCommentConvention:
+		return map[string]interface{}{
+			"number": 20,
+		}, nil
+	case advisor.SchemaRuleIndexKeyNumberLimit:
+		return map[string]interface{}{
+			"number": 5,
+		}, nil
+	case advisor.SchemaRuleIndexTotalNumberLimit:
+		return map[string]interface{}{
+			"number": 5,
+		}, nil
 	case advisor.SchemaRuleStatementInsertRowLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 100,
-		}
+		return map[string]interface{}{
+			"number": 100,
+		}, nil
 	case advisor.SchemaRuleStatementMaximumLimitValue:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 1000,
-		}
+		return map[string]interface{}{
+			"number": 1000,
+		}, nil
 	case advisor.SchemaRuleStatementAffectedRowLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 1000,
-		}
+		return map[string]interface{}{
+			"number": 1000,
+		}, nil
 	default:
 		// Rules without payload
 		return nil, nil
 	}
-
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 // createMockDatabase creates a mock database schema for testing.
@@ -446,6 +455,34 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 						Indexes: []*types.IndexMetadata{
 							{
 								Name:   "tech_book_pkey",
+								Type:   "PRIMARY KEY",
+								Unique: true,
+								Expressions: []string{
+									"id",
+								},
+								Primary: true,
+							},
+						},
+					},
+					{
+						Name: "author",
+						Columns: []*types.ColumnMetadata{
+							{
+								Name:     "id",
+								Position: 1,
+								Type:     "integer",
+								Nullable: false,
+							},
+							{
+								Name:     "name",
+								Position: 2,
+								Type:     "varchar(255)",
+								Nullable: false,
+							},
+						},
+						Indexes: []*types.IndexMetadata{
+							{
+								Name:   "author_pkey",
 								Type:   "PRIMARY KEY",
 								Unique: true,
 								Expressions: []string{
