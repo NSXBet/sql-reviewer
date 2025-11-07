@@ -654,3 +654,72 @@ func newFalsePointer() *bool {
 func newBoolPointer(v bool) *bool {
 	return &v
 }
+
+// ========================================
+// PostgreSQL-specific helper methods
+// ========================================
+
+// getSchema gets or creates a schema, defaulting to "public" if empty.
+func (d *DatabaseState) getSchema(schemaName string) (*SchemaState, *WalkThroughError) {
+	if schemaName == "" {
+		schemaName = "public"
+	}
+	schema, exists := d.schemaSet[schemaName]
+	if !exists {
+		if schemaName != "public" {
+			return nil, &WalkThroughError{
+				Type:    ErrorTypeSchemaNotExists,
+				Content: fmt.Sprintf("The schema %q doesn't exist", schemaName),
+			}
+		}
+		schema = &SchemaState{
+			ctx:           d.ctx.Copy(),
+			name:          "public",
+			tableSet:      make(tableStateMap),
+			viewSet:       make(viewStateMap),
+			identifierMap: make(identifierMap),
+		}
+		d.schemaSet["public"] = schema
+	}
+	return schema, nil
+}
+
+// pgGeneratePrimaryKeyName generates a unique primary key name.
+func (s *SchemaState) pgGeneratePrimaryKeyName(tableName string) string {
+	pkName := fmt.Sprintf("%s_pkey", tableName)
+	if _, exists := s.identifierMap[pkName]; !exists {
+		return pkName
+	}
+	suffix := 1
+	for {
+		if _, exists := s.identifierMap[fmt.Sprintf("%s%d", pkName, suffix)]; !exists {
+			return fmt.Sprintf("%s%d", pkName, suffix)
+		}
+		suffix++
+	}
+}
+
+// pgGetTable gets a table with proper error handling.
+func (s *SchemaState) pgGetTable(tableName string) (*TableState, *WalkThroughError) {
+	table, exists := s.tableSet[tableName]
+	if !exists {
+		return nil, &WalkThroughError{
+			Type:    ErrorTypeTableNotExists,
+			Content: fmt.Sprintf("The table %q does not exist in schema %q", tableName, s.name),
+		}
+	}
+	return table, nil
+}
+
+// getIndex finds an index by name across all tables in the schema.
+func (s *SchemaState) getIndex(indexName string) (*TableState, *IndexState, *WalkThroughError) {
+	for _, table := range s.tableSet {
+		if index, exists := table.indexSet[indexName]; exists {
+			return table, index, nil
+		}
+	}
+	return nil, nil, &WalkThroughError{
+		Type:    ErrorTypeIndexNotExists,
+		Content: fmt.Sprintf("Index %q does not exist in schema %q", indexName, s.name),
+	}
+}
