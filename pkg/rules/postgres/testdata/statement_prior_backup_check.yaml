@@ -1,0 +1,9 @@
+- statement: |
+    CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      name TEXT
+    );
+  want: []
+- statement: |
+    SELECT * FROM users;
+  want: []
