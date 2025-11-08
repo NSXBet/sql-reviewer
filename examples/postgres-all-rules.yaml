@@ -1,7 +1,6 @@
 # PostgreSQL All Rules Configuration
 # This file contains ALL available PostgreSQL rules with example configurations
 # Organized by category: Naming, Statement, Table, Column, Index, and System rules
-
 id: postgres-all-rules
 rules:
   # ============================================================================
