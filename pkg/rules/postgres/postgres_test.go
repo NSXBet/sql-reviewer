@@ -296,7 +296,7 @@ func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, 
 		}, nil
 	case advisor.SchemaRuleTableDropNamingConvention:
 		return map[string]interface{}{
-			"format":    "^[a-z]+(_[a-z]+)*_del$",
+			"format":    "_delete$",
 			"maxLength": 64,
 		}, nil
 	case advisor.SchemaRuleRequiredColumn:

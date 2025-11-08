@@ -330,8 +330,9 @@ func UnmarshalNamingRulePayload(payload map[string]interface{}) (*NamingRulePayl
 
 // NamingRulePayloadRegexp represents a naming rule payload with compiled regexp
 type NamingRulePayloadRegexp struct {
-	Format    *regexp.Regexp
-	MaxLength int
+	Format       *regexp.Regexp
+	FormatString string // Original format string for error messages
+	MaxLength    int
 }
 
 // UnmarshalNamingRulePayloadAsRegexp unmarshals a naming rule payload and returns a compiled regexp
@@ -348,8 +349,9 @@ func UnmarshalNamingRulePayloadAsRegexp(payload map[string]interface{}) (*Naming
 	}
 
 	return &NamingRulePayloadRegexp{
-		Format:    format,
-		MaxLength: result.MaxLength,
+		Format:       format,
+		FormatString: result.Format,
+		MaxLength:    result.MaxLength,
 	}, nil
 }
 
