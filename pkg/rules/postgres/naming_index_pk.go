@@ -210,9 +210,10 @@ func (c *namingIndexPKChecker) EnterRenamestmt(ctx *parser.RenamestmtContext) {
 				if normalizedSchema == "" {
 					normalizedSchema = "public"
 				}
+				// Use Origin state to check the index BEFORE rename
+				// Try without TableName filter to search across all tables
 				tableName, index := c.catalog.Origin.FindIndex(&catalog.IndexFind{
 					SchemaName: normalizedSchema,
-					TableName:  "",
 					IndexName:  oldIndexName,
 				})
 				if index != nil && index.Primary() {

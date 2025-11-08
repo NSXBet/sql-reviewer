@@ -101,19 +101,23 @@ func extractStringConstant(ctx parser.ISconstContext) string {
 func extractStatementText(statementsText string, startLine, endLine int) string {
 	lines := strings.Split(statementsText, "\n")
 
-	if startLine < 0 || startLine >= len(lines) {
+	// ANTLR uses 1-indexed line numbers, convert to 0-indexed array indices
+	startIdx := startLine - 1
+	endIdx := endLine - 1
+
+	if startIdx < 0 || startIdx >= len(lines) {
 		return ""
 	}
 
-	if endLine < 0 || endLine >= len(lines) {
-		endLine = len(lines) - 1
+	if endIdx < 0 || endIdx >= len(lines) {
+		endIdx = len(lines) - 1
 	}
 
-	if startLine > endLine {
+	if startIdx > endIdx {
 		return ""
 	}
 
-	return strings.Join(lines[startLine:endLine+1], "\n")
+	return strings.Join(lines[startIdx:endIdx+1], "\n")
 }
 
 // getTemplateRegexp generates a regex from a template string with tokens.

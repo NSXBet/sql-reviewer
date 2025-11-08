@@ -253,10 +253,9 @@ func (d *DatabaseState) FindIndex(find *IndexFind) (string, *IndexState) {
 		for _, table := range schema.tableSet {
 			// no need to further match table name because index is already unique in the schema
 			index, exists := table.indexSet[find.IndexName]
-			if !exists {
-				return "", nil
+			if exists {
+				return table.name, index
 			}
-			return table.name, index
 		}
 	}
 	return "", nil
