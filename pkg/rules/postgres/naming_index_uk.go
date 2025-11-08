@@ -327,7 +327,7 @@ func (c *namingIndexUKChecker) checkUniqueKeyName(indexName, tableName string, m
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.Internal),
+			Code:    int32(types.Internal),
 			Title:   "Internal error for unique key naming convention rule",
 			Content: fmt.Sprintf("Failed to compile regex for unique key naming convention: %v", err),
 			StartPosition: &types.Position{

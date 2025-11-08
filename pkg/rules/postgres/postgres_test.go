@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -199,6 +200,17 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 			advices, err := advisor.Check(ctx, types.Engine_POSTGRES, advisor.Type(rule), checkCtx)
 			require.NoError(t, err, "Advisor check failed")
 
+			// Sort adviceList by (line, content) for consistent comparison (same as Bytebase)
+			sort.Slice(advices, func(i, j int) bool {
+				if advices[i].StartPosition == nil || advices[j].StartPosition == nil {
+					return advices[i].StartPosition != nil
+				}
+				if advices[i].StartPosition.Line != advices[j].StartPosition.Line {
+					return advices[i].StartPosition.Line < advices[j].StartPosition.Line
+				}
+				return advices[i].Content < advices[j].Content
+			})
+
 			// Compare results
 			if len(tc.Want) == 0 {
 				// Expect no violations
@@ -325,11 +337,13 @@ func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, 
 		}, nil
 	case advisor.SchemaRuleColumnCommentConvention:
 		return map[string]interface{}{
-			"number": 20,
+			"required":  true,
+			"maxLength": 10,
 		}, nil
 	case advisor.SchemaRuleTableCommentConvention:
 		return map[string]interface{}{
-			"number": 20,
+			"required":  true,
+			"maxLength": 10,
 		}, nil
 	case advisor.SchemaRuleIndexKeyNumberLimit:
 		return map[string]interface{}{
@@ -341,7 +355,7 @@ func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, 
 		}, nil
 	case advisor.SchemaRuleStatementInsertRowLimit:
 		return map[string]interface{}{
-			"number": 100,
+			"number": 5,
 		}, nil
 	case advisor.SchemaRuleStatementMaximumLimitValue:
 		return map[string]interface{}{

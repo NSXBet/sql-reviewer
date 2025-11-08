@@ -16,14 +16,14 @@ rules:
   - type: naming.table
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$" # snake_case
+      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
       maxLength: 63
     engine: POSTGRES
   # Column naming convention
   - type: naming.column
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$" # snake_case
+      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
       maxLength: 63
     engine: POSTGRES
   # Primary key naming convention
@@ -211,7 +211,7 @@ rules:
     level: ERROR
     payload:
       list:
-        - MONEY # Use NUMERIC instead
+        - MONEY  # Use NUMERIC instead
         # - JSON  # Uncomment to disallow JSON type
     engine: POSTGRES
   # Columns cannot be NULL

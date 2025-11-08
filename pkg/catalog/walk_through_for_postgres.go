@@ -1438,6 +1438,117 @@ func (l *pgAntlrCatalogListener) EnterViewstmt(ctx *parser.ViewstmtContext) {
 }
 
 // ========================================
+// COMMENT ON handling
+// ========================================
+
+// EnterCommentstmt handles COMMENT ON statements.
+func (l *pgAntlrCatalogListener) EnterCommentstmt(ctx *parser.CommentstmtContext) {
+	if !isTopLevel(ctx.GetParent()) || l.err != nil {
+		return
+	}
+
+	if !l.checkDatabaseNotDeleted() {
+		return
+	}
+
+	l.currentLine = ctx.GetStart().GetLine()
+
+	// Get comment text
+	commentText := ""
+	if ctx.Comment_text() != nil {
+		text := ctx.Comment_text().GetText()
+		// Remove quotes from the string literal
+		if len(text) >= 2 && text[0] == '\'' && text[len(text)-1] == '\'' {
+			commentText = text[1 : len(text)-1]
+		}
+	}
+
+	// Parse the object name
+	if ctx.Any_name() == nil {
+		return
+	}
+
+	parts := pgparser.NormalizePostgreSQLAnyName(ctx.Any_name())
+
+	// Handle COMMENT ON COLUMN table.column
+	if ctx.COLUMN() != nil {
+		if len(parts) < 2 {
+			return // Need at least table.column
+		}
+
+		tableName := parts[0]
+		columnName := parts[1]
+		schemaName := "public" // Default schema
+
+		// If 3 parts, first is schema
+		if len(parts) == 3 {
+			schemaName = parts[0]
+			tableName = parts[1]
+			columnName = parts[2]
+		}
+
+		schema, err := l.databaseState.getSchema(schemaName)
+		if err != nil {
+			l.setError(err)
+			return
+		}
+
+		table, exists := schema.tableSet[tableName]
+		if !exists {
+			l.setError(&WalkThroughError{
+				Type:    ErrorTypeTableNotExists,
+				Content: fmt.Sprintf("The table %q does not exist in the schema %q", tableName, schemaName),
+			})
+			return
+		}
+
+		column, err := table.getColumn(columnName)
+		if err != nil {
+			l.setError(err)
+			return
+		}
+
+		// Update column comment
+		column.comment = newStringPointer(commentText)
+		return
+	}
+
+	// Handle COMMENT ON TABLE table
+	if ctx.CLASS() != nil {
+		if len(parts) == 0 {
+			return
+		}
+
+		tableName := parts[len(parts)-1]
+		schemaName := "public" // Default schema
+
+		// If 2+ parts, use second-to-last as schema
+		if len(parts) >= 2 {
+			schemaName = parts[len(parts)-2]
+		}
+
+		schema, err := l.databaseState.getSchema(schemaName)
+		if err != nil {
+			l.setError(err)
+			return
+		}
+
+		table, exists := schema.tableSet[tableName]
+		if !exists {
+			l.setError(&WalkThroughError{
+				Type:    ErrorTypeTableNotExists,
+				Content: fmt.Sprintf("The table %q does not exist in the schema %q", tableName, schemaName),
+			})
+			return
+		}
+
+		// Update table comment
+		table.comment = newStringPointer(commentText)
+		return
+	}
+}
+
+// ========================================
 // Helper functions
 // ========================================
 

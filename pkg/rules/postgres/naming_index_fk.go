@@ -294,7 +294,7 @@ func (c *namingIndexFKChecker) checkFKMetadata(fkData *fkMetaData) {
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.Internal),
+			Code:    int32(types.Internal),
 			Title:   "Internal error for foreign key naming convention rule",
 			Content: fmt.Sprintf("Failed to compile regex: %s", err.Error()),
 			StartPosition: &types.Position{

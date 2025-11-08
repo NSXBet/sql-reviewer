@@ -81,7 +81,7 @@ func (c *statementDisallowOnDelCascadeChecker) EnterKey_delete(ctx *parser.Key_d
 				// right before the statement (often a newline), while ANTLR's GetLine() points
 				// to the actual line where the statement starts. This creates an off-by-one
 				// when there are statements before the CREATE TABLE.
-				line := stmtCtx.GetStart().GetLine()
+				line := stmtCtx.GetStart().GetLine() - 1
 				if line < 1 {
 					line = 1
 				}

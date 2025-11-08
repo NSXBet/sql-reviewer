@@ -198,6 +198,11 @@ func (d *DatabaseState) DatabaseName() string {
 	return d.name
 }
 
+// Schemas returns a map of schema name to SchemaState for iteration.
+func (d *DatabaseState) Schemas() map[string]*SchemaState {
+	return d.schemaSet
+}
+
 // createSchema creates a new empty schema in the database state.
 func (d *DatabaseState) createSchema() *SchemaState {
 	schema := &SchemaState{
@@ -406,6 +411,11 @@ func (s *SchemaState) Index(tableIndexFind *TableIndexFind) *IndexStateMap {
 		return nil
 	}
 	return table.Index(tableIndexFind)
+}
+
+// Tables returns a map of table name to TableState for iteration.
+func (s *SchemaState) Tables() map[string]*TableState {
+	return s.tableSet
 }
 
 type schemaStateMap map[string]*SchemaState

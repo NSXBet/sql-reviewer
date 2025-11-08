@@ -59,7 +59,7 @@ rules:
     level: ERROR
     payload:
       list:
-        - MONEY # Use NUMERIC instead for better precision
+        - MONEY  # Use NUMERIC instead for better precision
     engine: POSTGRES
   # Disallow leading % in LIKE (can't use index)
   - type: statement.where.no-leading-wildcard-like
