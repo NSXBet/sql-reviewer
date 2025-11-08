@@ -190,7 +190,7 @@ func (c *namingFullyQualifiedChecker) checkQualifiedName(ctx parser.IQualified_n
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
-				Line: int32(line - 1),
+				Line: int32(line),
 			},
 		})
 	}
@@ -213,7 +213,7 @@ func (c *namingFullyQualifiedChecker) checkAnyName(ctx parser.IAny_nameContext, 
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
-				Line: int32(line - 1),
+				Line: int32(line),
 			},
 		})
 	}

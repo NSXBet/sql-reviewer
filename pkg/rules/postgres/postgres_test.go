@@ -230,6 +230,10 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 					// Compare position if specified
 					if want.StartPosition != nil {
 						require.NotNil(t, got.StartPosition, "Advice %d: expected start position", j)
+						if want.StartPosition.Line != got.StartPosition.Line {
+							t.Logf("DEBUG Line mismatch for advice %d: want line %d, got line %d. Content: %s",
+								j, want.StartPosition.Line, got.StartPosition.Line, got.Content)
+						}
 						require.Equal(t, want.StartPosition.Line, got.StartPosition.Line, "Advice %d: line mismatch", j)
 					}
 				}
