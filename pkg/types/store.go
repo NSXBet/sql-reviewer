@@ -396,6 +396,7 @@ const (
 	NotCurrentDatabase                          = 502  // Matches advisor.NotCurrentDatabase
 	IndexPKType                                 = 803  // Matches advisor.IndexPKType
 	IndexCountExceedsLimit                      = 813  // Matches advisor.IndexCountExceedsLimit
+	CreateIndexUnconcurrently                   = 814  // Matches advisor.CreateIndexUnconcurrently
 	TableExceedLimitSize                        = 615  // Matches advisor.TableExceedLimitSize
 	IndexTypeNotAllowed                         = 816  // Matches advisor.IndexTypeNotAllowed
 	IndexTypeNoBlob                             = 804  // Matches advisor.IndexTypeNoBlob

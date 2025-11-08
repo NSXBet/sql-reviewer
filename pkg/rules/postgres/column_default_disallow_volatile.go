@@ -176,11 +176,11 @@ func (c *columnDefaultDisallowVolatileChecker) generateAdvice() []*types.Advice 
 	for _, column := range columnList {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLColumnDefaultDisallowVolatile),
+			Code:    int32(types.ColumnRequireDefault),
 			Title:   c.title,
 			Content: fmt.Sprintf("Column %q.%q in schema %q has volatile DEFAULT", column.table, column.name, column.schema),
 			StartPosition: &types.Position{
-				Line: int32(column.line - 1),
+				Line: int32(column.line),
 			},
 		})
 	}

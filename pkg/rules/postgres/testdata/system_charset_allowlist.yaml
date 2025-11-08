@@ -10,7 +10,7 @@
       title: system.charset.allowlist
       content: '"" used disabled encoding ''latin1'''
       startposition:
-        line: 0
+        line: 1
         column: 0
       endposition: null
 - statement: /* this is a comment */
