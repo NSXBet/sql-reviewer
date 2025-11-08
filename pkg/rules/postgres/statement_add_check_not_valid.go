@@ -74,11 +74,11 @@ func (c *statementAddCheckNotValidChecker) EnterColconstraint(ctx *parser.Colcon
 		if constraintElem.CHECK() != nil {
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLAddCheckNotValid),
+				Code:    int32(types.StatementAddCheckWithValidation),
 				Title:   c.title,
 				Content: "Adding check constraints with validation will block reads and writes. You can add check constraints not valid and then validate separately",
 				StartPosition: &types.Position{
-					Line: int32(alterTableCtx.GetStart().GetLine() - 1),
+					Line: int32(alterTableCtx.GetStart().GetLine()),
 				},
 			})
 		}
@@ -120,11 +120,11 @@ func (c *statementAddCheckNotValidChecker) EnterTableconstraint(ctx *parser.Tabl
 			if !hasNotValid {
 				c.adviceList = append(c.adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLAddCheckNotValid),
+					Code:    int32(types.StatementAddCheckWithValidation),
 					Title:   c.title,
 					Content: "Adding check constraints with validation will block reads and writes. You can add check constraints not valid and then validate separately",
 					StartPosition: &types.Position{
-						Line: int32(alterTableCtx.GetStart().GetLine() - 1),
+						Line: int32(alterTableCtx.GetStart().GetLine()),
 					},
 				})
 			}

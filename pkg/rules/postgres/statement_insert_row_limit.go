@@ -78,7 +78,7 @@ func (c *statementInsertRowLimitChecker) EnterInsertstmt(ctx *parser.InsertstmtC
 			stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLInsertRowLimitExceeds),
+				Code:    int32(types.InsertTooManyRows),
 				Title:   c.title,
 				Content: fmt.Sprintf("The statement \"%s\" inserts %d rows. The count exceeds %d.", stmtText, rowCount, c.maxRow),
 				StartPosition: &types.Position{

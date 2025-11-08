@@ -44,9 +44,10 @@ func (*TableDropNamingConventionAdvisor) Check(ctx context.Context, checkCtx adv
 	}
 
 	checker := &tableDropNamingConventionChecker{
-		level:  level,
-		title:  string(checkCtx.Rule.Type),
-		format: payload.Format,
+		level:        level,
+		title:        string(checkCtx.Rule.Type),
+		format:       payload.Format,
+		formatString: payload.FormatString,
 	}
 
 	antlr.ParseTreeWalkerDefault.Walk(checker, tree.Tree)
@@ -57,10 +58,11 @@ func (*TableDropNamingConventionAdvisor) Check(ctx context.Context, checkCtx adv
 type tableDropNamingConventionChecker struct {
 	*parser.BasePostgreSQLParserListener
 
-	adviceList []*types.Advice
-	level      types.Advice_Status
-	title      string
-	format     *regexp.Regexp
+	adviceList   []*types.Advice
+	level        types.Advice_Status
+	title        string
+	format       *regexp.Regexp
+	formatString string
 }
 
 // EnterDropstmt handles DROP TABLE statements
@@ -87,7 +89,7 @@ func (c *tableDropNamingConventionChecker) EnterDropstmt(ctx *parser.DropstmtCon
 					Content: fmt.Sprintf(
 						"`%s` mismatches drop table naming convention, naming format should be %q",
 						tableName,
-						c.format.String(),
+						c.formatString,
 					),
 					StartPosition: &types.Position{
 						Line: int32(ctx.GetStart().GetLine()),

@@ -98,7 +98,7 @@ func (c *statementWhereRequireSelectChecker) checkSelect(
 
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status:  c.level,
-		Code:    int32(advisor.PostgreSQLStatementWhereRequirementForSelect),
+		Code:    int32(types.StatementNoWhere),
 		Title:   c.title,
 		Content: fmt.Sprintf("\"%s\" requires WHERE clause", stmtText),
 		StartPosition: &types.Position{

@@ -62,11 +62,11 @@ func (c *statementCreateSpecifySchemaChecker) EnterCreatestmt(ctx *parser.Create
 		if schemaName == "" {
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLStatementCreateSpecifySchema),
+				Code:    int32(types.StatementCreateWithoutSchemaName),
 				Title:   c.title,
 				Content: "Table schema should be specified.",
 				StartPosition: &types.Position{
-					Line: int32(ctx.GetStart().GetLine() - 1),
+					Line: int32(ctx.GetStart().GetLine()),
 				},
 			})
 		}

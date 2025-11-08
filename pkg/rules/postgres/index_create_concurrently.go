@@ -79,11 +79,11 @@ func (c *indexCreateConcurrentlyChecker) EnterIndexstmt(ctx *parser.IndexstmtCon
 
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLIndexConcurrently),
+			Code:    int32(types.CreateIndexUnconcurrently),
 			Title:   c.title,
 			Content: "Creating indexes will block writes on the table, unless use CONCURRENTLY",
 			StartPosition: &types.Position{
-				Line: int32(ctx.GetStart().GetLine() - 1),
+				Line: int32(ctx.GetStart().GetLine()),
 			},
 		})
 	}
@@ -98,11 +98,11 @@ func (c *indexCreateConcurrentlyChecker) EnterDropstmt(ctx *parser.DropstmtConte
 		if ctx.CONCURRENTLY() == nil {
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLIndexConcurrently),
+				Code:    int32(types.CreateIndexUnconcurrently),
 				Title:   c.title,
 				Content: "Droping indexes will block writes on the table, unless use CONCURRENTLY",
 				StartPosition: &types.Position{
-					Line: int32(ctx.GetStart().GetLine() - 1),
+					Line: int32(ctx.GetStart().GetLine()),
 				},
 			})
 		}

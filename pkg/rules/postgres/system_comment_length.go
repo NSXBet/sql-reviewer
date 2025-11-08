@@ -116,7 +116,7 @@ func (c *systemCommentLengthChecker) EnterCommentstmt(ctx *parser.CommentstmtCon
 
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLCommentTooLong),
+			Code:    int32(types.SystemCommentTooLong),
 			Title:   c.title,
 			Content: content,
 			StartPosition: &types.Position{

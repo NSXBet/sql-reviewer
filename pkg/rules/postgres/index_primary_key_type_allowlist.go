@@ -157,7 +157,7 @@ func (c *indexPrimaryKeyTypeAllowlistChecker) isTypeAllowed(columnType string) b
 func (c *indexPrimaryKeyTypeAllowlistChecker) addAdvice(columnName, columnType string, line int) {
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status: c.level,
-		Code:   int32(advisor.PostgreSQLPrimaryKeyTypeAllowlist),
+		Code:   int32(types.IndexPKType),
 		Title:  c.title,
 		Content: fmt.Sprintf(
 			"The column %q is one of the primary key, but its type %q is not in allowlist",

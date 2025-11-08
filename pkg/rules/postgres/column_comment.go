@@ -200,7 +200,7 @@ func (c *columnCommentChecker) generateAdvice() []*types.Advice {
 			if c.payload.Required {
 				adviceList = append(adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLCommentEmpty),
+					Code:    int32(types.ColumnRequireComment),
 					Title:   c.title,
 					Content: fmt.Sprintf("Comment is required for column `%s.%s`", col.table, col.column),
 					StartPosition: &types.Position{
@@ -215,7 +215,7 @@ func (c *columnCommentChecker) generateAdvice() []*types.Advice {
 			if c.payload.MaxLength > 0 && len(comment) > c.payload.MaxLength {
 				adviceList = append(adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLCommentTooLong),
+					Code:    int32(types.ColumnCommentTooLong),
 					Title:   c.title,
 					Content: fmt.Sprintf("Column `%s.%s` comment is too long. The length of comment should be within %d characters", col.table, col.column, c.payload.MaxLength),
 					StartPosition: &types.Position{

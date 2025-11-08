@@ -9,6 +9,7 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 	parser "github.com/bytebase/parser/postgresql"
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer/pkg/pgparser"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
@@ -38,9 +39,16 @@ func (*NamingFullyQualifiedAdvisor) Check(ctx context.Context, checkCtx advisor.
 		return nil, err
 	}
 
+	var finder *catalog.Finder
+	if checkCtx.Catalog != nil {
+		finder = checkCtx.Catalog.GetFinder()
+	}
+
 	checker := &namingFullyQualifiedChecker{
-		level: level,
-		title: string(checkCtx.Rule.Type),
+		level:          level,
+		title:          string(checkCtx.Rule.Type),
+		catalog:        finder,
+		statementsText: checkCtx.Statements,
 	}
 
 	antlr.ParseTreeWalkerDefault.Walk(checker, tree.Tree)
@@ -51,9 +59,11 @@ func (*NamingFullyQualifiedAdvisor) Check(ctx context.Context, checkCtx advisor.
 type namingFullyQualifiedChecker struct {
 	*parser.BasePostgreSQLParserListener
 
-	adviceList []*types.Advice
-	level      types.Advice_Status
-	title      string
+	adviceList     []*types.Advice
+	level          types.Advice_Status
+	title          string
+	catalog        *catalog.Finder
+	statementsText string
 }
 
 // EnterCreatestmt handles CREATE TABLE
@@ -186,11 +196,11 @@ func (c *namingFullyQualifiedChecker) checkQualifiedName(ctx parser.IQualified_n
 	if !c.isFullyQualified(objName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLNamingFullyQualifiedObjectName),
+			Code:    int32(types.NamingNotFullyQualifiedName),
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
-				Line: int32(line - 1),
+				Line: int32(line),
 			},
 		})
 	}
@@ -209,13 +219,103 @@ func (c *namingFullyQualifiedChecker) checkAnyName(ctx parser.IAny_nameContext, 
 	if !c.isFullyQualified(objName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLNamingFullyQualifiedObjectName),
+			Code:    int32(types.NamingNotFullyQualifiedName),
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
-				Line: int32(line - 1),
+				Line: int32(line),
 			},
 		})
+	}
+}
+
+// EnterSelectstmt handles SELECT statements
+func (c *namingFullyQualifiedChecker) EnterSelectstmt(ctx *parser.SelectstmtContext) {
+	if !isTopLevel(ctx.GetParent()) {
+		return
+	}
+
+	// Need catalog to check against existing tables
+	if c.catalog == nil {
+		return
+	}
+
+	// Extract statement text
+	stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
+	if stmtText == "" {
+		return
+	}
+
+	// Parse to find table references
+	result, err := pgparser.ParsePostgreSQL(stmtText)
+	if err != nil {
+		return
+	}
+
+	// Collect table references
+	collector := &tableReferenceCollector{
+		schemaNameMap: c.getSchemaTableMap(),
+	}
+	antlr.ParseTreeWalkerDefault.Walk(collector, result.Tree)
+
+	// Check each table reference
+	for _, tableName := range collector.tables {
+		if !c.isFullyQualified(tableName) {
+			c.adviceList = append(c.adviceList, &types.Advice{
+				Status:  c.level,
+				Code:    int32(types.NamingNotFullyQualifiedName),
+				Title:   c.title,
+				Content: fmt.Sprintf("unqualified object name: '%s'", tableName),
+				StartPosition: &types.Position{
+					Line: int32(ctx.GetStart().GetLine()),
+				},
+			})
+		}
+	}
+}
+
+// getSchemaTableMap creates a map of table names from catalog
+func (c *namingFullyQualifiedChecker) getSchemaTableMap() map[string]bool {
+	if c.catalog == nil || c.catalog.Final == nil {
+		return nil
+	}
+
+	tableMap := make(map[string]bool)
+
+	// Get all tables from all schemas
+	for _, schema := range c.catalog.Final.Schemas() {
+		for tableName := range schema.Tables() {
+			tableMap[tableName] = true
+		}
+	}
+
+	return tableMap
+}
+
+// tableReferenceCollector collects table references from parse tree
+type tableReferenceCollector struct {
+	*parser.BasePostgreSQLParserListener
+
+	tables        []string
+	schemaNameMap map[string]bool
+}
+
+// EnterTable_ref collects table references
+func (c *tableReferenceCollector) EnterTable_ref(ctx *parser.Table_refContext) {
+	if ctx.Relation_expr() != nil && ctx.Relation_expr().Qualified_name() != nil {
+		parts := pgparser.NormalizePostgreSQLQualifiedName(ctx.Relation_expr().Qualified_name())
+
+		var tableName string
+		if len(parts) == 2 {
+			tableName = strings.Join(parts, ".")
+		} else if len(parts) == 1 {
+			tableName = parts[0]
+		}
+
+		// Only add if table exists in schema or we have no schema info
+		if tableName != "" && (c.schemaNameMap == nil || c.schemaNameMap[parts[len(parts)-1]]) {
+			c.tables = append(c.tables, tableName)
+		}
 	}
 }
 

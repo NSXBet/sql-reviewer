@@ -67,14 +67,14 @@ func (c *statementDisallowAddNotNullChecker) EnterAltertablestmt(ctx *parser.Alt
 					columnName := pgparser.NormalizePostgreSQLColid(allColIDs[0])
 					c.adviceList = append(c.adviceList, &types.Advice{
 						Status: c.level,
-						Code:   int32(advisor.PostgreSQLDisallowAddNotNull),
+						Code:   int32(types.StatementAddNotNull),
 						Title:  c.title,
 						Content: fmt.Sprintf(
 							"Setting NOT NULL will block reads and writes. You can use CHECK (%q IS NOT NULL) instead",
 							columnName,
 						),
 						StartPosition: &types.Position{
-							Line: int32(ctx.GetStart().GetLine() - 1),
+							Line: int32(ctx.GetStart().GetLine()),
 						},
 					})
 				}

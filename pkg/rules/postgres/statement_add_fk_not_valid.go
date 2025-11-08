@@ -95,11 +95,11 @@ func (c *statementAddFKNotValidChecker) EnterAltertablestmt(ctx *parser.Altertab
 		if !hasNotValid {
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status:  c.level,
-				Code:    int32(advisor.PostgreSQLAddFKNotValid),
+				Code:    int32(types.StatementAddFKWithValidation),
 				Title:   c.title,
 				Content: "Adding foreign keys with validation will block reads and writes. You can add check foreign keys not valid and then validate separately",
 				StartPosition: &types.Position{
-					Line: int32(ctx.GetStart().GetLine() - 1),
+					Line: int32(ctx.GetStart().GetLine()),
 				},
 			})
 		}

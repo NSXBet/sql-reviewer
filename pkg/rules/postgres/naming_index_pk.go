@@ -210,9 +210,10 @@ func (c *namingIndexPKChecker) EnterRenamestmt(ctx *parser.RenamestmtContext) {
 				if normalizedSchema == "" {
 					normalizedSchema = "public"
 				}
+				// Use Origin state to check the index BEFORE rename
+				// Try without TableName filter to search across all tables
 				tableName, index := c.catalog.Origin.FindIndex(&catalog.IndexFind{
 					SchemaName: normalizedSchema,
-					TableName:  "",
 					IndexName:  oldIndexName,
 				})
 				if index != nil && index.Primary() {
@@ -309,7 +310,7 @@ func (c *namingIndexPKChecker) checkPKName(pkData *pkMetaData) {
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.Internal),
+			Code:    int32(types.Internal),
 			Title:   "Internal error for primary key naming convention rule",
 			Content: fmt.Sprintf("Failed to compile regex: %v", err),
 			StartPosition: &types.Position{
@@ -322,7 +323,7 @@ func (c *namingIndexPKChecker) checkPKName(pkData *pkMetaData) {
 	if !regex.MatchString(pkData.pkName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status: c.level,
-			Code:   int32(types.NamingIndexConventionMismatch),
+			Code:   int32(types.NamingPKConventionMismatch),
 			Title:  c.title,
 			Content: fmt.Sprintf(
 				`Primary key in table "%s" mismatches the naming convention, expect %q but found "%s"`,
@@ -339,7 +340,7 @@ func (c *namingIndexPKChecker) checkPKName(pkData *pkMetaData) {
 	if c.maxLength > 0 && len(pkData.pkName) > c.maxLength {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status: c.level,
-			Code:   int32(types.NamingIndexConventionMismatch),
+			Code:   int32(types.NamingPKConventionMismatch),
 			Title:  c.title,
 			Content: fmt.Sprintf(
 				`Primary key "%s" in table "%s" mismatches the naming convention, its length should be within %d characters`,

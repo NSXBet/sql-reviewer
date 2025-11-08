@@ -197,6 +197,9 @@ func (d *DatabaseState) WalkThrough(ast any) error {
 	case types.Engine_MYSQL, types.Engine_MARIADB, types.Engine_OCEANBASE:
 		err := d.mysqlWalkThrough(ast)
 		return err
+	case types.Engine_POSTGRES:
+		err := d.pgAntlrWalkThrough(ast)
+		return err
 	default:
 		return &WalkThroughError{
 			Type:    ErrorTypeUnsupported,

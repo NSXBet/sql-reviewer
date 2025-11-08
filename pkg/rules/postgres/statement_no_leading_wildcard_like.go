@@ -91,7 +91,7 @@ func (c *statementNoLeadingWildcardLikeChecker) EnterA_expr_like(ctx *parser.A_e
 		stmtText := extractStatementText(c.statementsText, stmtCtx.GetStart().GetLine(), stmtCtx.GetStop().GetLine())
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementNoLeadingWildcardLike),
+			Code:    int32(types.StatementLeadingWildcardLike),
 			Title:   c.title,
 			Content: fmt.Sprintf("\"%s\" uses leading wildcard LIKE", stmtText),
 			StartPosition: &types.Position{

@@ -148,7 +148,7 @@ func (c *columnTypeDisallowListChecker) checkType(tableName, columnName string, 
 	if matchedDisallowedType != "" {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status: c.level,
-			Code:   int32(advisor.PostgreSQLDisallowedColumnType),
+			Code:   int32(types.DisabledColumnType),
 			Title:  c.title,
 			Content: fmt.Sprintf(
 				"Disallow column type %s but column %q.%q is",

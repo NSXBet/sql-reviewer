@@ -73,7 +73,7 @@ func (c *statementMaximumLimitValueChecker) EnterSelectstmt(ctx *parser.Selectst
 	if limitValue > 0 && limitValue > c.limitMaxValue {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementMaximumLimitValue),
+			Code:    int32(types.StatementExceedMaximumLimitValue),
 			Title:   c.title,
 			Content: fmt.Sprintf("The limit value %d exceeds the maximum allowed value %d", limitValue, c.limitMaxValue),
 			StartPosition: &types.Position{

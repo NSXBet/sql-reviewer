@@ -2,10 +2,10 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -200,6 +200,17 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 			advices, err := advisor.Check(ctx, types.Engine_POSTGRES, advisor.Type(rule), checkCtx)
 			require.NoError(t, err, "Advisor check failed")
 
+			// Sort adviceList by (line, content) for consistent comparison (same as Bytebase)
+			sort.Slice(advices, func(i, j int) bool {
+				if advices[i].StartPosition == nil || advices[j].StartPosition == nil {
+					return advices[i].StartPosition != nil
+				}
+				if advices[i].StartPosition.Line != advices[j].StartPosition.Line {
+					return advices[i].StartPosition.Line < advices[j].StartPosition.Line
+				}
+				return advices[i].Content < advices[j].Content
+			})
+
 			// Compare results
 			if len(tc.Want) == 0 {
 				// Expect no violations
@@ -216,6 +227,9 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 
 					// Compare code if specified
 					if want.Code != 0 {
+						if want.Code != got.Code {
+							t.Logf("DEBUG: Expected code %d but got %d. Advice content: %s", want.Code, got.Code, got.Content)
+						}
 						require.Equal(t, want.Code, got.Code, "Advice %d: code mismatch", j)
 					}
 
@@ -228,6 +242,10 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 					// Compare position if specified
 					if want.StartPosition != nil {
 						require.NotNil(t, got.StartPosition, "Advice %d: expected start position", j)
+						if want.StartPosition.Line != got.StartPosition.Line {
+							t.Logf("DEBUG Line mismatch for advice %d: want line %d, got line %d. Content: %s",
+								j, want.StartPosition.Line, got.StartPosition.Line, got.Content)
+						}
 						require.Equal(t, want.StartPosition.Line, got.StartPosition.Line, "Advice %d: line mismatch", j)
 					}
 				}
@@ -253,95 +271,109 @@ func loadTestCases(filename string) ([]TestCase, error) {
 
 // getDefaultPayload returns the default payload for a PostgreSQL rule.
 func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, error) {
-	var payload interface{}
-
 	switch rule {
-	case advisor.SchemaRuleTableNaming,
-		advisor.SchemaRuleColumnNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*$",
-		}
+	case advisor.SchemaRuleTableNaming:
+		return map[string]interface{}{
+			"format":    "^[a-z]+(_[a-z]+)*$",
+			"maxLength": 64,
+		}, nil
+	case advisor.SchemaRuleColumnNaming:
+		return map[string]interface{}{
+			"format":    "^[a-z]+(_[a-z]+)*$",
+			"maxLength": 64,
+		}, nil
 	case advisor.SchemaRulePKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_pkey$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^pk_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleUKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_uk$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^uk_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleFKNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_fkey$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^fk_{{referencing_table}}_{{referencing_column}}_{{referenced_table}}_{{referenced_column}}$",
+			"maxLength":    64,
+			"templateList": []string{"referencing_table", "referencing_column", "referenced_table", "referenced_column"},
+		}, nil
 	case advisor.SchemaRuleIDXNaming:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_idx$",
-		}
+		return map[string]interface{}{
+			"format":       "^$|^idx_{{table}}_{{column_list}}$",
+			"maxLength":    64,
+			"templateList": []string{"table", "column_list"},
+		}, nil
 	case advisor.SchemaRuleTableDropNamingConvention:
-		payload = advisor.StringTypeRulePayload{
-			String: "^[a-z]+(_[a-z]+)*_del$",
-		}
+		return map[string]interface{}{
+			"format":    "_delete$",
+			"maxLength": 64,
+		}, nil
 	case advisor.SchemaRuleRequiredColumn:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"id", "created_at", "updated_at"},
-		}
+		return map[string]interface{}{
+			"list": []string{"created_ts", "creator_id", "updated_ts", "updater_id"},
+		}, nil
 	case advisor.SchemaRuleColumnTypeDisallowList:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"text", "json"},
-		}
+		return map[string]interface{}{
+			"list": []string{"text", "json"},
+		}, nil
 	case advisor.SchemaRuleIndexPrimaryKeyTypeAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"int", "bigint"},
-		}
+		return map[string]interface{}{
+			"list": []string{"int", "bigint"},
+		}, nil
 	case advisor.SchemaRuleCharsetAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"utf8", "utf8mb4"},
-		}
+		return map[string]interface{}{
+			"list": []string{"utf8", "utf8mb4"},
+		}, nil
 	case advisor.SchemaRuleCollationAllowlist:
-		payload = advisor.StringArrayTypeRulePayload{
-			List: []string{"utf8mb4_0900_ai_ci", "utf8mb4_general_ci"},
-		}
-	case advisor.SchemaRuleColumnMaximumCharacterLength,
-		advisor.SchemaRuleColumnCommentConvention,
-		advisor.SchemaRuleTableCommentConvention:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 20,
-		}
-	case advisor.SchemaRuleIndexKeyNumberLimit,
-		advisor.SchemaRuleIndexTotalNumberLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 5,
-		}
+		return map[string]interface{}{
+			"list": []string{"utf8mb4_0900_ai_ci", "utf8mb4_general_ci"},
+		}, nil
+	case advisor.SchemaRuleColumnMaximumCharacterLength:
+		return map[string]interface{}{
+			"number": 20,
+		}, nil
+	case advisor.SchemaRuleColumnCommentConvention:
+		return map[string]interface{}{
+			"required":  true,
+			"maxLength": 10,
+		}, nil
+	case advisor.SchemaRuleTableCommentConvention:
+		return map[string]interface{}{
+			"required":  true,
+			"maxLength": 10,
+		}, nil
+	case advisor.SchemaRuleIndexKeyNumberLimit:
+		return map[string]interface{}{
+			"number": 5,
+		}, nil
+	case advisor.SchemaRuleIndexTotalNumberLimit:
+		return map[string]interface{}{
+			"number": 5,
+		}, nil
 	case advisor.SchemaRuleStatementInsertRowLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 100,
-		}
+		return map[string]interface{}{
+			"number": 5,
+		}, nil
 	case advisor.SchemaRuleStatementMaximumLimitValue:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 1000,
-		}
+		return map[string]interface{}{
+			"number": 1000,
+		}, nil
 	case advisor.SchemaRuleStatementAffectedRowLimit:
-		payload = advisor.NumberTypeRulePayload{
-			Number: 1000,
-		}
+		return map[string]interface{}{
+			"number": 1000,
+		}, nil
 	default:
 		// Rules without payload
 		return nil, nil
 	}
-
-	jsonBytes, err := json.Marshal(payload)
-	if err != nil {
-		return nil, err
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 // createMockDatabase creates a mock database schema for testing.
+// Following Bytebase's pattern: tech_book has existing constraints with WRONG names
+// so tests can rename them or add new ones with correct names.
 func createMockDatabase() *types.DatabaseSchemaMetadata {
 	return &types.DatabaseSchemaMetadata{
 		Name:         "test_db",
@@ -418,6 +450,82 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 						Indexes: []*types.IndexMetadata{
 							{
 								Name:   "orders_pkey",
+								Type:   "PRIMARY KEY",
+								Unique: true,
+								Expressions: []string{
+									"id",
+								},
+								Primary: true,
+							},
+						},
+					},
+					{
+						Name: "tech_book",
+						Columns: []*types.ColumnMetadata{
+							{
+								Name:     "id",
+								Position: 1,
+								Type:     "integer",
+								Nullable: false,
+							},
+							{
+								Name:     "name",
+								Position: 2,
+								Type:     "varchar(255)",
+								Nullable: false,
+							},
+						},
+						// Existing constraints with WRONG names for testing rename/add
+						Indexes: []*types.IndexMetadata{
+							{
+								Name:   "old_pk",
+								Type:   "PRIMARY KEY",
+								Unique: true,
+								Expressions: []string{
+									"id",
+									"name",
+								},
+								Primary: true,
+							},
+							{
+								Name:   "old_uk",
+								Type:   "UNIQUE",
+								Unique: true,
+								Expressions: []string{
+									"id",
+									"name",
+								},
+							},
+							{
+								Name:   "old_index",
+								Type:   "INDEX",
+								Unique: false,
+								Expressions: []string{
+									"id",
+									"name",
+								},
+							},
+						},
+					},
+					{
+						Name: "author",
+						Columns: []*types.ColumnMetadata{
+							{
+								Name:     "id",
+								Position: 1,
+								Type:     "integer",
+								Nullable: false,
+							},
+							{
+								Name:     "name",
+								Position: 2,
+								Type:     "varchar(255)",
+								Nullable: false,
+							},
+						},
+						Indexes: []*types.IndexMetadata{
+							{
+								Name:   "author_pkey",
 								Type:   "PRIMARY KEY",
 								Unique: true,
 								Expressions: []string{

@@ -217,7 +217,7 @@ func (c *statementDisallowMixInDMLChecker) addDDLAdvice(ctx antlr.ParserRuleCont
 
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status:  c.level,
-		Code:    int32(advisor.PostgreSQLStatementDisallowMixInDML),
+		Code:    int32(types.StatementDisallowMixDDLDML),
 		Title:   c.title,
 		Content: fmt.Sprintf("Data change can only run DML, %q is not DML", stmtText),
 		StartPosition: &types.Position{

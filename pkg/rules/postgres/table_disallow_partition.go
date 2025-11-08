@@ -67,7 +67,7 @@ func (c *tableDisallowPartitionChecker) EnterCreatestmt(ctx *parser.CreatestmtCo
 		stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLTableDisallowPartition),
+			Code:    int32(types.CreateTablePartition),
 			Title:   c.title,
 			Content: fmt.Sprintf("Table partition is forbidden, but \"%s\" creates", stmtText),
 			StartPosition: &types.Position{
@@ -97,7 +97,7 @@ func (c *tableDisallowPartitionChecker) EnterPartition_cmd(ctx *parser.Partition
 				)
 				c.adviceList = append(c.adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLTableDisallowPartition),
+					Code:    int32(types.CreateTablePartition),
 					Title:   c.title,
 					Content: fmt.Sprintf("Table partition is forbidden, but \"%s\" creates", stmtText),
 					StartPosition: &types.Position{

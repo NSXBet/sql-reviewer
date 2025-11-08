@@ -1,7 +1,6 @@
 # PostgreSQL All Rules Configuration
 # This file contains ALL available PostgreSQL rules with example configurations
 # Organized by category: Naming, Statement, Table, Column, Index, and System rules
-
 id: postgres-all-rules
 rules:
   # ============================================================================
@@ -16,14 +15,14 @@ rules:
   - type: naming.table
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$" # snake_case
+      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
       maxLength: 63
     engine: POSTGRES
   # Column naming convention
   - type: naming.column
     level: WARNING
     payload:
-      format: "^[a-z]+(_[a-z]+)*$" # snake_case
+      format: "^[a-z]+(_[a-z]+)*$"  # snake_case
       maxLength: 63
     engine: POSTGRES
   # Primary key naming convention
@@ -54,12 +53,12 @@ rules:
       format: "^$|^fk_{{referencing_table}}_{{referencing_column}}_{{referenced_table}}_{{referenced_column}}$"
       maxLength: 63
     engine: POSTGRES
-  # ============================================================================
-  # STATEMENT RULES
-  # ============================================================================
-
   # Disallow SELECT *
   - type: statement.select.no-select-all
+    # ============================================================================
+    # STATEMENT RULES
+    # ============================================================================
+
     level: ERROR
     engine: POSTGRES
   # Require WHERE clause for SELECT statements
@@ -164,12 +163,12 @@ rules:
   - type: statement.object-owner-check
     level: ERROR
     engine: POSTGRES
-  # ============================================================================
-  # TABLE RULES
-  # ============================================================================
-
   # Require primary key on all tables
   - type: table.require-pk
+    # ============================================================================
+    # TABLE RULES
+    # ============================================================================
+
     level: ERROR
     engine: POSTGRES
   # Disallow foreign keys
@@ -193,12 +192,12 @@ rules:
   - type: table.disallow-partition
     level: WARNING
     engine: POSTGRES
-  # ============================================================================
-  # COLUMN RULES
-  # ============================================================================
-
   # Required columns in each table
   - type: column.required
+    # ============================================================================
+    # COLUMN RULES
+    # ============================================================================
+
     level: DISABLED
     payload:
       list:
@@ -211,7 +210,7 @@ rules:
     level: ERROR
     payload:
       list:
-        - MONEY # Use NUMERIC instead
+        - MONEY  # Use NUMERIC instead
         # - JSON  # Uncomment to disallow JSON type
     engine: POSTGRES
   # Columns cannot be NULL
@@ -255,12 +254,12 @@ rules:
   - type: column.auto-increment-must-unsigned
     level: DISABLED
     engine: POSTGRES
-  # ============================================================================
-  # INDEX RULES
-  # ============================================================================
-
   # Disallow duplicate columns in index
   - type: index.no-duplicate-column
+    # ============================================================================
+    # INDEX RULES
+    # ============================================================================
+
     level: ERROR
     engine: POSTGRES
   # Limit index key count
@@ -293,12 +292,12 @@ rules:
   - type: index.create-concurrently
     level: WARNING
     engine: POSTGRES
-  # ============================================================================
-  # SYSTEM RULES
-  # ============================================================================
-
   # Charset allowlist
   - type: system.charset.allowlist
+    # ============================================================================
+    # SYSTEM RULES
+    # ============================================================================
+
     level: WARNING
     payload:
       list:
@@ -320,11 +319,11 @@ rules:
     payload:
       number: 2048
     engine: POSTGRES
-  # ============================================================================
-  # BACKWARD COMPATIBILITY
-  # ============================================================================
-
   # Schema backward compatibility check (not implemented for PostgreSQL yet)
   - type: schema.backward-compatibility
+    # ============================================================================
+    # BACKWARD COMPATIBILITY
+    # ============================================================================
+
     level: DISABLED
     engine: POSTGRES

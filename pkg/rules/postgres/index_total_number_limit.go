@@ -107,7 +107,7 @@ func (c *indexTotalNumberLimitChecker) generateAdvice() []*types.Advice {
 		if tableInfo != nil && tableInfo.CountIndex() > c.max {
 			c.adviceList = append(c.adviceList, &types.Advice{
 				Status: c.level,
-				Code:   int32(advisor.PostgreSQLIndexTotalNumberExceedsLimit),
+				Code:   int32(types.IndexCountExceedsLimit),
 				Title:  c.title,
 				Content: fmt.Sprintf(
 					"The count of index in table %q.%q should be no more than %d, but found %d",

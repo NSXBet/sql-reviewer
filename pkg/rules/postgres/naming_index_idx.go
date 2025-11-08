@@ -164,7 +164,7 @@ func (c *namingIndexIdxChecker) checkIndexName(indexName, tableName string, colu
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.Internal),
+			Code:    int32(types.Internal),
 			Title:   "Internal error for index naming convention rule",
 			Content: fmt.Sprintf("Failed to compile regex: %v", err),
 			StartPosition: &types.Position{

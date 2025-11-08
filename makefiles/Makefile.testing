@@ -56,7 +56,7 @@ ghz:
 
 .PHONY: coverage-package
 coverage-package: merge-coverage coverage-package-setup
-	@package-coverage -c ./internal
+	@package-coverage -c ./pkg
 
 .PHONY: coverage-package-setup
 coverage-package-setup:

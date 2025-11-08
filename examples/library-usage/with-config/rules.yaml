@@ -1,6 +1,5 @@
 # Example custom configuration
 # This file demonstrates how to customize SQL review rules
-
 ruleList:
   # Naming rules - ERRORS
   - type: naming.table

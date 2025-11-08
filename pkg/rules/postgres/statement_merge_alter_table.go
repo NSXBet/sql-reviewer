@@ -104,7 +104,7 @@ func (checker *statementMergeAlterTableChecker) generateAdvice() []*types.Advice
 		if table.count > 1 {
 			adviceList = append(adviceList, &types.Advice{
 				Status:  checker.level,
-				Code:    int32(advisor.PostgreSQLMergeAlterTable),
+				Code:    int32(types.StatementRedundantAlterTable),
 				Title:   checker.title,
 				Content: fmt.Sprintf("There are %d statements to modify table `%s`", table.count, table.name),
 				StartPosition: &types.Position{

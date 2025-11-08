@@ -101,7 +101,7 @@ func (c *statementNoSelectAllChecker) EnterSimple_select_pramary(ctx *parser.Sim
 
 				c.adviceList = append(c.adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLNoSelectAll),
+					Code:    int32(types.StatementSelectAll),
 					Title:   c.title,
 					Content: fmt.Sprintf("\"%s\" uses SELECT all", stmtText),
 					StartPosition: &types.Position{

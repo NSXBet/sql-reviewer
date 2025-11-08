@@ -55,7 +55,7 @@ func (*TableCommentAdvisor) Check(ctx context.Context, checkCtx advisor.Context)
 			if checker.payload.Required {
 				checker.adviceList = append(checker.adviceList, &types.Advice{
 					Status:  checker.level,
-					Code:    int32(advisor.PostgreSQLCommentEmpty),
+					Code:    int32(types.TableRequireComment),
 					Title:   checker.title,
 					Content: fmt.Sprintf("Comment is required for table `%s`", tableInfo.displayName),
 					StartPosition: &types.Position{
@@ -68,7 +68,7 @@ func (*TableCommentAdvisor) Check(ctx context.Context, checkCtx advisor.Context)
 			if checker.payload.MaxLength > 0 && len(comment) > checker.payload.MaxLength {
 				checker.adviceList = append(checker.adviceList, &types.Advice{
 					Status:  checker.level,
-					Code:    int32(advisor.PostgreSQLCommentTooLong),
+					Code:    int32(types.TableCommentTooLong),
 					Title:   checker.title,
 					Content: fmt.Sprintf("Table `%s` comment is too long. The length of comment should be within %d characters", tableInfo.displayName, checker.payload.MaxLength),
 					StartPosition: &types.Position{
