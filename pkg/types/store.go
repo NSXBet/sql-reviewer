@@ -404,6 +404,7 @@ const (
 	NamingPKConventionMismatch                  = 306  // Matches advisor.NamingPKConventionMismatch
 	NamingAutoIncrementColumnConventionMismatch = 307  // Matches advisor.NamingAutoIncrementColumnConventionMismatch
 	NameIsKeywordIdentifier                     = 308  // Matches advisor.NameIsKeywordIdentifier
+	NamingNotFullyQualifiedName                 = 310  // Matches advisor.NamingNotFullyQualifiedName
 	StatementCheckSelectFullTableScanFailed     = 214  // Matches advisor.StatementCheckSelectFullTableScanFailed
 	StatementHasTableFullScan                   = 215  // Matches advisor.StatementHasTableFullScan
 	StatementHasUsingFilesort                   = 219  // Matches advisor.StatementHasUsingFilesort

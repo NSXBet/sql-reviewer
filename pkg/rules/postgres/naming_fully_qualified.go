@@ -186,7 +186,7 @@ func (c *namingFullyQualifiedChecker) checkQualifiedName(ctx parser.IQualified_n
 	if !c.isFullyQualified(objName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLNamingFullyQualifiedObjectName),
+			Code:    int32(types.NamingNotFullyQualifiedName),
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
@@ -209,7 +209,7 @@ func (c *namingFullyQualifiedChecker) checkAnyName(ctx parser.IAny_nameContext, 
 	if !c.isFullyQualified(objName) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLNamingFullyQualifiedObjectName),
+			Code:    int32(types.NamingNotFullyQualifiedName),
 			Title:   c.title,
 			Content: fmt.Sprintf("unqualified object name: '%s'", objName),
 			StartPosition: &types.Position{
