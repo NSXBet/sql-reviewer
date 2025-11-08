@@ -68,11 +68,11 @@ func (c *statementDisallowRemoveTblCascadeChecker) EnterDropstmt(ctx *parser.Dro
 	if c.hasCascadeOption(ctx.Opt_drop_behavior()) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLDisallowRemoveTblCascade),
+			Code:    int32(types.StatementDisallowCascade),
 			Title:   c.title,
 			Content: "The use of CASCADE is not permitted when removing a table",
 			StartPosition: &types.Position{
-				Line: int32(ctx.GetStart().GetLine() - 1),
+				Line: int32(ctx.GetStart().GetLine()),
 			},
 		})
 	}
@@ -88,11 +88,11 @@ func (c *statementDisallowRemoveTblCascadeChecker) EnterTruncatestmt(ctx *parser
 	if c.hasCascadeOption(ctx.Opt_drop_behavior()) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLDisallowRemoveTblCascade),
+			Code:    int32(types.StatementDisallowCascade),
 			Title:   c.title,
 			Content: "The use of CASCADE is not permitted when removing a table",
 			StartPosition: &types.Position{
-				Line: int32(ctx.GetStart().GetLine() - 1),
+				Line: int32(ctx.GetStart().GetLine()),
 			},
 		})
 	}

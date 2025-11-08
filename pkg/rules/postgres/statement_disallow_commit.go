@@ -69,7 +69,7 @@ func (c *statementDisallowCommitChecker) EnterTransactionstmt(ctx *parser.Transa
 	stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status:  c.level,
-		Code:    int32(advisor.PostgreSQLDisallowCommit),
+		Code:    int32(types.StatementDisallowCommit),
 		Title:   c.title,
 		Content: fmt.Sprintf("Commit is not allowed, related statement: \"%s\"", stmtText),
 		StartPosition: &types.Position{

@@ -76,18 +76,18 @@ func (c *statementDisallowOnDelCascadeChecker) EnterKey_delete(ctx *parser.Key_d
 			}
 
 			if stmtCtx != nil {
-				// Note: To match legacy pg-query behavior, we need to use GetLine() - 1
+				// Note: To match legacy pg-query behavior, we need to use GetLine()
 				// The legacy advisor uses pg_query's stmt_location which points to the position
 				// right before the statement (often a newline), while ANTLR's GetLine() points
 				// to the actual line where the statement starts. This creates an off-by-one
 				// when there are statements before the CREATE TABLE.
-				line := stmtCtx.GetStart().GetLine() - 1
+				line := stmtCtx.GetStart().GetLine()
 				if line < 1 {
 					line = 1
 				}
 				c.adviceList = append(c.adviceList, &types.Advice{
 					Status:  c.level,
-					Code:    int32(advisor.PostgreSQLDisallowOnDelCascade),
+					Code:    int32(types.StatementDisallowCascade),
 					Title:   c.title,
 					Content: "The CASCADE option is not permitted for ON DELETE clauses",
 					StartPosition: &types.Position{

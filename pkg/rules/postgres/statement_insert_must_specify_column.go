@@ -74,7 +74,7 @@ func (c *statementInsertMustSpecifyColumnChecker) EnterInsertstmt(ctx *parser.In
 
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLInsertMustSpecifyColumn),
+			Code:    int32(types.InsertNotSpecifyColumn),
 			Title:   c.title,
 			Content: fmt.Sprintf("The INSERT statement must specify columns but \"%s\" does not", stmtText),
 			StartPosition: &types.Position{

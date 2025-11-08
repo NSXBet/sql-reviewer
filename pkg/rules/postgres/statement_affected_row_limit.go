@@ -119,7 +119,7 @@ func (c *statementAffectedRowLimitChecker) checkAffectedRows(ctx antlr.ParserRul
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementAffectedRowLimit),
+			Code:    int32(types.StatementAffectedRowExceedsLimit),
 			Title:   c.title,
 			Content: fmt.Sprintf("\"%s\" dry runs failed: %s", normalizedStmt, err.Error()),
 			StartPosition: &types.Position{
@@ -146,7 +146,7 @@ func (c *statementAffectedRowLimitChecker) checkAffectedRows(ctx antlr.ParserRul
 	if rowCount > int64(c.maxRow) {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status: c.level,
-			Code:   int32(advisor.PostgreSQLStatementAffectedRowLimit),
+			Code:   int32(types.StatementAffectedRowExceedsLimit),
 			Title:  c.title,
 			Content: fmt.Sprintf(
 				"The statement \"%s\" affected %d rows (estimated). The count exceeds %d.",

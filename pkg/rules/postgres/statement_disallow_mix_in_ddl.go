@@ -113,7 +113,7 @@ func (c *statementDisallowMixInDDLChecker) addDMLAdvice(ctx antlr.ParserRuleCont
 
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status:  c.level,
-		Code:    int32(advisor.PostgreSQLStatementDisallowMixInDDL),
+		Code:    int32(types.StatementDisallowMixDDLDML),
 		Title:   c.title,
 		Content: fmt.Sprintf("Alter schema can only run DDL, %q is not DDL", stmtText),
 		StartPosition: &types.Position{

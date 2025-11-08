@@ -72,7 +72,7 @@ func (c *statementInsertDisallowOrderByRandChecker) EnterInsertstmt(ctx *parser.
 
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status: c.level,
-			Code:   int32(advisor.PostgreSQLInsertDisallowOrderByRand),
+			Code:   int32(types.InsertUseOrderByRand),
 			Title:  c.title,
 			Content: fmt.Sprintf(
 				"The INSERT statement uses ORDER BY random() or random_between(), related statement \"%s\"",

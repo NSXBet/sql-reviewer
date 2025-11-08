@@ -66,7 +66,7 @@ func (c *statementWhereRequireUpdateDeleteChecker) EnterUpdatestmt(ctx *parser.U
 		stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementWhereRequirementForUpdateDelete),
+			Code:    int32(types.StatementNoWhere),
 			Title:   c.title,
 			Content: fmt.Sprintf("\"%s\" requires WHERE clause", stmtText),
 			StartPosition: &types.Position{
@@ -87,7 +87,7 @@ func (c *statementWhereRequireUpdateDeleteChecker) EnterDeletestmt(ctx *parser.D
 		stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
-			Code:    int32(advisor.PostgreSQLStatementWhereRequirementForUpdateDelete),
+			Code:    int32(types.StatementNoWhere),
 			Title:   c.title,
 			Content: fmt.Sprintf("\"%s\" requires WHERE clause", stmtText),
 			StartPosition: &types.Position{

@@ -405,8 +405,16 @@ const (
 	NamingAutoIncrementColumnConventionMismatch = 307  // Matches advisor.NamingAutoIncrementColumnConventionMismatch
 	NameIsKeywordIdentifier                     = 308  // Matches advisor.NameIsKeywordIdentifier
 	NamingNotFullyQualifiedName                 = 310  // Matches advisor.NamingNotFullyQualifiedName
+
+	// Additional Statement error codes (others already defined above)
+	StatementAddColumnWithDefault               = 210  // Matches advisor.StatementAddColumnWithDefault
+	StatementAddCheckWithValidation             = 211  // Matches advisor.StatementAddCheckWithValidation
+	StatementAddNotNull                         = 212  // Matches advisor.StatementAddNotNull
+	StatementDisallowCascade                    = 213  // Matches advisor.StatementDisallowCascade
 	StatementCheckSelectFullTableScanFailed     = 214  // Matches advisor.StatementCheckSelectFullTableScanFailed
 	StatementHasTableFullScan                   = 215  // Matches advisor.StatementHasTableFullScan
+	StatementCreateWithoutSchemaName            = 216  // Matches advisor.StatementCreateWithoutSchemaName
+	StatementCheckSetRoleVariable               = 217  // Matches advisor.StatementCheckSetRoleVariable
 	StatementHasUsingFilesort                   = 219  // Matches advisor.StatementHasUsingFilesort
 	StatementHasUsingTemporary                  = 220  // Matches advisor.StatementHasUsingTemporary
 	StatementWhereNoEqualNull                   = 221  // Matches advisor.StatementWhereNoEqualNull
@@ -414,6 +422,7 @@ const (
 	StatementMaximumJoinTableCount              = 223  // Matches advisor.StatementMaximumJoinTableCount
 	StatementUnwantedQueryPlanLevel             = 224  // Matches advisor.StatementUnwantedQueryPlanLevel
 	StatementMaximumStatementsInTransaction     = 228  // New error code for max statements in transaction
+	StatementAddFKWithValidation                = 229  // Matches advisor.StatementAddFKWithValidation
 	StatementNoMaxExecutionTime                 = 235  // Matches advisor.StatementNoMaxExecutionTime
 	DatabaseNotExists                           = 704  // Matches advisor.DatabaseNotExists
 	AdviseOnlineMigration                       = 1801 // Matches advisor.AdviseOnlineMigration

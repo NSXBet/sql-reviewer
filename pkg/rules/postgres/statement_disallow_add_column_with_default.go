@@ -72,11 +72,11 @@ func (c *statementDisallowAddColumnWithDefaultChecker) EnterAltertablestmt(ctx *
 							if constraintElem.DEFAULT() != nil {
 								c.adviceList = append(c.adviceList, &types.Advice{
 									Status:  c.level,
-									Code:    int32(advisor.PostgreSQLDisallowAddColumnWithDefault),
+									Code:    int32(types.StatementAddColumnWithDefault),
 									Title:   c.title,
 									Content: "Adding column with DEFAULT will locked the whole table and rewriting each rows",
 									StartPosition: &types.Position{
-										Line: int32(ctx.GetStart().GetLine() - 1),
+										Line: int32(ctx.GetStart().GetLine()),
 									},
 								})
 								return
