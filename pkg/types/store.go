@@ -399,10 +399,11 @@ const (
 	TableExceedLimitSize                        = 615  // Matches advisor.TableExceedLimitSize
 	IndexTypeNotAllowed                         = 816  // Matches advisor.IndexTypeNotAllowed
 	IndexTypeNoBlob                             = 804  // Matches advisor.IndexTypeNoBlob
+	NamingUKConventionMismatch                  = 304  // Matches advisor.NamingUKConventionMismatch
+	NamingFKConventionMismatch                  = 305  // Matches advisor.NamingFKConventionMismatch
+	NamingPKConventionMismatch                  = 306  // Matches advisor.NamingPKConventionMismatch
 	NamingAutoIncrementColumnConventionMismatch = 307  // Matches advisor.NamingAutoIncrementColumnConventionMismatch
 	NameIsKeywordIdentifier                     = 308  // Matches advisor.NameIsKeywordIdentifier
-	NamingFKConventionMismatch                  = 305  // Matches advisor.NamingFKConventionMismatch
-	NamingUKConventionMismatch                  = 304  // Matches advisor.NamingUKConventionMismatch
 	StatementCheckSelectFullTableScanFailed     = 214  // Matches advisor.StatementCheckSelectFullTableScanFailed
 	StatementHasTableFullScan                   = 215  // Matches advisor.StatementHasTableFullScan
 	StatementHasUsingFilesort                   = 219  // Matches advisor.StatementHasUsingFilesort

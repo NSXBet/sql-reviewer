@@ -148,7 +148,7 @@ func compileTemplateRegexp(template string, tokens map[string]string) (*regexp.R
 	// Replace tokens with their values or regex patterns
 	pattern := template
 
-	// Common tokens
+	// Common tokens - default fallback patterns if no custom value provided
 	tokenReplacements := map[string]string{
 		"{{table}}":              `[a-z]+(_[a-z]+)*`,
 		"{{column}}":             `[a-z]+(_[a-z]+)*`,
@@ -159,11 +159,9 @@ func compileTemplateRegexp(template string, tokens map[string]string) (*regexp.R
 		"{{referenced_column}}":  `[a-z]+(_[a-z]+)*`,
 	}
 
-	// Apply custom token values if provided
+	// Override with custom token values if provided
 	for token, value := range tokens {
-		if _, exists := tokenReplacements[token]; !exists {
-			tokenReplacements[token] = regexp.QuoteMeta(value)
-		}
+		tokenReplacements[token] = regexp.QuoteMeta(value)
 	}
 
 	// Replace all tokens

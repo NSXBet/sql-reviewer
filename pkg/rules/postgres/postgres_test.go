@@ -215,6 +215,9 @@ func runPostgreSQLRuleTest(t *testing.T, rule advisor.SQLReviewRuleType, needMet
 
 					// Compare code if specified
 					if want.Code != 0 {
+						if want.Code != got.Code {
+							t.Logf("DEBUG: Expected code %d but got %d. Advice content: %s", want.Code, got.Code, got.Content)
+						}
 						require.Equal(t, want.Code, got.Code, "Advice %d: code mismatch", j)
 					}
 
@@ -351,6 +354,8 @@ func getDefaultPayload(rule advisor.SQLReviewRuleType) (map[string]interface{}, 
 }
 
 // createMockDatabase creates a mock database schema for testing.
+// Following Bytebase's pattern: tech_book has existing constraints with WRONG names
+// so tests can rename them or add new ones with correct names.
 func createMockDatabase() *types.DatabaseSchemaMetadata {
 	return &types.DatabaseSchemaMetadata{
 		Name:         "test_db",
@@ -452,15 +457,35 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 								Nullable: false,
 							},
 						},
+						// Existing constraints with WRONG names for testing rename/add
 						Indexes: []*types.IndexMetadata{
 							{
-								Name:   "tech_book_pkey",
+								Name:   "old_pk",
 								Type:   "PRIMARY KEY",
 								Unique: true,
 								Expressions: []string{
 									"id",
+									"name",
 								},
 								Primary: true,
+							},
+							{
+								Name:   "old_uk",
+								Type:   "UNIQUE",
+								Unique: true,
+								Expressions: []string{
+									"id",
+									"name",
+								},
+							},
+							{
+								Name:   "old_index",
+								Type:   "INDEX",
+								Unique: false,
+								Expressions: []string{
+									"id",
+									"name",
+								},
 							},
 						},
 					},
