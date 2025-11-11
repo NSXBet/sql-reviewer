@@ -59,6 +59,7 @@ func TestPostgreSQLRules(t *testing.T) {
 		advisor.SchemaRuleIndexTotalNumberLimit,
 		advisor.SchemaRulePKNaming,
 		advisor.SchemaRuleRequiredColumn,
+		advisor.SchemaRuleSchemaBackwardCompatibility,
 		advisor.SchemaRuleStatementAddCheckNotValid,
 		advisor.SchemaRuleStatementAddFKNotValid,
 		advisor.SchemaRuleStatementAffectedRowLimit,

@@ -9,3 +9,58 @@
         line: 1
         column: 0
       endposition: null
+- statement: DROP TABLE tech_book
+  changeType: 1
+  want:
+    - status: 2
+      code: 103
+      title: schema.backward-compatibility
+      content: '"DROP TABLE tech_book" may cause incompatibility with the existing data and code'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: DROP DATABASE tech_book
+  changeType: 1
+  want:
+    - status: 2
+      code: 101
+      title: schema.backward-compatibility
+      content: '"DROP DATABASE tech_book" may cause incompatibility with the existing data and code'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: ALTER TABLE tech_book RENAME TO tech_book_new
+  changeType: 1
+  want:
+    - status: 2
+      code: 102
+      title: schema.backward-compatibility
+      content: '"ALTER TABLE tech_book RENAME TO tech_book_new" may cause incompatibility with the existing data and code'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: ALTER TABLE tech_book RENAME COLUMN name TO name_new
+  changeType: 1
+  want:
+    - status: 2
+      code: 104
+      title: schema.backward-compatibility
+      content: '"ALTER TABLE tech_book RENAME COLUMN name TO name_new" may cause incompatibility with the existing data and code'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null
+- statement: ALTER TABLE tech_book DROP COLUMN name
+  changeType: 1
+  want:
+    - status: 2
+      code: 105
+      title: schema.backward-compatibility
+      content: '"ALTER TABLE tech_book DROP COLUMN name" may cause incompatibility with the existing data and code'
+      startposition:
+        line: 1
+        column: 0
+      endposition: null

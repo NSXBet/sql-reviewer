@@ -309,6 +309,7 @@ const (
 	Internal = 1 // Matches advisor.Internal
 
 	// 101 ~ 199 compatibility error code.
+	CompatibilityOK            = 100 // Matches advisor.Ok - no compatibility issue
 	CompatibilityDropDatabase  = 101 // Matches advisor.CompatibilityDropDatabase
 	CompatibilityRenameTable   = 102 // Matches advisor.CompatibilityRenameTable
 	CompatibilityDropTable     = 103 // Matches advisor.CompatibilityDropTable

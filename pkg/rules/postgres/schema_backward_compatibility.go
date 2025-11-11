@@ -36,8 +36,10 @@ func (*SchemaBackwardCompatibilityAdvisor) Check(ctx context.Context, checkCtx a
 	}
 
 	checker := &schemaBackwardCompatibilityChecker{
-		level: level,
-		title: string(checkCtx.Rule.Type),
+		BasePostgreSQLParserListener: &parser.BasePostgreSQLParserListener{},
+		level:                        level,
+		title:                        string(checkCtx.Rule.Type),
+		statementsText:               checkCtx.Statements,
 	}
 
 	antlr.ParseTreeWalkerDefault.Walk(checker, tree.Tree)
@@ -48,18 +50,11 @@ func (*SchemaBackwardCompatibilityAdvisor) Check(ctx context.Context, checkCtx a
 type schemaBackwardCompatibilityChecker struct {
 	*parser.BasePostgreSQLParserListener
 
-	level            types.Advice_Status
-	title            string
-	lastCreateTable  string
-	adviceList       []*types.Advice
-	currentStmtStart int
-	currentStmtText  string
-}
-
-// EnterStmt captures the current statement
-func (c *schemaBackwardCompatibilityChecker) EnterStmt(ctx *parser.StmtContext) {
-	c.currentStmtStart = ctx.GetStart().GetLine()
-	c.currentStmtText = ctx.GetParser().GetTokenStream().GetTextFromRuleContext(ctx)
+	level           types.Advice_Status
+	title           string
+	lastCreateTable string
+	adviceList      []*types.Advice
+	statementsText  string
 }
 
 // EnterCreatestmt tracks CREATE TABLE statements
@@ -68,46 +63,91 @@ func (c *schemaBackwardCompatibilityChecker) EnterCreatestmt(ctx *parser.Creates
 		return
 	}
 
-	if len(ctx.AllQualified_name()) > 0 {
-		tableName := extractTableName(ctx.AllQualified_name()[0])
-		c.lastCreateTable = tableName
+	qualifiedNames := ctx.AllQualified_name()
+	if len(qualifiedNames) > 0 {
+		c.lastCreateTable = extractTableName(qualifiedNames[0])
 	}
 }
 
-// EnterDropdbstmt checks DROP DATABASE/SCHEMA
+// EnterDropdbstmt handles DROP DATABASE
 func (c *schemaBackwardCompatibilityChecker) EnterDropdbstmt(ctx *parser.DropdbstmtContext) {
 	if !isTopLevel(ctx.GetParent()) {
 		return
 	}
 
-	// DROP DATABASE or DROP SCHEMA both use DropdbstmtContext
-	c.addIncompatibilityAdvice(ctx.GetStart().GetLine(), types.CompatibilityDropDatabase)
+	stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
+	c.adviceList = append(c.adviceList, &types.Advice{
+		Status:  c.level,
+		Code:    int32(types.CompatibilityDropDatabase),
+		Title:   c.title,
+		Content: fmt.Sprintf(`"%s" may cause incompatibility with the existing data and code`, stmtText),
+		StartPosition: &types.Position{
+			Line: int32(ctx.GetStart().GetLine()),
+		},
+	})
 }
 
-// EnterDropstmt checks DROP TABLE
+// EnterDropstmt handles DROP TABLE/VIEW
 func (c *schemaBackwardCompatibilityChecker) EnterDropstmt(ctx *parser.DropstmtContext) {
 	if !isTopLevel(ctx.GetParent()) {
 		return
 	}
 
-	// Check if this is DROP TABLE by checking if Object_type_any_name has TABLE
-	if ctx.Object_type_any_name() != nil && ctx.Object_type_any_name().TABLE() != nil {
-		c.addIncompatibilityAdvice(ctx.GetStart().GetLine(), types.CompatibilityDropTable)
+	// Check if this is DROP TABLE or DROP VIEW
+	if ctx.Object_type_any_name() != nil {
+		objType := ctx.Object_type_any_name()
+		if objType.TABLE() != nil || objType.VIEW() != nil {
+			stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
+			c.adviceList = append(c.adviceList, &types.Advice{
+				Status:  c.level,
+				Code:    int32(types.CompatibilityDropTable),
+				Title:   c.title,
+				Content: fmt.Sprintf(`"%s" may cause incompatibility with the existing data and code`, stmtText),
+				StartPosition: &types.Position{
+					Line: int32(ctx.GetStart().GetLine()),
+				},
+			})
+		}
 	}
 }
 
-// EnterRenamestmt checks table rename
+// EnterRenamestmt handles ALTER TABLE RENAME and RENAME COLUMN
 func (c *schemaBackwardCompatibilityChecker) EnterRenamestmt(ctx *parser.RenamestmtContext) {
 	if !isTopLevel(ctx.GetParent()) {
 		return
 	}
 
-	// RENAME TABLE - PostgreSQL uses ALTER TABLE RENAME syntax, so this might not catch all cases
-	// Most table renames are handled in EnterAltertablestmt
-	c.addIncompatibilityAdvice(ctx.GetStart().GetLine(), types.CompatibilityRenameTable)
+	code := types.CompatibilityOK
+
+	// Check if this is a column rename
+	if ctx.Opt_column() != nil && ctx.Opt_column().COLUMN() != nil {
+		// RENAME COLUMN - check if not on last created table
+		if ctx.Relation_expr() != nil && ctx.Relation_expr().Qualified_name() != nil {
+			tableName := extractTableName(ctx.Relation_expr().Qualified_name())
+			if c.lastCreateTable != tableName {
+				code = types.CompatibilityRenameColumn
+			}
+		}
+	} else {
+		// RENAME TABLE/VIEW
+		code = types.CompatibilityRenameTable
+	}
+
+	if code != types.CompatibilityOK {
+		stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
+		c.adviceList = append(c.adviceList, &types.Advice{
+			Status:  c.level,
+			Code:    int32(code),
+			Title:   c.title,
+			Content: fmt.Sprintf(`"%s" may cause incompatibility with the existing data and code`, stmtText),
+			StartPosition: &types.Position{
+				Line: int32(ctx.GetStart().GetLine()),
+			},
+		})
+	}
 }
 
-// EnterAltertablestmt checks ALTER TABLE for incompatible changes
+// EnterAltertablestmt handles various ALTER TABLE commands
 func (c *schemaBackwardCompatibilityChecker) EnterAltertablestmt(ctx *parser.AltertablestmtContext) {
 	if !isTopLevel(ctx.GetParent()) {
 		return
@@ -116,131 +156,118 @@ func (c *schemaBackwardCompatibilityChecker) EnterAltertablestmt(ctx *parser.Alt
 	if ctx.Relation_expr() == nil || ctx.Relation_expr().Qualified_name() == nil {
 		return
 	}
-
 	tableName := extractTableName(ctx.Relation_expr().Qualified_name())
 
-	// Skip if this is the table we just created in this script
-	if tableName == c.lastCreateTable {
+	// Skip if this is the table we just created
+	if c.lastCreateTable == tableName {
 		return
 	}
 
-	// Check ALTER TABLE commands
-	if ctx.Alter_table_cmds() != nil {
-		allCmds := ctx.Alter_table_cmds().AllAlter_table_cmd()
-		for _, cmd := range allCmds {
-			// Check for specific ALTER TABLE command types by inspecting the context
-			cmdText := cmd.GetText()
+	if ctx.Alter_table_cmds() == nil {
+		return
+	}
 
-			// RENAME COLUMN: ALTER TABLE ... RENAME COLUMN ... TO ...
-			if cmd.GetChild(0) != nil && cmd.GetChild(0).(antlr.ParseTree).GetText() == "RENAME" {
-				// Check if next token is COLUMN
-				if cmd.GetChildCount() > 1 {
-					secondToken := cmd.GetChild(1).(antlr.ParseTree).GetText()
-					if secondToken == "COLUMN" {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityRenameColumn)
-						return
+	allCmds := ctx.Alter_table_cmds().AllAlter_table_cmd()
+	for _, cmd := range allCmds {
+		code := types.CompatibilityOK
+
+		// DROP COLUMN
+		if cmd.DROP() != nil && cmd.Opt_column() != nil && cmd.Opt_column().COLUMN() != nil {
+			code = types.CompatibilityDropColumn
+		}
+
+		// ALTER COLUMN TYPE
+		if cmd.ALTER() != nil && cmd.TYPE_P() != nil {
+			code = types.CompatibilityAlterColumn
+		}
+
+		// ADD CONSTRAINT
+		if cmd.ADD_P() != nil && cmd.Tableconstraint() != nil {
+			constraint := cmd.Tableconstraint()
+			if constraint.Constraintelem() != nil {
+				elem := constraint.Constraintelem()
+
+				// PRIMARY KEY
+				if elem.PRIMARY() != nil && elem.KEY() != nil {
+					code = types.CompatibilityAddPrimaryKey
+				}
+
+				// UNIQUE
+				if elem.UNIQUE() != nil {
+					code = types.CompatibilityAddUniqueKey
+				}
+
+				// FOREIGN KEY
+				if elem.FOREIGN() != nil && elem.KEY() != nil {
+					code = types.CompatibilityAddForeignKey
+				}
+
+				// CHECK - only if NOT VALID is not present
+				if elem.CHECK() != nil {
+					// Check if NOT VALID is present in constraint attributes
+					hasNotValid := false
+					if elem.Constraintattributespec() != nil {
+						allAttrs := elem.Constraintattributespec().AllConstraintattributeElem()
+						for _, attr := range allAttrs {
+							if attr.NOT() != nil && attr.VALID() != nil {
+								hasNotValid = true
+								break
+							}
+						}
 					}
-					// RENAME TO (table rename)
-					if secondToken == "TO" {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityRenameTable)
-						return
+					if !hasNotValid {
+						code = types.CompatibilityAddCheck
 					}
 				}
 			}
+		}
 
-			// DROP COLUMN
-			if cmd.GetChild(0) != nil && cmd.GetChild(0).(antlr.ParseTree).GetText() == "DROP" {
-				if cmd.GetChildCount() > 1 && cmd.GetChild(1).(antlr.ParseTree).GetText() == "COLUMN" {
-					c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityDropColumn)
-					return
-				}
-			}
-
-			// ADD constraint types
-			if cmd.GetChild(0) != nil && cmd.GetChild(0).(antlr.ParseTree).GetText() == "ADD" {
-				// Check for ADD PRIMARY KEY, ADD UNIQUE, ADD FOREIGN KEY, ADD CHECK
-				if cmd.Tableconstraint() != nil && cmd.Tableconstraint().Constraintelem() != nil {
-					elem := cmd.Tableconstraint().Constraintelem()
-					elemText := elem.GetText()
-
-					if elem.PRIMARY() != nil {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAddPrimaryKey)
-						return
-					}
-					if elem.UNIQUE() != nil {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAddUniqueKey)
-						return
-					}
-					if elem.FOREIGN() != nil {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAddForeignKey)
-						return
-					}
-					if elem.CHECK() != nil {
-						c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAddCheck)
-						return
-					}
-					_ = elemText
-				}
-			}
-
-			// ALTER COLUMN TYPE (column type change)
-			if cmd.GetChild(0) != nil && cmd.GetChild(0).(antlr.ParseTree).GetText() == "ALTER" {
-				// Check if this is ALTER COLUMN ... TYPE
-				if cmd.Typename() != nil {
-					c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAlterColumn)
-					return
-				}
-			}
-
-			// VALIDATE CONSTRAINT
-			if cmd.GetChild(0) != nil && cmd.GetChild(0).(antlr.ParseTree).GetText() == "VALIDATE" {
-				if cmdText != "" && len(cmdText) > 8 && cmdText[:8] == "VALIDATE" {
-					c.addIncompatibilityAdvice(cmd.GetStart().GetLine(), types.CompatibilityAlterCheck)
-					return
-				}
-			}
+		if code != types.CompatibilityOK {
+			stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
+			c.adviceList = append(c.adviceList, &types.Advice{
+				Status:  c.level,
+				Code:    int32(code),
+				Title:   c.title,
+				Content: fmt.Sprintf(`"%s" may cause incompatibility with the existing data and code`, stmtText),
+				StartPosition: &types.Position{
+					Line: int32(ctx.GetStart().GetLine()),
+				},
+			})
+			return
 		}
 	}
 }
 
-// EnterIndexstmt checks CREATE UNIQUE INDEX on existing table
+// EnterIndexstmt handles CREATE UNIQUE INDEX
 func (c *schemaBackwardCompatibilityChecker) EnterIndexstmt(ctx *parser.IndexstmtContext) {
 	if !isTopLevel(ctx.GetParent()) {
 		return
 	}
 
-	// Check if this is CREATE UNIQUE INDEX by looking at the children
-	hasUnique := false
-	for i := 0; i < ctx.GetChildCount(); i++ {
-		child := ctx.GetChild(i)
-		if child != nil {
-			childText := child.(antlr.ParseTree).GetText()
-			if childText == "UNIQUE" {
-				hasUnique = true
-				break
-			}
-		}
+	// Check if this is CREATE UNIQUE INDEX
+	if ctx.Opt_unique() == nil || ctx.Opt_unique().UNIQUE() == nil {
+		return
 	}
 
-	if hasUnique {
-		if ctx.Relation_expr() != nil && ctx.Relation_expr().Qualified_name() != nil {
-			tableName := extractTableName(ctx.Relation_expr().Qualified_name())
-			// Only flag if it's not on the table we just created
-			if tableName != c.lastCreateTable {
-				c.addIncompatibilityAdvice(ctx.GetStart().GetLine(), types.CompatibilityAddUniqueKey)
-			}
-		}
+	// Get table name
+	if ctx.Relation_expr() == nil || ctx.Relation_expr().Qualified_name() == nil {
+		return
 	}
-}
+	tableName := extractTableName(ctx.Relation_expr().Qualified_name())
 
-func (c *schemaBackwardCompatibilityChecker) addIncompatibilityAdvice(line int, compatibilityCode int) {
+	// Skip if this is the table we just created
+	if c.lastCreateTable == tableName {
+		return
+	}
+
+	stmtText := extractStatementText(c.statementsText, ctx.GetStart().GetLine(), ctx.GetStop().GetLine())
 	c.adviceList = append(c.adviceList, &types.Advice{
 		Status:  c.level,
-		Code:    int32(compatibilityCode),
+		Code:    int32(types.CompatibilityAddUniqueKey),
 		Title:   c.title,
-		Content: fmt.Sprintf("\"%s\" may cause incompatibility with the existing data and code", c.currentStmtText),
+		Content: fmt.Sprintf(`"%s" may cause incompatibility with the existing data and code`, stmtText),
 		StartPosition: &types.Position{
-			Line: int32(line),
+			Line: int32(ctx.GetStart().GetLine()),
 		},
 	})
 }
