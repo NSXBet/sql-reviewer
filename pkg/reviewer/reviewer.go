@@ -44,10 +44,9 @@ import (
 
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/config"
-	"github.com/nsxbet/sql-reviewer/pkg/types"
-
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 // Reviewer provides a high-level API for SQL review operations.

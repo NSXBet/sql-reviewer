@@ -5,10 +5,8 @@ import (
 	"fmt"
 
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
-	"github.com/nsxbet/sql-reviewer/pkg/types"
-
-	// Import PostgreSQL rules for registration
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 func main() {
@@ -55,7 +53,12 @@ func main() {
 		ChangeType: types.PlanCheckRunConfig_DDL,
 	}
 
-	advices, err := advisor.Check(context.Background(), types.Engine_POSTGRES, advisor.Type(advisor.SchemaRuleTableNaming), checkCtx)
+	advices, err := advisor.Check(
+		context.Background(),
+		types.Engine_POSTGRES,
+		advisor.Type(advisor.SchemaRuleTableNaming),
+		checkCtx,
+	)
 	if err != nil {
 		fmt.Printf("  ❌ Unexpected error: %v\n", err)
 		return
@@ -90,7 +93,12 @@ func demonstrateSyntaxError(sql string, ruleType advisor.SQLReviewRuleType) {
 	}
 
 	// Call advisor.Check which will trigger rule execution
-	advices, err := advisor.Check(context.Background(), types.Engine_POSTGRES, advisor.Type(ruleType), checkCtx)
+	advices, err := advisor.Check(
+		context.Background(),
+		types.Engine_POSTGRES,
+		advisor.Type(ruleType),
+		checkCtx,
+	)
 	if err != nil {
 		fmt.Printf("  ❌ Unexpected error during check: %v\n", err)
 		return
