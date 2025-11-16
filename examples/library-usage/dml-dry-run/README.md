@@ -59,6 +59,22 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE
 );
 "
+
+# For Example 5 (Valid DML demonstration), create the customers table:
+mysql -u username -p sampledb -e "
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(255),
+    city VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO customers (customer_id, name, email, city) VALUES
+(1, 'Alice Johnson', 'alice@example.com', 'New York'),
+(2, 'Bob Smith', 'bob@example.com', 'Los Angeles'),
+(3, 'Carol White', 'carol@example.com', 'Chicago');
+"
 ```
 
 ## Running the Example
@@ -80,6 +96,14 @@ go run main.go
 ```bash
 # DML dry-run will gracefully skip validation
 # No environment variables needed
+go run main.go
+```
+
+### With Valid DML (Example 5)
+
+```bash
+# MySQL with sampledb.customers table
+export MYSQL_DSN='user:pass@tcp(localhost:3306)/sampledb'
 go run main.go
 ```
 
@@ -107,6 +131,27 @@ Example 3: Graceful Skip (No Database Connection)
 ✓ DML dry-run rule gracefully skipped (no database connection)
 ✓ No errors reported - validation requires database connection
 ✓ Clean result (as expected)
+```
+
+### With Valid DML Statements (Example 5)
+
+```
+Example 5: MySQL DML Dry-Run (Valid DML - Should Pass)
+-------------------------------------------------------
+✓ Connected to MySQL (sampledb)
+
+SQL to validate:
+  - INSERT INTO customers (valid table)
+  - UPDATE customers SET city WHERE customer_id = 2
+  - DELETE FROM customers WHERE customer_id = 3
+
+✅ SUCCESS: All DML statements passed EXPLAIN validation!
+   • INSERT statement is valid
+   • UPDATE statement is valid
+   • DELETE statement is valid
+
+This demonstrates that DML dry-run correctly validates statements
+against existing database schema without executing them.
 ```
 
 ## Code Examples

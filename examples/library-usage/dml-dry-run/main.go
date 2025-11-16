@@ -52,6 +52,13 @@ func main() {
 	fmt.Println("Example 4: MySQL DML Dry-Run (With Database Connection)")
 	fmt.Println("--------------------------------------------------------")
 	mysqlWithDatabase()
+
+	fmt.Println("\n")
+
+	// Example 5: MySQL with valid DML (should pass)
+	fmt.Println("Example 5: MySQL DML Dry-Run (Valid DML - Should Pass)")
+	fmt.Println("-------------------------------------------------------")
+	mysqlWithValidDML()
 }
 
 // postgresGracefulSkip demonstrates graceful skip when no database connection
@@ -89,7 +96,7 @@ func postgresWithDatabase() {
 	pgURL := os.Getenv("POSTGRES_URL")
 	if pgURL == "" {
 		fmt.Println("⚠️  POSTGRES_URL not set. Skipping database connection example.")
-		fmt.Println("   Set POSTGRES_URL to test: export POSTGRES_URL='postgres://user:pass@localhost/dbname'")
+		fmt.Println("   Set POSTGRES_URL to test: export POSTGRES_URL='postgres://user:pass@localhost/dbname?sslmode=disable'")
 		return
 	}
 
@@ -205,6 +212,77 @@ func mysqlWithDatabase() {
 
 	// Display results
 	displayResults(result)
+}
+
+// mysqlWithValidDML demonstrates MySQL DML dry-run with valid statements that should pass
+func mysqlWithValidDML() {
+	mysqlDSN := os.Getenv("MYSQL_DSN")
+	if mysqlDSN == "" {
+		fmt.Println("⚠️  MYSQL_DSN not set. Skipping database connection example.")
+		fmt.Println("   Set MYSQL_DSN to test: export MYSQL_DSN='user:pass@tcp(localhost:3306)/sampledb'")
+		fmt.Println("   Note: Requires 'customers' table in 'sampledb' database")
+		return
+	}
+
+	// Connect to MySQL
+	db, err := sql.Open("mysql", mysqlDSN)
+	if err != nil {
+		log.Printf("Failed to connect to MySQL: %v", err)
+		return
+	}
+	defer db.Close()
+
+	// Verify connection
+	if err := db.Ping(); err != nil {
+		log.Printf("Failed to ping MySQL: %v", err)
+		return
+	}
+
+	fmt.Println("✓ Connected to MySQL (sampledb)")
+
+	// Create reviewer
+	r := createMySQLReviewer()
+
+	// SQL with valid DML statements against existing customers table
+	// This should pass EXPLAIN validation
+	sql := `
+	INSERT INTO customers (customer_id, name, email, city)
+	VALUES (4, 'David Brown', 'david@example.com', 'Boston');
+
+	UPDATE customers
+	SET city = 'San Francisco'
+	WHERE customer_id = 2;
+
+	DELETE FROM customers
+	WHERE customer_id = 3;
+	`
+
+	fmt.Println("\nSQL to validate:")
+	fmt.Println("  - INSERT INTO customers (valid table)")
+	fmt.Println("  - UPDATE customers SET city WHERE customer_id = 2")
+	fmt.Println("  - DELETE FROM customers WHERE customer_id = 3")
+
+	// Review WITH database connection
+	ctx := context.Background()
+	result, err := r.Review(ctx, sql, reviewer.WithDriver(db))
+	if err != nil {
+		log.Printf("Review failed: %v", err)
+		return
+	}
+
+	// Display results
+	fmt.Println()
+	if result.IsClean() {
+		fmt.Println("✅ SUCCESS: All DML statements passed EXPLAIN validation!")
+		fmt.Println("   • INSERT statement is valid")
+		fmt.Println("   • UPDATE statement is valid")
+		fmt.Println("   • DELETE statement is valid")
+		fmt.Println()
+		fmt.Println("This demonstrates that DML dry-run correctly validates statements")
+		fmt.Println("against existing database schema without executing them.")
+	} else {
+		displayResults(result)
+	}
 }
 
 // createPostgreSQLReviewer creates a reviewer with DML dry-run rule enabled
