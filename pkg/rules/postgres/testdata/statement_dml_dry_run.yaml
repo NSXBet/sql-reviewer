@@ -3,7 +3,6 @@
 # Note: These tests validate the rule's behavior when no database connection is available.
 # The DML dry-run rule gracefully skips validation when Driver is nil, returning no advice.
 # Tests with actual database connections and EXPLAIN execution are covered in integration tests.
-
 # Test 1: INSERT statement - graceful skip without Driver
 - statement: INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')
   changeType: 2
