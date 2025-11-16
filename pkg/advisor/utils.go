@@ -208,10 +208,10 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 	}
 	defer func() {
 		_ = tx.Rollback()
-		slog.Debug("Transaction rolled back")
+		slog.Debug("Transaction rolled back", "statement", formatSQLForLog("ROLLBACK"))
 	}()
 
-	slog.Debug("Transaction started")
+	slog.Debug("Transaction started", "statement", formatSQLForLog("BEGIN"))
 
 	if engine == types.Engine_POSTGRES && qCtx.UsePostgresDatabaseOwner {
 		const query = `
