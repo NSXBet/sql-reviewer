@@ -107,6 +107,20 @@ export MYSQL_DSN='user:pass@tcp(localhost:3306)/sampledb'
 go run main.go
 ```
 
+### With Query Logging (Example 6)
+
+```bash
+# PostgreSQL with query logging enabled
+export POSTGRES_URL='postgres://user:pass@localhost/dbname'
+go run main.go
+# Shows detailed SQL execution logs including:
+# - Query text and engine
+# - Transaction lifecycle
+# - Pre-execution statements
+# - Execution timing
+# - Result metadata
+```
+
 ## Example Output
 
 ### With Valid Database Connection
@@ -152,6 +166,40 @@ SQL to validate:
 
 This demonstrates that DML dry-run correctly validates statements
 against existing database schema without executing them.
+```
+
+### With Query Logging (Example 6)
+
+```
+Example 6: PostgreSQL DML Dry-Run (With Query Logging)
+-------------------------------------------------------
+✓ Connected to PostgreSQL
+✓ Query logging ENABLED - detailed SQL execution logs will appear below
+
+Executing SQL with query logging:
+
+	INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com');
+
+--- DEBUG LOG OUTPUT START ---
+3:00PM DBG Starting SQL query engine=POSTGRES query="EXPLAIN INSERT INTO users..." (in cyan)
+3:00PM DBG Transaction started
+3:00PM DBG Executing main query statement="EXPLAIN INSERT INTO users..." (in cyan)
+3:00PM DBG Query execution succeeded
+3:00PM DBG Query result metadata column_count=1 column_names=[QUERY PLAN]
+3:00PM DBG Query completed successfully duration_ms=12 row_count=3 column_count=1
+3:00PM DBG Transaction rolled back
+--- DEBUG LOG OUTPUT END ---
+
+✓ No validation errors (graceful skip or statement passed)
+
+📝 Note: Debug logs show:
+   • Query start with engine and statement text (SQL in cyan color)
+   • Transaction begin/rollback
+   • Pre-execution statements (e.g., SET ROLE)
+   • Main query execution (SQL in cyan color)
+   • Result metadata (columns, row count)
+   • Execution duration in milliseconds
+   • Colored output: DBG (dimmed), WRN (yellow), ERR (red)
 ```
 
 ## Code Examples
@@ -228,6 +276,55 @@ r.SetConfig(config)
 sql := `INSERT INTO users (id, name) VALUES (1, 'test');`
 result, _ := r.Review(context.Background(), sql)
 // result.IsClean() == true (no validation errors)
+```
+
+### Query Logging for Debugging
+
+```go
+// Enable detailed SQL query logging for debugging
+db, _ := sql.Open("postgres", "postgres://user:pass@localhost/dbname")
+defer db.Close()
+
+// Create reviewer
+r := reviewer.New(types.Engine_POSTGRES)
+
+// Enable DML dry-run rule
+config := &types.SQLReviewConfig{
+    Rules: []*types.SQLReviewRule{
+        {
+            Type:  string(types.SchemaRuleName_STATEMENT_DML_DRY_RUN),
+            Level: types.SQLReviewRuleLevel_ERROR,
+        },
+    },
+}
+r.SetConfig(config)
+
+// Review with query logging enabled
+sql := `INSERT INTO users (id, name) VALUES (1, 'test');`
+result, _ := r.Review(context.Background(), sql,
+    reviewer.WithDriver(db),
+    reviewer.WithQueryLogging(true), // Enable debug logging
+)
+
+// Debug logs will show:
+// - Query text and engine (SQL queries displayed in cyan)
+// - Transaction lifecycle (begin/rollback)
+// - Pre-execution statements
+// - Main query execution (SQL in cyan)
+// - Result metadata (columns, row count)
+// - Execution duration in milliseconds
+// - Colored output for easy reading
+```
+
+### CLI Query Logging
+
+```bash
+# Enable query logging with --debug flag
+./sql-reviewer check -e postgres examples/test.sql --debug
+
+# Or set debug level programmatically
+export DEBUG=true
+./sql-reviewer check -e postgres examples/test.sql
 ```
 
 ## How It Works

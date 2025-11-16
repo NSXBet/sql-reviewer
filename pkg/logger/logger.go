@@ -3,6 +3,9 @@ package logger
 import (
 	"log/slog"
 	"os"
+	"time"
+
+	"github.com/lmittmann/tint"
 )
 
 // Interface defines logging methods used by the advisor
@@ -18,20 +21,48 @@ type Logger struct {
 	logger *slog.Logger
 }
 
-// New creates a new logger instance
+// New creates a new logger instance with colored output
 func New() *Logger {
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+	handler := tint.NewHandler(os.Stderr, &tint.Options{
+		Level:      slog.LevelInfo,
+		TimeFormat: time.Kitchen,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			// Color error attributes (both key and value) in red (color code 9)
+			if a.Key == "error" {
+				return tint.Attr(9, a)
+			}
+			// Check if the value is an error type
+			if a.Value.Kind() == slog.KindAny {
+				if _, ok := a.Value.Any().(error); ok {
+					return tint.Attr(9, a)
+				}
+			}
+			return a
+		},
 	})
 	return &Logger{
 		logger: slog.New(handler),
 	}
 }
 
-// NewWithLevel creates a new logger with specified level
+// NewWithLevel creates a new logger with specified level and colored output
 func NewWithLevel(level slog.Level) *Logger {
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: level,
+	handler := tint.NewHandler(os.Stderr, &tint.Options{
+		Level:      level,
+		TimeFormat: time.Kitchen,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			// Color error attributes (both key and value) in red (color code 9)
+			if a.Key == "error" {
+				return tint.Attr(9, a)
+			}
+			// Check if the value is an error type
+			if a.Value.Kind() == slog.KindAny {
+				if _, ok := a.Value.Any().(error); ok {
+					return tint.Attr(9, a)
+				}
+			}
+			return a
+		},
 	})
 	return &Logger{
 		logger: slog.New(handler),

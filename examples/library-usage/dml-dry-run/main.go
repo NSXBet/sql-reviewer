@@ -59,6 +59,13 @@ func main() {
 	fmt.Println("Example 5: MySQL DML Dry-Run (Valid DML - Should Pass)")
 	fmt.Println("-------------------------------------------------------")
 	mysqlWithValidDML()
+
+	fmt.Println("\n")
+
+	// Example 6: PostgreSQL with query logging enabled
+	fmt.Println("Example 6: PostgreSQL DML Dry-Run (With Query Logging)")
+	fmt.Println("-------------------------------------------------------")
+	postgresWithQueryLogging()
 }
 
 // postgresGracefulSkip demonstrates graceful skip when no database connection
@@ -315,6 +322,73 @@ func createMySQLReviewer() *reviewer.Reviewer {
 	}
 
 	return reviewer.New(types.Engine_MYSQL).WithConfigObject(cfg)
+}
+
+// postgresWithQueryLogging demonstrates PostgreSQL DML dry-run with query logging enabled
+func postgresWithQueryLogging() {
+	pgURL := os.Getenv("POSTGRES_URL")
+	if pgURL == "" {
+		fmt.Println("⚠️  POSTGRES_URL not set. Skipping database connection example.")
+		fmt.Println("   Set POSTGRES_URL to test: export POSTGRES_URL='postgres://user:pass@localhost/dbname?sslmode=disable'")
+		return
+	}
+
+	// Connect to PostgreSQL
+	db, err := sql.Open("postgres", pgURL)
+	if err != nil {
+		log.Printf("Failed to connect to PostgreSQL: %v", err)
+		return
+	}
+	defer db.Close()
+
+	// Verify connection
+	if err := db.Ping(); err != nil {
+		log.Printf("Failed to ping PostgreSQL: %v", err)
+		return
+	}
+
+	fmt.Println("✓ Connected to PostgreSQL")
+	fmt.Println("✓ Query logging ENABLED - detailed SQL execution logs will appear below")
+	fmt.Println()
+
+	// Create reviewer
+	r := createPostgreSQLReviewer()
+
+	// SQL with valid INSERT statement
+	sql := `
+	INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com');
+	`
+
+	fmt.Println("Executing SQL with query logging:")
+	fmt.Println(sql)
+	fmt.Println("--- DEBUG LOG OUTPUT START ---")
+
+	// Review WITH database connection AND query logging enabled
+	ctx := context.Background()
+	result, err := r.Review(ctx, sql, reviewer.WithDriver(db), reviewer.WithQueryLogging(true))
+	if err != nil {
+		log.Printf("Review failed: %v", err)
+		return
+	}
+
+	fmt.Println("--- DEBUG LOG OUTPUT END ---")
+	fmt.Println()
+
+	// Display results
+	if result.IsClean() {
+		fmt.Println("✓ No validation errors (graceful skip or statement passed)")
+	} else {
+		displayResults(result)
+	}
+
+	fmt.Println()
+	fmt.Println("📝 Note: Debug logs show:")
+	fmt.Println("   • Query start with engine and statement text")
+	fmt.Println("   • Transaction begin/rollback")
+	fmt.Println("   • Pre-execution statements (e.g., SET ROLE)")
+	fmt.Println("   • Main query execution")
+	fmt.Println("   • Result metadata (columns, row count)")
+	fmt.Println("   • Execution duration in milliseconds")
 }
 
 // displayResults shows the review results

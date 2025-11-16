@@ -12,9 +12,10 @@ type ReviewOption func(*reviewOptions)
 
 // reviewOptions holds optional configuration for a review operation.
 type reviewOptions struct {
-	catalog    catalogInterface
-	driver     *sql.DB
-	changeType types.PlanCheckRunConfig_ChangeDatabaseType
+	catalog      catalogInterface
+	driver       *sql.DB
+	changeType   types.PlanCheckRunConfig_ChangeDatabaseType
+	queryLogging bool
 }
 
 // catalogInterface is the interface required for catalog implementations.
@@ -67,5 +68,30 @@ func WithDriver(driver *sql.DB) ReviewOption {
 func WithChangeType(changeType types.PlanCheckRunConfig_ChangeDatabaseType) ReviewOption {
 	return func(opts *reviewOptions) {
 		opts.changeType = changeType
+	}
+}
+
+// WithQueryLogging enables detailed SQL query logging for debugging.
+//
+// When enabled, all database queries executed during review will be logged
+// at DEBUG level using slog, including:
+//   - Query text and engine
+//   - Pre-execution statements
+//   - Transaction lifecycle
+//   - Execution timing and results
+//   - Error details
+//
+// This is useful for debugging rule behavior and understanding what queries
+// are being executed against the database.
+//
+// Example:
+//
+//	db, _ := sql.Open("mysql", dsn)
+//	result, err := r.Review(ctx, sql,
+//	    WithDriver(db),
+//	    WithQueryLogging(true))
+func WithQueryLogging(enabled bool) ReviewOption {
+	return func(opts *reviewOptions) {
+		opts.queryLogging = enabled
 	}
 }
