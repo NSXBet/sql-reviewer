@@ -3,6 +3,8 @@ package postgres
 import (
 	"github.com/antlr4-go/antlr/v4"
 	parser "github.com/bytebase/parser/postgresql"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/pgparser"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
@@ -155,4 +157,61 @@ func NormalizeSchemaName(schemaName string) string {
 		return "public"
 	}
 	return schemaName
+}
+
+// ConvertSyntaxErrorToAdvice converts PostgreSQL parser syntax errors to
+// advice format, matching the pattern used in MySQL rules and Bytebase.
+//
+// This function handles two types of errors:
+//   - *pgparser.SyntaxError: Converts to Advice with error code 201 (StatementSyntaxError)
+//     and preserves position information (line/column) from the parser
+//   - Other errors: Converts to internal error advice with error code 1 (Internal)
+//
+// The function always returns ([]*types.Advice, nil) and never returns an error,
+// which maintains consistency with the advisor interface contract and allows
+// syntax errors to be visible to users as actionable advice.
+//
+// Example usage in PostgreSQL rules:
+//
+//	tree, err := getANTLRTree(checkCtx)
+//	if err != nil {
+//	    return ConvertSyntaxErrorToAdvice(err)
+//	}
+func ConvertSyntaxErrorToAdvice(err error) ([]*types.Advice, error) {
+	// Handle nil error (should not happen in practice, but be defensive)
+	if err == nil {
+		return []*types.Advice{
+			{
+				Status:        types.Advice_ERROR,
+				Code:          int32(types.Internal), // 1
+				Title:         "Parse error",
+				Content:       "unknown error (nil)",
+				StartPosition: nil,
+			},
+		}, nil
+	}
+
+	// Handle typed syntax errors with position information
+	if syntaxErr, ok := err.(*pgparser.SyntaxError); ok {
+		return []*types.Advice{
+			{
+				Status:        types.Advice_ERROR,
+				Code:          int32(types.StatementSyntaxError), // 201
+				Title:         advisor.SyntaxErrorTitle,          // "Syntax error"
+				Content:       syntaxErr.Message,
+				StartPosition: syntaxErr.Position,
+			},
+		}, nil
+	}
+
+	// Fallback for unexpected error types
+	return []*types.Advice{
+		{
+			Status:        types.Advice_ERROR,
+			Code:          int32(types.Internal), // 1
+			Title:         "Parse error",
+			Content:       err.Error(),
+			StartPosition: nil,
+		},
+	}, nil
 }

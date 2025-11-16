@@ -45,3 +45,6 @@ config.local.*
 dist/
 build/
 bin/
+
+# Todos
+.todos/

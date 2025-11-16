@@ -23,7 +23,7 @@ type ColumnRequireDefaultAdvisor struct{}
 func (*ColumnRequireDefaultAdvisor) Check(_ context.Context, checkCtx advisor.Context) ([]*types.Advice, error) {
 	tree, err := getANTLRTree(checkCtx)
 	if err != nil {
-		return nil, err
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(checkCtx.Rule.Level)

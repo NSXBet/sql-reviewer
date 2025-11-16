@@ -10,6 +10,7 @@ A command-line tool for reviewing SQL statements against configurable rules. Thi
 - **Flexible Configuration**: Support for both config/schema.yaml defaults and custom YAML/JSON config files
 - **Multiple Output Formats**: Clean text, structured JSON, and YAML output options
 - **ANTLR-based Parsing**: Robust SQL parsing with detailed error reporting and line/column information
+- **Consistent Error Handling**: Syntax errors are converted to actionable advice with position information across all database engines
 - **Zero-config Operation**: Works out-of-the-box with sensible defaults for MySQL and PostgreSQL
 - **Extensible Architecture**: Modular design supporting easy addition of new database engines and rules
 

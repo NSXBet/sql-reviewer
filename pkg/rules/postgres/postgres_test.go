@@ -541,3 +541,103 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 		},
 	}
 }
+
+// TestPostgreSQLRulesSyntaxErrorHandling verifies that PostgreSQL rules
+// convert syntax errors to Advice objects (not errors) with proper error codes.
+func TestPostgreSQLRulesSyntaxErrorHandling(t *testing.T) {
+	// Test cases with invalid SQL that should produce syntax error advice
+	testCases := []struct {
+		name            string
+		sql             string
+		rule            advisor.SQLReviewRuleType
+		wantAdviceCode  int32
+		wantAdviceTitle string
+	}{
+		{
+			name:            "invalid DDL - missing table name",
+			sql:             "CREATE TABLE;",
+			rule:            advisor.SchemaRuleTableNaming,
+			wantAdviceCode:  201, // StatementSyntaxError
+			wantAdviceTitle: "Syntax error",
+		},
+		{
+			name:            "invalid DML - malformed INSERT",
+			sql:             "INSERT users VALUES;",
+			rule:            advisor.SchemaRuleStatementInsertMustSpecifyColumn,
+			wantAdviceCode:  201,
+			wantAdviceTitle: "Syntax error",
+		},
+		{
+			name:            "invalid SELECT - unexpected token",
+			sql:             "SELECT * FROM WHERE;",
+			rule:            advisor.SchemaRuleStatementNoSelectAll,
+			wantAdviceCode:  201,
+			wantAdviceTitle: "Syntax error",
+		},
+		{
+			name:            "invalid ALTER - malformed statement",
+			sql:             "ALTER TABLE ADD;",
+			rule:            advisor.SchemaRuleColumnNaming,
+			wantAdviceCode:  201,
+			wantAdviceTitle: "Syntax error",
+		},
+		{
+			name:            "invalid INDEX - syntax error",
+			sql:             "CREATE INDEX;",
+			rule:            advisor.SchemaRuleIDXNaming,
+			wantAdviceCode:  201,
+			wantAdviceTitle: "Syntax error",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Get default payload for the rule
+			payload, err := getDefaultPayload(tc.rule)
+			if err != nil {
+				payload = map[string]interface{}{}
+			}
+
+			// Create the rule
+			sqlRule := &types.SQLReviewRule{
+				Type:    string(tc.rule),
+				Level:   types.SQLReviewRuleLevel_ERROR,
+				Payload: payload,
+			}
+
+			// Do NOT pre-parse the SQL - let getANTLRTree do it (simulates real flow)
+			// This ensures syntax errors are properly caught and converted
+
+			// Create check context with nil AST to force parsing in the rule
+			checkCtx := advisor.Context{
+				DBType:     types.Engine_POSTGRES,
+				Statements: tc.sql,
+				Rule:       sqlRule,
+				AST:        nil, // Let getANTLRTree handle parsing and error conversion
+				ChangeType: types.PlanCheckRunConfig_DDL,
+			}
+
+			// Run the advisor
+			ctx := context.Background()
+			advices, err := advisor.Check(ctx, types.Engine_POSTGRES, advisor.Type(tc.rule), checkCtx)
+
+			// Should NEVER return an error (syntax errors converted to advice)
+			require.NoError(t, err, "advisor.Check should not return error for syntax failures")
+
+			// Should return at least one advice with syntax error
+			require.NotEmpty(t, advices, "Expected at least one advice for syntax error")
+
+			// First advice should be syntax error
+			advice := advices[0]
+			require.Equal(t, types.Advice_ERROR, advice.Status, "Advice status should be ERROR")
+			require.Equal(t, tc.wantAdviceCode, advice.Code, "Advice code should be 201 (StatementSyntaxError)")
+			require.Equal(t, tc.wantAdviceTitle, advice.Title, "Advice title should be 'Syntax error'")
+			require.NotEmpty(t, advice.Content, "Advice content should not be empty")
+
+			t.Logf("Advice content: %s", advice.Content)
+			if advice.StartPosition != nil {
+				t.Logf("Position: line %d, column %d", advice.StartPosition.Line, advice.StartPosition.Column)
+			}
+		})
+	}
+}

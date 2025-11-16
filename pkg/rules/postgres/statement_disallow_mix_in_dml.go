@@ -31,7 +31,7 @@ func (*StatementDisallowMixInDMLAdvisor) Check(ctx context.Context, checkCtx adv
 
 	tree, err := getANTLRTree(checkCtx)
 	if err != nil {
-		return nil, err
+		return ConvertSyntaxErrorToAdvice(err)
 	}
 
 	level, err := advisor.NewStatusBySQLReviewRuleLevel(checkCtx.Rule.Level)
