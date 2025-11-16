@@ -218,11 +218,12 @@ func (r *Reviewer) ReviewWithSchema(
 
 	// Prepare check context
 	checkCtx := advisor.Context{
-		DBType:     r.engine,
-		DBSchema:   schema,
-		Statements: sql,
-		Driver:     reviewOpts.driver,
-		ChangeType: reviewOpts.changeType,
+		DBType:                   r.engine,
+		DBSchema:                 schema,
+		Statements:               sql,
+		Driver:                   reviewOpts.driver,
+		ChangeType:               reviewOpts.changeType,
+		UsePostgresDatabaseOwner: reviewOpts.usePostgresDatabaseOwner,
 	}
 
 	// Set catalog if provided (using type assertion to satisfy internal interface)

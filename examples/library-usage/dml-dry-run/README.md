@@ -128,9 +128,11 @@ go run main.go
 ```
 === SQL Reviewer: DML Dry-Run Validation Example ===
 
-Example 1: PostgreSQL DML Dry-Run with Database Connection
+Example 2: PostgreSQL DML Dry-Run with Database Connection
 -----------------------------------------------------------
 ✓ Connected to PostgreSQL
+✓ Query logging enabled
+✓ Using database owner role for permission elevation
 
 ❌ Errors:
   • "INSERT INTO nonexistent_table..." dry runs failed: relation "nonexistent_table" does not exist
@@ -242,7 +244,37 @@ UPDATE users SET email = 'test@example.com' WHERE id = 1;
 result, _ := r.Review(context.Background(), sql)
 ```
 
-### PostgreSQL with SET ROLE
+### PostgreSQL with Database Owner Role
+
+```go
+// Connect to PostgreSQL
+db, _ := sql.Open("postgres", "postgres://user:pass@localhost/dbname")
+defer db.Close()
+
+// Create reviewer
+r := reviewer.New(types.Engine_POSTGRES)
+
+// Enable DML dry-run rule
+config := &types.SQLReviewConfig{
+    Rules: []*types.SQLReviewRule{
+        {
+            Type:  string(types.SchemaRuleName_STATEMENT_DML_DRY_RUN),
+            Level: types.SQLReviewRuleLevel_ERROR,
+        },
+    },
+}
+r.SetConfig(config)
+
+// Review with database owner role for permission elevation
+// The reviewer will query the database owner and execute "SET ROLE '<owner>'"
+// before running EXPLAIN queries
+sql := `INSERT INTO users (id, name) VALUES (1, 'test');`
+result, _ := r.Review(context.Background(), sql,
+    reviewer.WithDriver(db),
+    reviewer.WithPostgresDatabaseOwner(true))
+```
+
+### PostgreSQL with SET ROLE in SQL
 
 ```go
 // SQL with SET ROLE (automatically tracked and pre-executed)

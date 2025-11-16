@@ -123,6 +123,7 @@ func postgresWithDatabase() {
 
 	fmt.Println("✓ Connected to PostgreSQL")
 	fmt.Println("✓ Query logging enabled")
+	fmt.Println("✓ Using database owner role for permission elevation")
 
 	// Create reviewer
 	r := createPostgreSQLReviewer()
@@ -134,9 +135,12 @@ func postgresWithDatabase() {
 	DELETE FROM products WHERE id = 999;
 	`
 
-	// Review WITH database connection AND query logging
+	// Review WITH database connection, query logging, AND database owner role
 	ctx := context.Background()
-	result, err := r.Review(ctx, sql, reviewer.WithDriver(db), reviewer.WithQueryLogging(true))
+	result, err := r.Review(ctx, sql,
+		reviewer.WithDriver(db),
+		reviewer.WithQueryLogging(true),
+		reviewer.WithPostgresDatabaseOwner(true))
 	if err != nil {
 		log.Printf("Review failed: %v", err)
 		return

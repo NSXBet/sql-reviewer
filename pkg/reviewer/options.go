@@ -12,10 +12,11 @@ type ReviewOption func(*reviewOptions)
 
 // reviewOptions holds optional configuration for a review operation.
 type reviewOptions struct {
-	catalog      catalogInterface
-	driver       *sql.DB
-	changeType   types.PlanCheckRunConfig_ChangeDatabaseType
-	queryLogging bool
+	catalog                  catalogInterface
+	driver                   *sql.DB
+	changeType               types.PlanCheckRunConfig_ChangeDatabaseType
+	queryLogging             bool
+	usePostgresDatabaseOwner bool
 }
 
 // catalogInterface is the interface required for catalog implementations.
@@ -93,5 +94,26 @@ func WithChangeType(changeType types.PlanCheckRunConfig_ChangeDatabaseType) Revi
 func WithQueryLogging(enabled bool) ReviewOption {
 	return func(opts *reviewOptions) {
 		opts.queryLogging = enabled
+	}
+}
+
+// WithPostgresDatabaseOwner enables using PostgreSQL database owner role.
+//
+// When enabled for PostgreSQL databases, queries will be executed with
+// the database owner role using SET ROLE. This is useful for permission
+// elevation when the connected user has limited privileges but the
+// database owner has the necessary permissions.
+//
+// This option only affects PostgreSQL databases and is ignored for other engines.
+//
+// Example:
+//
+//	db, _ := sql.Open("postgres", dsn)
+//	result, err := r.Review(ctx, sql,
+//	    WithDriver(db),
+//	    WithPostgresDatabaseOwner(true))
+func WithPostgresDatabaseOwner(enabled bool) ReviewOption {
+	return func(opts *reviewOptions) {
+		opts.usePostgresDatabaseOwner = enabled
 	}
 }
