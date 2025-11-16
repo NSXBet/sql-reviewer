@@ -156,9 +156,11 @@ func formatSQLForLog(statement string) string {
 		// Add indentation for readability
 		// Main clauses (SELECT, FROM, WHERE, etc.) stay at base level
 		// Everything else gets indented
-		mainClauses := []string{"SELECT", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT", "INNER",
+		mainClauses := []string{
+			"SELECT", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT", "INNER",
 			"GROUP BY", "ORDER BY", "HAVING", "LIMIT", "OFFSET", "INSERT", "UPDATE",
-			"DELETE", "VALUES", "SET", "ON", "AND", "OR", "UNION", "EXPLAIN"}
+			"DELETE", "VALUES", "SET", "ON", "AND", "OR", "UNION", "EXPLAIN",
+		}
 
 		isMainClause := false
 		upperLine := strings.ToUpper(line)
