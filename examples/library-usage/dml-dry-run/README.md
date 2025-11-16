@@ -181,9 +181,9 @@ Executing SQL with query logging:
 	INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com');
 
 --- DEBUG LOG OUTPUT START ---
-3:00PM DBG Starting SQL query engine=POSTGRES query="EXPLAIN INSERT INTO users..." (in cyan)
+3:00PM DBG Starting SQL query engine=POSTGRES query="EXPLAIN INSERT INTO users..." (SQL in magenta)
 3:00PM DBG Transaction started
-3:00PM DBG Executing main query statement="EXPLAIN INSERT INTO users..." (in cyan)
+3:00PM DBG Executing main query statement="EXPLAIN INSERT INTO users..." (SQL in magenta)
 3:00PM DBG Query execution succeeded
 3:00PM DBG Query result metadata column_count=1 column_names=[QUERY PLAN]
 3:00PM DBG Query completed successfully duration_ms=12 row_count=3 column_count=1
@@ -193,13 +193,14 @@ Executing SQL with query logging:
 ✓ No validation errors (graceful skip or statement passed)
 
 📝 Note: Debug logs show:
-   • Query start with engine and statement text (SQL in cyan color)
+   • Query start with engine and statement text (SQL colored by statement type)
    • Transaction begin/rollback
    • Pre-execution statements (e.g., SET ROLE)
-   • Main query execution (SQL in cyan color)
+   • Main query execution (SQL colored by statement type)
    • Result metadata (columns, row count)
    • Execution duration in milliseconds
    • Colored output: DBG (dimmed), WRN (yellow), ERR (red)
+   • SQL colors (Rails 5+ standard): SELECT (blue), INSERT (green), UPDATE (yellow), DELETE (red), EXPLAIN (magenta)
 ```
 
 ## Code Examples
@@ -307,13 +308,13 @@ result, _ := r.Review(context.Background(), sql,
 )
 
 // Debug logs will show:
-// - Query text and engine (SQL queries displayed in cyan)
+// - Query text and engine (SQL queries colored by statement type)
 // - Transaction lifecycle (begin/rollback)
 // - Pre-execution statements
-// - Main query execution (SQL in cyan)
+// - Main query execution (SQL colored by type: SELECT=blue, INSERT=green, UPDATE=yellow, etc.)
 // - Result metadata (columns, row count)
 // - Execution duration in milliseconds
-// - Colored output for easy reading
+// - Colored output using Rails 5+ SQL color conventions
 ```
 
 ### CLI Query Logging

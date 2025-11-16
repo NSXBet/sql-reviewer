@@ -386,12 +386,13 @@ func postgresWithQueryLogging() {
 
 	fmt.Println()
 	fmt.Println("📝 Note: Debug logs show:")
-	fmt.Println("   • Query start with engine and statement text")
+	fmt.Println("   • Query start with engine and statement text (SQL colored by type)")
 	fmt.Println("   • Transaction begin/rollback")
 	fmt.Println("   • Pre-execution statements (e.g., SET ROLE)")
-	fmt.Println("   • Main query execution")
+	fmt.Println("   • Main query execution (SQL colored by type)")
 	fmt.Println("   • Result metadata (columns, row count)")
 	fmt.Println("   • Execution duration in milliseconds")
+	fmt.Println("   • SQL colors: SELECT (blue), INSERT (green), UPDATE (yellow), DELETE (red), EXPLAIN (magenta)")
 }
 
 // displayResults shows the review results

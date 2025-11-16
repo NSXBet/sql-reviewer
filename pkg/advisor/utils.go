@@ -62,21 +62,85 @@ func NormalizeStatement(statement string) string {
 	return statement
 }
 
+// getSQLColor returns the ANSI color code for a SQL statement based on Rails 5+ conventions.
+// The color is determined by the statement type (SELECT, INSERT, UPDATE, DELETE, etc.).
+func getSQLColor(statement string) string {
+	// Rails 5+ SQL color standard
+	const (
+		colorBlue    = "\033[34m" // SELECT
+		colorGreen   = "\033[32m" // INSERT
+		colorYellow  = "\033[33m" // UPDATE
+		colorRed     = "\033[31m" // DELETE, ROLLBACK
+		colorCyan    = "\033[36m" // TRANSACTION, BEGIN, COMMIT
+		colorMagenta = "\033[35m" // EXPLAIN, DDL (CREATE, ALTER, DROP)
+		colorWhite   = "\033[37m" // LOCK, SELECT FOR UPDATE
+	)
+
+	// Normalize for pattern matching
+	upperStatement := strings.ToUpper(strings.TrimSpace(statement))
+
+	// Check for ROLLBACK (must come before other patterns)
+	if strings.HasPrefix(upperStatement, "ROLLBACK") {
+		return colorRed
+	}
+
+	// Check for SELECT ... FOR UPDATE or LOCK
+	if strings.HasPrefix(upperStatement, "LOCK") ||
+		(strings.HasPrefix(upperStatement, "SELECT") && strings.Contains(upperStatement, "FOR UPDATE")) {
+		return colorWhite
+	}
+
+	// Check for basic DML operations
+	if strings.HasPrefix(upperStatement, "SELECT") {
+		return colorBlue
+	}
+	if strings.HasPrefix(upperStatement, "INSERT") {
+		return colorGreen
+	}
+	if strings.HasPrefix(upperStatement, "UPDATE") {
+		return colorYellow
+	}
+	if strings.HasPrefix(upperStatement, "DELETE") {
+		return colorRed
+	}
+
+	// Check for transaction control
+	if strings.HasPrefix(upperStatement, "BEGIN") ||
+		strings.HasPrefix(upperStatement, "COMMIT") ||
+		strings.Contains(upperStatement, "TRANSACTION") {
+		return colorCyan
+	}
+
+	// Check for EXPLAIN
+	if strings.HasPrefix(upperStatement, "EXPLAIN") {
+		return colorMagenta
+	}
+
+	// Check for DDL operations (CREATE, ALTER, DROP)
+	if strings.HasPrefix(upperStatement, "CREATE") ||
+		strings.HasPrefix(upperStatement, "ALTER") ||
+		strings.HasPrefix(upperStatement, "DROP") {
+		return colorMagenta
+	}
+
+	// Default to magenta for other statements
+	return colorMagenta
+}
+
 // formatSQLForLog formats SQL statements for beautiful log output.
-// It adds proper indentation, highlights SQL keywords, and colors the output in cyan.
+// It adds proper indentation, highlights SQL keywords, and colors the output
+// using Rails 5+ color conventions based on statement type.
 func formatSQLForLog(statement string) string {
 	// Normalize first
 	statement = NormalizeStatement(statement)
 
-	// ANSI color codes
-	const (
-		colorCyan  = "\033[36m" // Cyan color
-		colorReset = "\033[0m"  // Reset color
-	)
+	// Get color based on statement type (Rails 5+ convention)
+	color := getSQLColor(statement)
+	const colorReset = "\033[0m" // Reset color
 
-	// For short single-line statements, wrap in cyan and return
+	// For short single-line statements, wrap in color and return
 	if !strings.Contains(statement, "\n") && len(statement) < 100 {
-		return colorCyan + statement + colorReset
+		return color + statement + colorReset
 	}
 
 	// Split into lines and add indentation
@@ -117,8 +181,8 @@ func formatSQLForLog(statement string) string {
 		}
 	}
 
-	// Wrap the entire formatted SQL in cyan color
-	return colorCyan + strings.Join(formatted, "\n") + colorReset
+	// Wrap the entire formatted SQL in statement-specific color
+	return color + strings.Join(formatted, "\n") + colorReset
 }
 
 type QueryContext struct {
