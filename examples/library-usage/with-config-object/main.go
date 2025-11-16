@@ -15,11 +15,9 @@ import (
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/config"
 	"github.com/nsxbet/sql-reviewer/pkg/reviewer"
-	"github.com/nsxbet/sql-reviewer/pkg/types"
-
-	// Import rule packages to register all advisors
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"
+	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
 func main() {
