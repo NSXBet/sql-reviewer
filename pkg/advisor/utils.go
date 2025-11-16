@@ -7,18 +7,184 @@ import (
 	"log/slog"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"github.com/pkg/errors"
 )
 
-// NormalizeStatement limit the max length of the statements.
+// NormalizeStatement formats and limits the max length of SQL statements for logging.
+// It removes extra whitespace, normalizes line breaks, and truncates if too long.
 func NormalizeStatement(statement string) string {
-	maxLength := 1000
-	if len(statement) > maxLength {
-		return statement[:maxLength] + "..."
+	// Remove leading/trailing whitespace
+	statement = strings.TrimSpace(statement)
+
+	// Replace multiple spaces/tabs with single space
+	statement = regexp.MustCompile(`[\t ]+`).ReplaceAllString(statement, " ")
+
+	// Replace multiple newlines with single newline
+	statement = regexp.MustCompile(`\n+`).ReplaceAllString(statement, "\n")
+
+	// Remove newlines followed by spaces
+	statement = regexp.MustCompile(`\n\s+`).ReplaceAllString(statement, "\n")
+
+	// For single-line queries, keep them on one line
+	if !strings.Contains(statement, "\n") {
+		maxLength := 1000
+		if len(statement) > maxLength {
+			return statement[:maxLength] + "..."
+		}
+		return statement
 	}
+
+	// For multi-line queries, format nicely with proper indentation
+	lines := strings.Split(statement, "\n")
+	var formatted []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			formatted = append(formatted, line)
+		}
+	}
+	statement = strings.Join(formatted, "\n")
+
+	// Truncate if too long (accounting for newlines)
+	maxLength := 2000
+	if len(statement) > maxLength {
+		// Find a good break point (end of line if possible)
+		truncated := statement[:maxLength]
+		if lastNewline := strings.LastIndex(truncated, "\n"); lastNewline > maxLength-200 {
+			truncated = truncated[:lastNewline]
+		}
+		return truncated + "\n..."
+	}
+
 	return statement
+}
+
+// getSQLColor returns the ANSI color code for a SQL statement based on Rails 5+ conventions.
+// The color is determined by the statement type (SELECT, INSERT, UPDATE, DELETE, etc.).
+func getSQLColor(statement string) string {
+	// Rails 5+ SQL color standard
+	const (
+		colorBlue    = "\033[34m" // SELECT
+		colorGreen   = "\033[32m" // INSERT
+		colorYellow  = "\033[33m" // UPDATE
+		colorRed     = "\033[31m" // DELETE, ROLLBACK
+		colorCyan    = "\033[36m" // TRANSACTION, BEGIN, COMMIT
+		colorMagenta = "\033[35m" // EXPLAIN, DDL (CREATE, ALTER, DROP)
+		colorWhite   = "\033[37m" // LOCK, SELECT FOR UPDATE
+	)
+
+	// Normalize for pattern matching
+	upperStatement := strings.ToUpper(strings.TrimSpace(statement))
+
+	// Check for ROLLBACK (must come before other patterns)
+	if strings.HasPrefix(upperStatement, "ROLLBACK") {
+		return colorRed
+	}
+
+	// Check for SELECT ... FOR UPDATE or LOCK
+	if strings.HasPrefix(upperStatement, "LOCK") ||
+		(strings.HasPrefix(upperStatement, "SELECT") && strings.Contains(upperStatement, "FOR UPDATE")) {
+		return colorWhite
+	}
+
+	// Check for basic DML operations
+	if strings.HasPrefix(upperStatement, "SELECT") {
+		return colorBlue
+	}
+	if strings.HasPrefix(upperStatement, "INSERT") {
+		return colorGreen
+	}
+	if strings.HasPrefix(upperStatement, "UPDATE") {
+		return colorYellow
+	}
+	if strings.HasPrefix(upperStatement, "DELETE") {
+		return colorRed
+	}
+
+	// Check for transaction control
+	if strings.HasPrefix(upperStatement, "BEGIN") ||
+		strings.HasPrefix(upperStatement, "COMMIT") ||
+		strings.Contains(upperStatement, "TRANSACTION") {
+		return colorCyan
+	}
+
+	// Check for EXPLAIN
+	if strings.HasPrefix(upperStatement, "EXPLAIN") {
+		return colorMagenta
+	}
+
+	// Check for DDL operations (CREATE, ALTER, DROP)
+	if strings.HasPrefix(upperStatement, "CREATE") ||
+		strings.HasPrefix(upperStatement, "ALTER") ||
+		strings.HasPrefix(upperStatement, "DROP") {
+		return colorMagenta
+	}
+
+	// Default to magenta for other statements
+	return colorMagenta
+}
+
+// formatSQLForLog formats SQL statements for beautiful log output.
+// It adds proper indentation, highlights SQL keywords, and colors the output
+// using Rails 5+ color conventions based on statement type.
+func formatSQLForLog(statement string) string {
+	// Normalize first
+	statement = NormalizeStatement(statement)
+
+	// Get color based on statement type (Rails 5+ convention)
+	color := getSQLColor(statement)
+	const colorReset = "\033[0m" // Reset color
+
+	// For short single-line statements, wrap in color and return
+	if !strings.Contains(statement, "\n") && len(statement) < 100 {
+		return color + statement + colorReset
+	}
+
+	// Split into lines and add indentation
+	lines := strings.Split(statement, "\n")
+	var formatted []string
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// Add indentation for readability
+		// Main clauses (SELECT, FROM, WHERE, etc.) stay at base level
+		// Everything else gets indented
+		mainClauses := []string{
+			"SELECT", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT", "INNER",
+			"GROUP BY", "ORDER BY", "HAVING", "LIMIT", "OFFSET", "INSERT", "UPDATE",
+			"DELETE", "VALUES", "SET", "ON", "AND", "OR", "UNION", "EXPLAIN",
+		}
+
+		isMainClause := false
+		upperLine := strings.ToUpper(line)
+		for _, clause := range mainClauses {
+			if strings.HasPrefix(upperLine, clause) {
+				isMainClause = true
+				break
+			}
+		}
+
+		if isMainClause {
+			formatted = append(formatted, line)
+		} else {
+			// Check if line starts with opening paren - don't indent
+			if strings.HasPrefix(line, "(") {
+				formatted = append(formatted, line)
+			} else {
+				formatted = append(formatted, "  "+line)
+			}
+		}
+	}
+
+	// Wrap the entire formatted SQL in statement-specific color
+	return color + strings.Join(formatted, "\n") + colorReset
 }
 
 type QueryContext struct {
@@ -28,13 +194,26 @@ type QueryContext struct {
 
 // Query runs the EXPLAIN or SELECT statements for advisors.
 func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine types.Engine, statement string) ([]any, error) {
+	// Log query start
+	startTime := time.Now()
+	slog.Debug("Starting SQL query",
+		"engine", engine,
+		"query", formatSQLForLog(statement),
+		"pre_executions", qCtx.PreExecutions,
+		"use_db_owner", qCtx.UsePostgresDatabaseOwner,
+	)
+
 	tx, err := connection.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
+		slog.Debug("Failed to begin transaction", "error", err)
 		return nil, err
 	}
 	defer func() {
 		_ = tx.Rollback()
+		slog.Debug("Transaction rolled back", "statement", formatSQLForLog("ROLLBACK"))
 	}()
+
+	slog.Debug("Transaction started", "statement", formatSQLForLog("BEGIN"))
 
 	if engine == types.Engine_POSTGRES && qCtx.UsePostgresDatabaseOwner {
 		const query = `
@@ -45,42 +224,56 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 		WHERE
 			d.datname = current_database();
 		`
+		slog.Debug("Querying database owner role")
 		var owner string
 		if err := tx.QueryRowContext(ctx, query).Scan(&owner); err != nil {
+			slog.Debug("Failed to query database owner", "error", err)
 			return nil, err
 		}
-		if _, err := tx.ExecContext(ctx, fmt.Sprintf("SET ROLE '%s';", owner)); err != nil {
+		setRoleStmt := fmt.Sprintf("SET ROLE '%s';", owner)
+		slog.Debug("Setting database owner role", "owner", owner, "statement", setRoleStmt)
+		if _, err := tx.ExecContext(ctx, setRoleStmt); err != nil {
+			slog.Debug("Failed to set role", "error", err)
 			return nil, err
 		}
 	}
 
-	for _, preExec := range qCtx.PreExecutions {
+	for i, preExec := range qCtx.PreExecutions {
 		if preExec != "" {
+			slog.Debug("Executing pre-execution statement", "index", i, "statement", formatSQLForLog(preExec))
 			if _, err := tx.ExecContext(ctx, preExec); err != nil {
+				slog.Debug("Pre-execution failed", "index", i, "error", err)
 				return nil, errors.Wrapf(err, "failed to execute pre-execution: %s", preExec)
 			}
+			slog.Debug("Pre-execution completed", "index", i)
 		}
 	}
 
+	slog.Debug("Executing main query", "statement", formatSQLForLog(statement))
 	rows, err := tx.QueryContext(ctx, statement)
 	if err != nil {
+		slog.Debug("Query execution failed", "error", err)
 		return nil, err
 	}
+	slog.Debug("Query execution succeeded")
 	defer func() {
 		_ = rows.Close()
 	}()
 
 	columnNames, err := rows.Columns()
 	if err != nil {
+		slog.Debug("Failed to get column names", "error", err)
 		return nil, err
 	}
 
 	columnTypes, err := rows.ColumnTypes()
 	if err != nil {
+		slog.Debug("Failed to get column types", "error", err)
 		return nil, err
 	}
 
 	colCount := len(columnTypes)
+	slog.Debug("Query result metadata", "column_count", colCount, "column_names", columnNames)
 
 	var columnTypeNames []string
 	for _, v := range columnTypes {
@@ -90,7 +283,9 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 	}
 
 	data := []any{}
+	rowCount := 0
 	for rows.Next() {
+		rowCount++
 		scanArgs := make([]any, colCount)
 		for i, v := range columnTypeNames {
 			// TODO(steven need help): Consult a common list of data types from database driver documentation. e.g. MySQL,PostgreSQL.
@@ -141,8 +336,16 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 		data = append(data, rowData)
 	}
 	if err := rows.Err(); err != nil {
+		slog.Debug("Error iterating rows", "error", err)
 		return nil, err
 	}
+
+	duration := time.Since(startTime)
+	slog.Debug("Query completed successfully",
+		"duration_ms", duration.Milliseconds(),
+		"row_count", rowCount,
+		"column_count", colCount,
+	)
 
 	return []any{columnNames, columnTypeNames, data}, nil
 }

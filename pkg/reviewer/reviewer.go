@@ -40,10 +40,12 @@ package reviewer
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/config"
+	"github.com/nsxbet/sql-reviewer/pkg/logger"
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/mysql"
 	_ "github.com/nsxbet/sql-reviewer/pkg/rules/postgres"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
@@ -208,13 +210,20 @@ func (r *Reviewer) ReviewWithSchema(
 		opt(reviewOpts)
 	}
 
+	// Set query logging level if requested
+	if reviewOpts.queryLogging {
+		customLogger := logger.NewWithLevel(slog.LevelDebug)
+		slog.SetDefault(customLogger.GetSlogLogger())
+	}
+
 	// Prepare check context
 	checkCtx := advisor.Context{
-		DBType:     r.engine,
-		DBSchema:   schema,
-		Statements: sql,
-		Driver:     reviewOpts.driver,
-		ChangeType: reviewOpts.changeType,
+		DBType:                   r.engine,
+		DBSchema:                 schema,
+		Statements:               sql,
+		Driver:                   reviewOpts.driver,
+		ChangeType:               reviewOpts.changeType,
+		UsePostgresDatabaseOwner: reviewOpts.usePostgresDatabaseOwner,
 	}
 
 	// Set catalog if provided (using type assertion to satisfy internal interface)
