@@ -1,6 +1,81 @@
-- statement: INSERT INTO tech_book values(1, 'zp');
+- statement: INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com');
+  changeType: 2
+- statement: UPDATE users SET name = 'Jane Doe' WHERE id = 1;
+  changeType: 2
+- statement: DELETE FROM users WHERE id = 1;
+  changeType: 2
+- statement: |
+    INSERT INTO users (id, name) VALUES (1, 'Alice');
+    UPDATE users SET name = 'Bob' WHERE id = 1;
+    DELETE FROM users WHERE id = 2;
+  changeType: 2
+- statement: |
+    INSERT INTO orders (id, user_id, amount)
+    SELECT id, user_id, amount FROM temp_orders WHERE status = 'pending';
+  changeType: 2
+- statement: |
+    UPDATE users u
+    INNER JOIN orders o ON u.id = o.user_id
+    SET u.name = o.customer_name;
+  changeType: 2
+- statement: |
+    DELETE u FROM users u
+    INNER JOIN inactive_accounts i ON u.id = i.user_id;
+  changeType: 2
+- statement: |
+    INSERT INTO users (id, name, email) VALUES
+    (1, 'User1', 'user1@example.com'),
+    (2, 'User2', 'user2@example.com'),
+    (3, 'User3', 'user3@example.com');
+  changeType: 2
+- statement: |
+    UPDATE users
+    SET name = (SELECT name FROM temp_users WHERE temp_users.id = users.id)
+    WHERE id IN (SELECT id FROM active_users);
+  changeType: 2
+- statement: |
+    DELETE FROM users
+    WHERE id IN (SELECT user_id FROM inactive_accounts);
+  changeType: 2
+- statement: |
+    INSERT INTO users (id, name, email)
+    VALUES (1, 'John', 'john@example.com')
+    ON DUPLICATE KEY UPDATE email = VALUES(email);
+  changeType: 2
+- statement: |
+    UPDATE users u, orders o
+    SET u.email = 'new@example.com'
+    WHERE u.id = o.user_id AND o.status = 'active';
+  changeType: 2
+- statement: |
+    DELETE u, o FROM users u
+    INNER JOIN orders o ON u.id = o.user_id
+    WHERE o.status = 'cancelled';
+  changeType: 2
+- statement: |
+    INSERT INTO users (id, name)
+    SELECT id, name FROM (
+      SELECT id, name FROM temp_users WHERE active = 1
+    ) AS t;
+  changeType: 2
+- statement: |
+    UPDATE users
+    SET status = CASE
+      WHEN last_login > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 'active'
+      ELSE 'inactive'
+    END;
+  changeType: 2
+- statement: DELETE FROM users WHERE status = 'inactive' LIMIT 100;
+  changeType: 2
+- statement: INSERT IGNORE INTO users (id, name) VALUES (1, 'Test');
+  changeType: 2
+- statement: REPLACE INTO users (id, name, email) VALUES (1, 'John', 'john@example.com');
+  changeType: 2
+- statement: CREATE TABLE test_table (id INT PRIMARY KEY);
   changeType: 1
-- statement: DELETE FROM tech_book;
-  changeType: 1
-- statement: UPDATE tech_book SET name = 'xz' WHERE id = 1;
+- statement: SELECT * FROM users WHERE id = 1;
+  changeType: 0
+- statement: |
+    CREATE TABLE temp (id INT);
+    INSERT INTO temp (id) VALUES (1);
   changeType: 1

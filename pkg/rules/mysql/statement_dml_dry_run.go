@@ -41,7 +41,7 @@ func (a *StatementDmlDryRunAdvisor) Check(
 			dmlDryRunRule.SetBaseLine(stmt.BaseLine)
 			checker.SetBaseLine(stmt.BaseLine)
 			antlr.ParseTreeWalkerDefault.Walk(checker, stmt.Tree)
-			if dmlDryRunRule.GetExplainCount() >= 100 { // MaximumLintExplainSize
+			if dmlDryRunRule.GetExplainCount() >= advisor.MaximumLintExplainSize {
 				break
 			}
 		}

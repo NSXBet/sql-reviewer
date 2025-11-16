@@ -55,6 +55,10 @@ import (
 // Each rule type corresponds to a specific validation check.
 type SQLReviewRuleType string
 
+// MaximumLintExplainSize is the maximum number of EXPLAIN queries to run during DML dry-run validation.
+// This limit prevents performance issues when reviewing scripts with many DML statements.
+const MaximumLintExplainSize = 100
+
 // Engine rules - Database engine and storage configuration
 const (
 	// SchemaRuleMySQLEngine require InnoDB as the storage engine.
