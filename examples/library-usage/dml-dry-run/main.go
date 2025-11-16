@@ -24,28 +24,29 @@ import (
 )
 
 func main() {
-	fmt.Println("=== SQL Reviewer: DML Dry-Run Validation Example ===\n")
+	fmt.Println("=== SQL Reviewer: DML Dry-Run Validation Example ===")
+	fmt.Println("")
 
 	// Example 1: PostgreSQL with graceful skip (no database connection)
 	fmt.Println("Example 1: PostgreSQL DML Dry-Run (Graceful Skip - No Database)")
 	fmt.Println("------------------------------------------------------------------")
 	postgresGracefulSkip()
 
-	fmt.Println("\n")
+	fmt.Println("")
 
 	// Example 2: PostgreSQL with database connection (if available)
 	fmt.Println("Example 2: PostgreSQL DML Dry-Run (With Database Connection)")
 	fmt.Println("-------------------------------------------------------------")
 	postgresWithDatabase()
 
-	fmt.Println("\n")
+	fmt.Println("")
 
 	// Example 3: MySQL with graceful skip
 	fmt.Println("Example 3: MySQL DML Dry-Run (Graceful Skip - No Database)")
 	fmt.Println("-----------------------------------------------------------")
 	mysqlGracefulSkip()
 
-	fmt.Println("\n")
+	fmt.Println("")
 
 	// Example 4: MySQL with database connection (if available)
 	fmt.Println("Example 4: MySQL DML Dry-Run (With Database Connection)")

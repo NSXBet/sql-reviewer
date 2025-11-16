@@ -8,17 +8,14 @@
 - statement: INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')
   changeType: 2
   want: []
-
 # Test 2: UPDATE statement - graceful skip without Driver
 - statement: UPDATE users SET name = 'Jane Doe' WHERE id = 1
   changeType: 2
   want: []
-
 # Test 3: DELETE statement - graceful skip without Driver
 - statement: DELETE FROM users WHERE id = 1
   changeType: 2
   want: []
-
 # Test 4: Multiple DML statements - graceful skip without Driver
 - statement: |
     INSERT INTO users (id, name) VALUES (1, 'Alice');
@@ -26,21 +23,18 @@
     DELETE FROM users WHERE id = 2;
   changeType: 2
   want: []
-
 # Test 5: SET ROLE followed by INSERT - graceful skip without Driver
 - statement: |
     SET ROLE 'app_user';
     INSERT INTO users (id, name) VALUES (1, 'Test User');
   changeType: 2
   want: []
-
 # Test 6: Complex INSERT with subquery - graceful skip without Driver
 - statement: |
     INSERT INTO orders (id, user_id, amount)
     SELECT id, user_id, amount FROM temp_orders WHERE status = 'pending'
   changeType: 2
   want: []
-
 # Test 7: UPDATE with JOIN - graceful skip without Driver
 - statement: |
     UPDATE users u
@@ -49,14 +43,12 @@
     WHERE u.id = o.user_id
   changeType: 2
   want: []
-
 # Test 8: DELETE with subquery - graceful skip without Driver
 - statement: |
     DELETE FROM users
     WHERE id IN (SELECT user_id FROM inactive_accounts)
   changeType: 2
   want: []
-
 # Test 9: INSERT with RETURNING clause - graceful skip without Driver
 - statement: |
     INSERT INTO users (id, name, email)
@@ -64,7 +56,6 @@
     RETURNING id, name
   changeType: 2
   want: []
-
 # Test 10: UPDATE with CTE - graceful skip without Driver
 - statement: |
     WITH updated AS (
@@ -73,7 +64,6 @@
     SELECT * FROM updated
   changeType: 2
   want: []
-
 # Test 11: Multi-table UPDATE - graceful skip without Driver
 - statement: |
     UPDATE users u
@@ -82,7 +72,6 @@
     WHERE u.id = o.user_id AND o.status = 'active'
   changeType: 2
   want: []
-
 # Test 12: INSERT with ON CONFLICT - graceful skip without Driver
 - statement: |
     INSERT INTO users (id, name, email)
@@ -90,7 +79,6 @@
     ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email
   changeType: 2
   want: []
-
 # Test 13: Nested DML statements - graceful skip without Driver
 - statement: |
     INSERT INTO users (id, name)
@@ -99,7 +87,6 @@
     ) t
   changeType: 2
   want: []
-
 # Test 14: DELETE with multiple conditions - graceful skip without Driver
 - statement: |
     DELETE FROM users
@@ -107,7 +94,6 @@
     AND last_login_at < NOW() - INTERVAL '6 months'
   changeType: 2
   want: []
-
 # Test 15: Batch INSERT - graceful skip without Driver
 - statement: |
     INSERT INTO users (id, name, email) VALUES
@@ -116,17 +102,14 @@
     (3, 'User3', 'user3@example.com')
   changeType: 2
   want: []
-
 # Test 16: Non-DML statement (DDL) - should be ignored
 - statement: CREATE TABLE test_table (id INTEGER PRIMARY KEY)
   changeType: 1
   want: []
-
 # Test 17: Non-DML statement (SELECT) - should be ignored
 - statement: SELECT * FROM users WHERE id = 1
   changeType: 0
   want: []
-
 # Test 18: Mixed DDL and DML - only DML checked, graceful skip without Driver
 - statement: |
     CREATE TABLE temp (id INT);

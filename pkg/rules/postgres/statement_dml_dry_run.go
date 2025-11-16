@@ -7,7 +7,6 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	parser "github.com/bytebase/parser/postgresql"
-
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
@@ -134,7 +133,6 @@ func (c *statementDMLDryRunChecker) checkDMLDryRun(ctx antlr.ParserRuleContext) 
 		UsePostgresDatabaseOwner: c.usePostgresDatabaseOwner,
 		PreExecutions:            c.setRoles,
 	}, c.driver, types.Engine_POSTGRES, fmt.Sprintf("EXPLAIN %s", stmtText))
-
 	if err != nil {
 		c.adviceList = append(c.adviceList, &types.Advice{
 			Status:  c.level,
