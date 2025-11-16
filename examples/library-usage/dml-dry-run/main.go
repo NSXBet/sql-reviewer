@@ -53,14 +53,14 @@ func main() {
 	fmt.Println("--------------------------------------------------------")
 	mysqlWithDatabase()
 
-	fmt.Println("\n")
+	fmt.Println("")
 
 	// Example 5: MySQL with valid DML (should pass)
 	fmt.Println("Example 5: MySQL DML Dry-Run (Valid DML - Should Pass)")
 	fmt.Println("-------------------------------------------------------")
 	mysqlWithValidDML()
 
-	fmt.Println("\n")
+	fmt.Println("")
 
 	// Example 6: PostgreSQL with query logging enabled
 	fmt.Println("Example 6: PostgreSQL DML Dry-Run (With Query Logging)")
@@ -122,6 +122,7 @@ func postgresWithDatabase() {
 	}
 
 	fmt.Println("✓ Connected to PostgreSQL")
+	fmt.Println("✓ Query logging enabled")
 
 	// Create reviewer
 	r := createPostgreSQLReviewer()
@@ -133,9 +134,9 @@ func postgresWithDatabase() {
 	DELETE FROM products WHERE id = 999;
 	`
 
-	// Review WITH database connection
+	// Review WITH database connection AND query logging
 	ctx := context.Background()
-	result, err := r.Review(ctx, sql, reviewer.WithDriver(db))
+	result, err := r.Review(ctx, sql, reviewer.WithDriver(db), reviewer.WithQueryLogging(true))
 	if err != nil {
 		log.Printf("Review failed: %v", err)
 		return
@@ -199,6 +200,7 @@ func mysqlWithDatabase() {
 	}
 
 	fmt.Println("✓ Connected to MySQL")
+	fmt.Println("✓ Query logging enabled")
 
 	// Create reviewer
 	r := createMySQLReviewer()
@@ -209,9 +211,9 @@ func mysqlWithDatabase() {
 	UPDATE users SET email = 'test@example.com' WHERE id = 1;
 	`
 
-	// Review WITH database connection
+	// Review WITH database connection AND query logging
 	ctx := context.Background()
-	result, err := r.Review(ctx, sql, reviewer.WithDriver(db))
+	result, err := r.Review(ctx, sql, reviewer.WithDriver(db), reviewer.WithQueryLogging(true))
 	if err != nil {
 		log.Printf("Review failed: %v", err)
 		return
@@ -246,6 +248,7 @@ func mysqlWithValidDML() {
 	}
 
 	fmt.Println("✓ Connected to MySQL (sampledb)")
+	fmt.Println("✓ Query logging enabled")
 
 	// Create reviewer
 	r := createMySQLReviewer()
@@ -269,9 +272,9 @@ func mysqlWithValidDML() {
 	fmt.Println("  - UPDATE customers SET city WHERE customer_id = 2")
 	fmt.Println("  - DELETE FROM customers WHERE customer_id = 3")
 
-	// Review WITH database connection
+	// Review WITH database connection AND query logging
 	ctx := context.Background()
-	result, err := r.Review(ctx, sql, reviewer.WithDriver(db))
+	result, err := r.Review(ctx, sql, reviewer.WithDriver(db), reviewer.WithQueryLogging(true))
 	if err != nil {
 		log.Printf("Review failed: %v", err)
 		return
