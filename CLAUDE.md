@@ -34,6 +34,7 @@ The SQL Reviewer CLI is a command-line tool for reviewing SQL statements against
 - `make clean` - Clean generated files
 - `go run main.go` - Run the CLI locally during development
 - `go install .` - Install the binary locally
+- `go mod tidy` - Tidy up the go.mod file
 
 ### Testing Commands
 - `make unit` - Run unit tests with testdox format and coverage

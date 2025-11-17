@@ -4,7 +4,9 @@ go 1.24.5
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
+	github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a
 	github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373
+	github.com/lmittmann/tint v1.1.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
@@ -13,12 +15,10 @@ require (
 )
 
 require (
-	github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/lmittmann/tint v1.1.2 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
