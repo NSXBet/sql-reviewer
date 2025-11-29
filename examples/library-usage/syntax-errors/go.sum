@@ -1,7 +1,7 @@
 github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
-github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a h1:a/vntE2CQ559g2L0HceY5Xn3nXztzfzzJJiHkmeFOik=
-github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a/go.mod h1:jeak/EfutSOAuWKvrFIT2IZunhWprM7oTFBRgZ9RCxo=
+github.com/gedhean/parser v0.0.0-20251103101721-8b106e9a4f5a h1:a/vntE2CQ559g2L0HceY5Xn3nXztzfzzJJiHkmeFOik=
+github.com/gedhean/parser v0.0.0-20251103101721-8b106e9a4f5a/go.mod h1:jeak/EfutSOAuWKvrFIT2IZunhWprM7oTFBRgZ9RCxo=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373 h1:nBXfwt5jyKBUc4L6vTpuPlBJ8eCq0afBUh2kqQnHvHw=

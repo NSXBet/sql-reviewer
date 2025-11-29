@@ -4,8 +4,8 @@ go 1.24.5
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
-	github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a
 	github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373
+	github.com/gedhean/parser v0.0.1
 	github.com/lmittmann/tint v1.1.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0

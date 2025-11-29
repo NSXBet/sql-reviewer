@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/antlr4-go/antlr/v4"
-	parser "github.com/bytebase/parser/postgresql"
+	parser "github.com/gedhean/parser/postgresql"
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )

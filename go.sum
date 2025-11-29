@@ -1,7 +1,5 @@
 github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
-github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a h1:a/vntE2CQ559g2L0HceY5Xn3nXztzfzzJJiHkmeFOik=
-github.com/bytebase/parser v0.0.0-20251103101721-8b106e9a4f5a/go.mod h1:jeak/EfutSOAuWKvrFIT2IZunhWprM7oTFBRgZ9RCxo=
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -13,6 +11,8 @@ github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nos
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373 h1:nBXfwt5jyKBUc4L6vTpuPlBJ8eCq0afBUh2kqQnHvHw=
 github.com/gedhean/mysql-parser v0.0.0-20251028130751-f72cf5f35373/go.mod h1:HD9qo0yTaQ9BeFrB5Ku2SI6njlVzyFGq73qoLBq16yw=
+github.com/gedhean/parser v0.0.1 h1:1dArm2VlM77HK8iVRzlMOSPfxFky8L/XbzHBduP849I=
+github.com/gedhean/parser v0.0.1/go.mod h1:ROHj+nviDef8msDRN8EUl80I36M5Ag5SAlY/7vZ6dKA=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
