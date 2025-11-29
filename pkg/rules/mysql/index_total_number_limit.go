@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -254,7 +255,7 @@ func (a *IndexTotalNumberLimitAdvisor) Check(
 	if err := catalogFinder.WalkThrough(catalogAST); err != nil {
 		// If walkthrough fails, continue without updated catalog but log the error
 		// This ensures the rule still works even if catalog update fails
-		_ = err // Ignore error but keep variable assignment to satisfy staticcheck
+		slog.Warn("catalog walkthrough failed", "error", err, "rule", rule.Type)
 	}
 
 	// Create the rule with updated catalog

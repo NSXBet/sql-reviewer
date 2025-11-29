@@ -565,19 +565,31 @@ func TestPostgreSQLRulesNilCatalogNoPanic(t *testing.T) {
 			sql:  "CREATE TABLE test_table (id INT, name VARCHAR(100));",
 		},
 		{
-			rule:    advisor.SchemaRuleIDXNaming,
-			sql:     "CREATE INDEX idx_test ON users(email);",
-			payload: map[string]interface{}{"format": "^idx_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+			rule: advisor.SchemaRuleIDXNaming,
+			sql:  "CREATE INDEX idx_test ON users(email);",
+			payload: map[string]interface{}{
+				"format":       "^idx_{{table}}_{{column_list}}$",
+				"maxLength":    64,
+				"templateList": []string{"table", "column_list"},
+			},
 		},
 		{
-			rule:    advisor.SchemaRulePKNaming,
-			sql:     "CREATE TABLE test_table (id INT PRIMARY KEY);",
-			payload: map[string]interface{}{"format": "^pk_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+			rule: advisor.SchemaRulePKNaming,
+			sql:  "CREATE TABLE test_table (id INT PRIMARY KEY);",
+			payload: map[string]interface{}{
+				"format":       "^pk_{{table}}_{{column_list}}$",
+				"maxLength":    64,
+				"templateList": []string{"table", "column_list"},
+			},
 		},
 		{
-			rule:    advisor.SchemaRuleUKNaming,
-			sql:     "CREATE TABLE test_table (id INT UNIQUE);",
-			payload: map[string]interface{}{"format": "^uk_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+			rule: advisor.SchemaRuleUKNaming,
+			sql:  "CREATE TABLE test_table (id INT UNIQUE);",
+			payload: map[string]interface{}{
+				"format":       "^uk_{{table}}_{{column_list}}$",
+				"maxLength":    64,
+				"templateList": []string{"table", "column_list"},
+			},
 		},
 		{
 			rule:    advisor.SchemaRuleFullyQualifiedObjectName,
