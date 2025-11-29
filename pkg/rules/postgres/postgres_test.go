@@ -542,6 +542,91 @@ func createMockDatabase() *types.DatabaseSchemaMetadata {
 	}
 }
 
+// TestPostgreSQLRulesNilCatalogNoPanic verifies that PostgreSQL rules
+// that require catalog metadata do not panic when catalog is nil.
+func TestPostgreSQLRulesNilCatalogNoPanic(t *testing.T) {
+	// Rules that access checkCtx.Catalog and require nil checks
+	catalogDependentRules := []struct {
+		rule    advisor.SQLReviewRuleType
+		sql     string
+		payload map[string]interface{}
+	}{
+		{
+			rule: advisor.SchemaRuleTableRequirePK,
+			sql:  "CREATE TABLE test_table (id INT);",
+		},
+		{
+			rule:    advisor.SchemaRuleIndexTotalNumberLimit,
+			sql:     "CREATE TABLE test_table (id INT PRIMARY KEY);",
+			payload: map[string]interface{}{"number": 5},
+		},
+		{
+			rule: advisor.SchemaRuleColumnNotNull,
+			sql:  "CREATE TABLE test_table (id INT, name VARCHAR(100));",
+		},
+		{
+			rule:    advisor.SchemaRuleIDXNaming,
+			sql:     "CREATE INDEX idx_test ON users(email);",
+			payload: map[string]interface{}{"format": "^idx_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+		},
+		{
+			rule:    advisor.SchemaRulePKNaming,
+			sql:     "CREATE TABLE test_table (id INT PRIMARY KEY);",
+			payload: map[string]interface{}{"format": "^pk_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+		},
+		{
+			rule:    advisor.SchemaRuleUKNaming,
+			sql:     "CREATE TABLE test_table (id INT UNIQUE);",
+			payload: map[string]interface{}{"format": "^uk_{{table}}_{{column_list}}$", "maxLength": 64, "templateList": []string{"table", "column_list"}},
+		},
+		{
+			rule:    advisor.SchemaRuleFullyQualifiedObjectName,
+			sql:     "SELECT * FROM users;",
+			payload: nil,
+		},
+	}
+
+	for _, tc := range catalogDependentRules {
+		t.Run(string(tc.rule), func(t *testing.T) {
+			// Parse the SQL
+			parseResult, err := pgparser.ParsePostgreSQL(tc.sql)
+			require.NoError(t, err, "Failed to parse SQL: %s", tc.sql)
+
+			// Create the rule with appropriate payload
+			payload := tc.payload
+			if payload == nil {
+				payload = map[string]interface{}{}
+			}
+
+			sqlRule := &types.SQLReviewRule{
+				Type:    string(tc.rule),
+				Level:   types.SQLReviewRuleLevel_WARNING,
+				Payload: payload,
+			}
+
+			// Create check context WITHOUT catalog (Catalog: nil)
+			checkCtx := advisor.Context{
+				DBType:     types.Engine_POSTGRES,
+				Statements: tc.sql,
+				Rule:       sqlRule,
+				AST:        parseResult,
+				ChangeType: types.PlanCheckRunConfig_DDL,
+				Catalog:    nil, // Explicitly nil to test nil catalog handling
+			}
+
+			// Run the advisor - this should NOT panic
+			ctx := context.Background()
+			advices, err := advisor.Check(ctx, types.Engine_POSTGRES, advisor.Type(tc.rule), checkCtx)
+
+			// Should not return error
+			require.NoError(t, err, "advisor.Check should not return error when catalog is nil")
+
+			// Test passes if no panic occurred - advices may be empty since catalog validation is skipped
+			t.Logf("Rule %s completed without panic, returned %d advices", tc.rule, len(advices))
+		})
+	}
+}
+
 // TestPostgreSQLRulesSyntaxErrorHandling verifies that PostgreSQL rules
 // convert syntax errors to Advice objects (not errors) with proper error codes.
 func TestPostgreSQLRulesSyntaxErrorHandling(t *testing.T) {

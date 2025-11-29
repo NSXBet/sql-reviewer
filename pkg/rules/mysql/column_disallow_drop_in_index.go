@@ -193,11 +193,8 @@ func (a *ColumnDisallowDropInIndexAdvisor) Check(
 		return nil, err
 	}
 
-	// Get catalog finder from check context
-	var catalogFinder *catalog.Finder
-	if checkContext.Catalog != nil {
-		catalogFinder = checkContext.Catalog.GetFinder()
-	}
+	// Get catalog finder (nil is acceptable for this rule)
+	catalogFinder := getCatalogFinder(checkContext)
 
 	// Create the rule with catalog support
 	dropInIndexRule := NewColumnDisallowDropInIndexRule(types.SQLReviewRuleLevel(level), string(rule.Type), catalogFinder)

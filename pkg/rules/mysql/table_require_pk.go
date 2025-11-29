@@ -11,7 +11,6 @@ import (
 	"github.com/nsxbet/sql-reviewer/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -266,20 +265,10 @@ func (a *TableRequirePKAdvisor) Check(
 		return nil, err
 	}
 
-	// Get catalog from context
-	var catalogFinder *catalog.Finder
-	if checkContext.Catalog != nil {
-		catalogFinder = checkContext.Catalog.GetFinder()
-	} else if checkContext.DBSchema != nil {
-		// Create catalog from database schema if available
-		finderCtx := &catalog.FinderContext{
-			CheckIntegrity:      true,
-			EngineType:          checkContext.DBType,
-			IgnoreCaseSensitive: !checkContext.IsObjectCaseSensitive,
-		}
-		catalogFinder = catalog.NewFinder(checkContext.DBSchema, finderCtx)
-	} else {
-		return nil, errors.New("no catalog or database schema provided in context")
+	// Get catalog from context - skip validation if not available
+	catalogFinder := getCatalogFinder(checkContext)
+	if catalogFinder == nil {
+		return nil, nil
 	}
 
 	// Create the rule

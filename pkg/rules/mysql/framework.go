@@ -7,9 +7,30 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	mysql "github.com/gedhean/mysql-parser"
+	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer/pkg/mysqlparser"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
+
+// getCatalogFinder safely extracts the catalog finder from the advisor context.
+// Returns nil if neither Catalog nor DBSchema is available, and logs a warning.
+// If DBSchema is available but Catalog is not, it creates a new Finder from the schema.
+func getCatalogFinder(checkContext advisor.Context) *catalog.Finder {
+	if checkContext.Catalog != nil {
+		return checkContext.Catalog.GetFinder()
+	}
+	if checkContext.DBSchema != nil {
+		finderCtx := &catalog.FinderContext{
+			CheckIntegrity:      true,
+			EngineType:          checkContext.DBType,
+			IgnoreCaseSensitive: !checkContext.IsObjectCaseSensitive,
+		}
+		return catalog.NewFinder(checkContext.DBSchema, finderCtx)
+	}
+	slog.Warn("Catalog is nil, skipping catalog-dependent validation", "rule", checkContext.Rule.Type)
+	return nil
+}
 
 // Node type constants for consistent node type checking
 const (
