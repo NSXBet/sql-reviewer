@@ -252,11 +252,8 @@ func (a *IndexPrimaryKeyTypeAllowlistAdvisor) Check(
 		}
 	}
 
-	// Get catalog finder
-	var catalogFinder *catalog.Finder
-	if checkContext.Catalog != nil {
-		catalogFinder = checkContext.Catalog.GetFinder()
-	}
+	// Get catalog finder (nil is acceptable for this rule)
+	catalogFinder := getCatalogFinder(checkContext)
 
 	// Create the rule with allowlist and catalog
 	pkTypeAllowlistRule := NewIndexPrimaryKeyTypeAllowlistRule(

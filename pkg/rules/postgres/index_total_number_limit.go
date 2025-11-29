@@ -43,11 +43,11 @@ func (*IndexTotalNumberLimitAdvisor) Check(ctx context.Context, checkCtx advisor
 		level:     level,
 		title:     string(checkCtx.Rule.Type),
 		max:       payload.Number,
-		catalog:   checkCtx.Catalog.GetFinder(),
+		catalog:   getCatalogFinder(checkCtx),
 		tableLine: make(tableLineMap),
 	}
 
-	if checker.catalog.Final.Usable() {
+	if checker.catalog != nil && checker.catalog.Final != nil && checker.catalog.Final.Usable() {
 		antlr.ParseTreeWalkerDefault.Walk(checker, tree.Tree)
 	}
 

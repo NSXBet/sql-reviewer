@@ -36,7 +36,7 @@ func (*TableRequirePKAdvisor) Check(ctx context.Context, checkCtx advisor.Contex
 		level:          level,
 		title:          string(checkCtx.Rule.Type),
 		statementsText: checkCtx.Statements,
-		catalog:        checkCtx.Catalog.GetFinder(),
+		catalog:        getCatalogFinder(checkCtx),
 		tableMentions:  make(map[string]*tableMention),
 	}
 
@@ -129,6 +129,10 @@ func (c *tableRequirePKChecker) EnterDropstmt(ctx *parser.DropstmtContext) {
 }
 
 func (c *tableRequirePKChecker) validateFinalState() {
+	if c.catalog == nil || c.catalog.Final == nil {
+		return
+	}
+
 	for tableKey, mention := range c.tableMentions {
 		schemaName, tableName := parseTableKey(tableKey)
 

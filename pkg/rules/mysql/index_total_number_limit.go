@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -240,31 +241,21 @@ func (a *IndexTotalNumberLimitAdvisor) Check(
 	}
 	maxIndexes := int(payload.Number)
 
-	// Get catalog finder
-	var catalogFinder *catalog.Finder
-	if checkContext.Catalog != nil {
-		catalogFinder = checkContext.Catalog.GetFinder()
-	} else if checkContext.DBSchema != nil {
-		// Create catalog from database schema if available
-		finderCtx := &catalog.FinderContext{
-			CheckIntegrity:      true,
-			EngineType:          checkContext.DBType,
-			IgnoreCaseSensitive: true,
-		}
-		catalogFinder = catalog.NewFinder(checkContext.DBSchema, finderCtx)
+	// Get catalog finder - skip validation if not available
+	catalogFinder := getCatalogFinder(checkContext)
+	if catalogFinder == nil {
+		return nil, nil
 	}
 
 	// Update the catalog with the current statements to simulate the final state
-	if catalogFinder != nil {
-		// Convert our parse results to the format expected by catalog walkthrough
-		catalogAST := catalog.ConvertMySQLParseResults(root)
+	// Convert our parse results to the format expected by catalog walkthrough
+	catalogAST := catalog.ConvertMySQLParseResults(root)
 
-		// Walk through the statements to update the catalog state
-		if err := catalogFinder.WalkThrough(catalogAST); err != nil {
-			// If walkthrough fails, continue without updated catalog but log the error
-			// This ensures the rule still works even if catalog update fails
-			_ = err // Ignore error but keep variable assignment to satisfy staticcheck
-		}
+	// Walk through the statements to update the catalog state
+	if err := catalogFinder.WalkThrough(catalogAST); err != nil {
+		// If walkthrough fails, continue without updated catalog but log the error
+		// This ensures the rule still works even if catalog update fails
+		slog.Warn("catalog walkthrough failed", "error", err, "rule", rule.Type)
 	}
 
 	// Create the rule with updated catalog

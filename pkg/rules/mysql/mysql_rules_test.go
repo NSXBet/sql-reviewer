@@ -1526,3 +1526,83 @@ func TestAvailableRules(t *testing.T) {
 		}
 	}
 }
+
+// TestMySQLRulesNilCatalogNoPanic verifies that MySQL rules
+// that use catalog metadata do not panic when catalog is nil.
+func TestMySQLRulesNilCatalogNoPanic(t *testing.T) {
+	// Rules that access checkContext.Catalog and require nil checks
+	catalogDependentRules := []struct {
+		ruleName string
+		sql      string
+	}{
+		{
+			ruleName: "table_require_pk",
+			sql:      "CREATE TABLE test_table (id INT);",
+		},
+		{
+			ruleName: "index_total_number_limit",
+			sql:      "CREATE TABLE test_table (id INT PRIMARY KEY);",
+		},
+		{
+			ruleName: "column_disallow_change_type",
+			sql:      "ALTER TABLE users MODIFY COLUMN name VARCHAR(200);",
+		},
+		{
+			ruleName: "database_drop_empty_database",
+			sql:      "DROP DATABASE test_db;",
+		},
+		{
+			ruleName: "index_pk_type_limit",
+			sql:      "CREATE TABLE test_table (id INT PRIMARY KEY);",
+		},
+		{
+			ruleName: "column_disallow_drop_in_index",
+			sql:      "ALTER TABLE users DROP COLUMN email;",
+		},
+		{
+			ruleName: "index_primary_key_type_allowlist",
+			sql:      "CREATE TABLE test_table (id INT PRIMARY KEY);",
+		},
+	}
+
+	ruleMappings := GetRuleMappings()
+
+	for _, tc := range catalogDependentRules {
+		t.Run(tc.ruleName, func(t *testing.T) {
+			mapping, exists := ruleMappings[tc.ruleName]
+			if !exists {
+				t.Skipf("Rule %s not found in mappings", tc.ruleName)
+				return
+			}
+
+			// Create the rule with default payload
+			sqlRule := &types.SQLReviewRule{
+				Type:  string(mapping.RuleType),
+				Level: types.SQLReviewRuleLevel_WARNING,
+			}
+			if payload, err := SetDefaultSQLReviewRulePayload(mapping.RuleType); err == nil && payload != nil {
+				sqlRule.Payload = payload
+			}
+
+			// Create check context WITHOUT catalog (Catalog: nil, DBSchema: nil)
+			checkCtx := advisor.Context{
+				DBType:     types.Engine_MYSQL,
+				Statements: tc.sql,
+				Rule:       sqlRule,
+				ChangeType: types.PlanCheckRunConfig_DDL,
+				Catalog:    nil, // Explicitly nil to test nil catalog handling
+				DBSchema:   nil, // Also nil to ensure we test the fallback behavior
+			}
+
+			// Run the advisor - this should NOT panic
+			ctx := context.Background()
+			advices, err := mapping.Advisor.Check(ctx, tc.sql, sqlRule, checkCtx)
+
+			// Should not return error (should skip validation gracefully)
+			require.NoError(t, err, "advisor.Check should not return error when catalog is nil")
+
+			// Test passes if no panic occurred - advices may be empty since catalog validation is skipped
+			t.Logf("Rule %s completed without panic, returned %d advices", tc.ruleName, len(advices))
+		})
+	}
+}

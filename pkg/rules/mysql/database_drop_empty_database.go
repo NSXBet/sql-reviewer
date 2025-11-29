@@ -113,11 +113,8 @@ func (a *DatabaseDropEmptyDatabaseAdvisor) Check(
 		return nil, err
 	}
 
-	// Get catalog finder
-	var catalogFinder *catalog.Finder
-	if checkContext.Catalog != nil {
-		catalogFinder = checkContext.Catalog.GetFinder()
-	}
+	// Get catalog finder (nil is acceptable for this rule)
+	catalogFinder := getCatalogFinder(checkContext)
 
 	// Create the rule with catalog
 	dropEmptyRule := NewDatabaseDropEmptyDatabaseRule(types.SQLReviewRuleLevel(level), string(rule.Type), catalogFinder)

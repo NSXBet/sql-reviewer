@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,10 +10,21 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 	parser "github.com/bytebase/parser/postgresql"
 	"github.com/nsxbet/sql-reviewer/pkg/advisor"
+	"github.com/nsxbet/sql-reviewer/pkg/catalog"
 	"github.com/nsxbet/sql-reviewer/pkg/pgparser"
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 	"github.com/pkg/errors"
 )
+
+// getCatalogFinder safely extracts the catalog finder from the advisor context.
+// Returns nil if the catalog is not available, and logs a warning with the rule name.
+func getCatalogFinder(checkCtx advisor.Context) *catalog.Finder {
+	if checkCtx.Catalog == nil {
+		slog.Warn("Catalog is nil, skipping catalog-dependent validation", "rule", checkCtx.Rule.Type)
+		return nil
+	}
+	return checkCtx.Catalog.GetFinder()
+}
 
 // getANTLRTree returns the ANTLR parse tree from the advisor context.
 func getANTLRTree(checkCtx advisor.Context) (*pgparser.ParseResult, error) {
