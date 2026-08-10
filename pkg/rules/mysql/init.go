@@ -82,10 +82,6 @@ func registerBasicMySQLRules() {
 	registerMySQLRule(&StatementDisallowLimitAdvisor{}, advisor.SchemaRuleStatementDisallowLimit)
 	registerMySQLRule(&StatementDisallowMixInDDLAdvisor{}, advisor.SchemaRuleStatementDisallowMixInDDL)
 	registerMySQLRule(&StatementDisallowMixInDMLAdvisor{}, advisor.SchemaRuleStatementDisallowMixInDML)
-	registerMySQLRule(
-		&StatementMySQLDisallowImplicitCommitDDLMixAdvisor{},
-		advisor.SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix,
-	)
 	registerMySQLRule(&StatementDisallowOrderByAdvisor{}, advisor.SchemaRuleStatementDisallowOrderBy)
 	registerMySQLRule(&StatementDisallowUsingFilesortAdvisor{}, advisor.SchemaRuleStatementDisallowUsingFilesort)
 	registerMySQLRule(&StatementDisallowUsingTemporaryAdvisor{}, advisor.SchemaRuleStatementDisallowUsingTemporary)

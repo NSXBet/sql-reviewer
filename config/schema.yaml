@@ -314,9 +314,6 @@
 - type: statement.disallow-mix-in-dml
   category: STATEMENT
   engine: MYSQL
-- type: statement.mysql.disallow-implicit-commit-ddl-mix
-  category: STATEMENT
-  engine: MYSQL
 - type: statement.disallow-mix-in-dml
   category: STATEMENT
   engine: POSTGRES

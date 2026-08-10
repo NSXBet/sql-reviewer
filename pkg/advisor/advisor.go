@@ -161,8 +161,6 @@ const (
 	SchemaRuleStatementDisallowMixInDDL = "statement.disallow-mix-in-ddl"
 	// SchemaRuleStatementDisallowMixInDML disallows DDL statements in DML statements.
 	SchemaRuleStatementDisallowMixInDML = "statement.disallow-mix-in-dml"
-	// SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix keeps implicitly committing MySQL DDL isolated.
-	SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix = "statement.mysql.disallow-implicit-commit-ddl-mix"
 	// SchemaRuleStatementPriorBackupCheck checks for prior backup.
 	SchemaRuleStatementPriorBackupCheck = "statement.prior-backup-check"
 	// SchemaRuleStatementNonTransactional checks for non-transactional statements.
