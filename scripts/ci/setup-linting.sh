@@ -1,10 +1,7 @@
 #!/bin/bash
 
-if ! command -v golangci-lint &>/dev/null; then
-    echo "golangci-lint could not be found! Installing..."
-
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-fi
+echo "Installing golangci-lint v2.5.0 with $(go version)..."
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0
 
 if ! command -v yamllint &>/dev/null; then
     echo "yamllint could not be found! Installing..."
