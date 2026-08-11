@@ -6,7 +6,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -17,7 +17,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -28,7 +28,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -36,7 +36,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -47,7 +47,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -60,18 +60,20 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
       endposition: null
 - statement: SET AUTOCOMMIT = 0; SELECT 1;
   changeType: 1
+- statement: SET SESSION AUTOCOMMIT = 1; SELECT 1;
+  changeType: 1
   want:
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0
@@ -86,7 +88,7 @@
     - status: 2
       code: 10632
       title: statement.mysql.disallow-implicit-commit-ddl-mix
-      content: MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
       startposition:
         line: 0
         column: 0

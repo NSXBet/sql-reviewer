@@ -11,9 +11,14 @@ import (
 	"github.com/nsxbet/sql-reviewer/pkg/types"
 )
 
-const implicitCommitDDLMixMessage = "MySQL implicitly commits this DDL. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back."
+const implicitCommitDDLMixMessage = "MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back."
 
-var mysqlCommentPattern = regexp.MustCompile(`(?s)/\*.*?\*/|--[^\r\n]*|#[^\r\n]*`)
+var (
+	mysqlCommentPattern          = regexp.MustCompile(`(?s)/\*.*?\*/|--[^\r\n]*|#[^\r\n]*`)
+	mysqlAutocommitEnablePattern = regexp.MustCompile(
+		`^(?:SET(?:SESSION)?AUTOCOMMIT|SET@@SESSION\.AUTOCOMMIT)(?::=|=)1;?(?:<EOF>)?$`,
+	)
+)
 
 type StatementMySQLDisallowImplicitCommitDDLMixAdvisor struct{}
 
@@ -62,6 +67,5 @@ func isMySQLImplicitCommitDDL(tree antlr.Tree) bool {
 	statement := strings.ToUpper(mysqlCommentPattern.ReplaceAllString(tree.(antlr.ParseTree).GetText(), ""))
 	return strings.HasPrefix(statement, "LOCKTABLES") ||
 		strings.HasPrefix(statement, "UNLOCKTABLES") ||
-		strings.HasPrefix(statement, "SETAUTOCOMMIT") ||
-		strings.HasPrefix(statement, "SETSESSIONAUTOCOMMIT")
+		mysqlAutocommitEnablePattern.MatchString(statement)
 }
