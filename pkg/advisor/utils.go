@@ -196,7 +196,8 @@ type QueryContext struct {
 func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine types.Engine, statement string) ([]any, error) {
 	// Log query start
 	startTime := time.Now()
-	slog.Debug("Starting SQL query",
+	slog.Debug(
+		"Starting SQL query",
 		"engine", engine,
 		"query", formatSQLForLog(statement),
 		"pre_executions", qCtx.PreExecutions,
@@ -309,23 +310,23 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 
 		rowData := []any{}
 		for i := range columnTypes {
-			if v, ok := (scanArgs[i]).(*sql.NullBool); ok && v.Valid {
+			if v, ok := scanArgs[i].(*sql.NullBool); ok && v.Valid {
 				rowData = append(rowData, v.Bool)
 				continue
 			}
-			if v, ok := (scanArgs[i]).(*sql.NullString); ok && v.Valid {
+			if v, ok := scanArgs[i].(*sql.NullString); ok && v.Valid {
 				rowData = append(rowData, v.String)
 				continue
 			}
-			if v, ok := (scanArgs[i]).(*sql.NullInt64); ok && v.Valid {
+			if v, ok := scanArgs[i].(*sql.NullInt64); ok && v.Valid {
 				rowData = append(rowData, v.Int64)
 				continue
 			}
-			if v, ok := (scanArgs[i]).(*sql.NullInt32); ok && v.Valid {
+			if v, ok := scanArgs[i].(*sql.NullInt32); ok && v.Valid {
 				rowData = append(rowData, v.Int32)
 				continue
 			}
-			if v, ok := (scanArgs[i]).(*sql.NullFloat64); ok && v.Valid {
+			if v, ok := scanArgs[i].(*sql.NullFloat64); ok && v.Valid {
 				rowData = append(rowData, v.Float64)
 				continue
 			}
@@ -341,7 +342,8 @@ func Query(ctx context.Context, qCtx QueryContext, connection *sql.DB, engine ty
 	}
 
 	duration := time.Since(startTime)
-	slog.Debug("Query completed successfully",
+	slog.Debug(
+		"Query completed successfully",
 		"duration_ms", duration.Milliseconds(),
 		"row_count", rowCount,
 		"column_count", colCount,

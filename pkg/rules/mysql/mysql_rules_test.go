@@ -110,6 +110,8 @@ func yamlFileNameToRuleType(fileName string) advisor.SQLReviewRuleType {
 		return advisor.SchemaRuleStatementDisallowMixInDDL
 	case "statement_disallow_mix_in_dml":
 		return advisor.SchemaRuleStatementDisallowMixInDML
+	case "statement_mysql_disallow_implicit_commit_ddl_mix":
+		return advisor.SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix
 	case "statement_insert_must_specify_column":
 		return advisor.SchemaRuleStatementInsertMustSpecifyColumn
 	case "statement_insert_disallow_order_by_rand":
@@ -570,6 +572,11 @@ func GetRuleMappings() map[string]RuleMapping {
 			Advisor:  &StatementDisallowMixInDMLAdvisor{},
 			RuleType: advisor.SchemaRuleStatementDisallowMixInDML,
 			Title:    string(advisor.SchemaRuleStatementDisallowMixInDML),
+		},
+		"statement_mysql_disallow_implicit_commit_ddl_mix": {
+			Advisor:  &StatementMySQLDisallowImplicitCommitDDLMixAdvisor{},
+			RuleType: advisor.SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix,
+			Title:    string(advisor.SchemaRuleStatementMySQLDisallowImplicitCommitDDLMix),
 		},
 		"statement_insert_row_limit": {
 			Advisor:  &StatementInsertRowLimitAdvisor{},
@@ -1382,6 +1389,11 @@ func TestMySQLStatementMergeAlterTableRule(t *testing.T) {
 func TestMySQLStatementDisallowMixInDDLRule(t *testing.T) {
 	mapping := GetRuleMappings()["statement_disallow_mix_in_ddl"]
 	runRuleTest(t, "statement_disallow_mix_in_ddl", mapping, false)
+}
+
+func TestMySQLStatementDisallowImplicitCommitDDLMixRule(t *testing.T) {
+	mapping := GetRuleMappings()["statement_mysql_disallow_implicit_commit_ddl_mix"]
+	runRuleTest(t, "statement_mysql_disallow_implicit_commit_ddl_mix", mapping, false)
 }
 
 func TestMySQLStatementWhereNoLeadingWildcardLikeRule(t *testing.T) {

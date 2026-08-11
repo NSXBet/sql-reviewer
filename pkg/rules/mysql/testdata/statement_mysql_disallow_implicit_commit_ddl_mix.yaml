@@ -1,0 +1,95 @@
+- statement: ALTER TABLE test ADD c1 INT;
+  changeType: 1
+- statement: ALTER TABLE test ADD c1 INT; SELECT SLEEP(10);
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: SELECT 1; ALTER TABLE test ADD c1 INT;
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: ALTER TABLE test ADD c1 INT; ALTER TABLE test ADD c2 INT;
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: CREATE TABLE test (id INT); INSERT INTO test VALUES (1);
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: INSERT INTO test VALUES ('ALTER TABLE test ADD c1 INT'); UPDATE test SET id = 2;
+  changeType: 1
+- statement: LOCK TABLES test READ; SELECT 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: SET AUTOCOMMIT = 0; SELECT 1;
+  changeType: 1
+- statement: SET SESSION AUTOCOMMIT = 1; SELECT 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null
+- statement: |
+    /* ALTER TABLE test ADD c1 INT */
+    AlTeR /* split */ TABLE test ADD c1 INT;
+    -- CREATE TABLE ignored
+    SELECT 1;
+  changeType: 1
+  want:
+    - status: 2
+      code: 10632
+      title: statement.mysql.disallow-implicit-commit-ddl-mix
+      content: MySQL implicitly commits this statement. Split it into a dedicated single-statement change; cancellation and timeout cannot transactionally roll it back.
+      startposition:
+        line: 0
+        column: 0
+      endposition: null

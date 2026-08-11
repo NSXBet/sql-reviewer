@@ -153,6 +153,7 @@ const (
 	MySQLStatementRequireAlgorithmOption           Code = 10629
 	MySQLStatementRequireLockOption                Code = 10630
 	MySQLOnlineMigration                           Code = 10631
+	MySQLStatementImplicitCommitDDLMix             Code = 10632
 
 	// 10701 ~ 10799 MySQL system error.
 	MySQLCharsetAllowlistViolation     Code = 10701
